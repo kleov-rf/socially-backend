@@ -22,5 +22,6 @@ jobs:
     uses: ./.github/workflows/push.yaml
     with:
       artifact_name: socially-backend-jar
-      aws_account_id: ${{ secrets.AWS_ACCOUNT_ID }}
       image_tag: ${{ github.run_number }}-${{ github.run_attempt }}
+    secrets:
+      aws_account_id: ${{ secrets.AWS_ACCOUNT_ID }}
