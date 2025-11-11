@@ -1,0 +1,45 @@
+# Git files
+.git
+.gitignore
+.github
+
+# IDE files
+.idea
+.vscode
+*.iml
+*.iws
+*.ipr
+
+# Build files (except the final JAR)
+build/classes
+build/generated
+build/reports
+build/test-results
+build/tmp
+build/resources
+build/spotless-clean
+build/spotless-lints
+
+# Gradle files
+.gradle
+gradle/wrapper/gradle-wrapper.jar
+
+# Source files (JAR is already built)
+src
+
+# Test files
+*.test.*
+
+# Documentation
+README.md
+HELP.md
+LICENSE
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*~
