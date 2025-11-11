@@ -22,6 +22,9 @@ jobs:
     outputs:
       docker-image: ${{ steps.login-ecr.outputs.registry }}/socially-dev-service:${{ inputs.image_tag }}
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Download JAR artifact
         uses: actions/download-artifact@v4
         with:
