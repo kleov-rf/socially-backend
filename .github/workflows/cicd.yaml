@@ -13,3 +13,14 @@ jobs:
   build:
     name: Build image
     uses: ./.github/workflows/build.yaml
+    with:
+      artifact_name: socially-backend-jar
+
+  push:
+    name: Push image to ECR
+    needs: [ build ]
+    uses: ./.github/workflows/push.yaml
+    with:
+      artifact_name: socially-backend-jar
+      aws_account_id: ${{ secrets.AWS_ACCOUNT_ID }}
+      image_tag: ${{ github.run_number }}-${{ github.run_attempt }}
