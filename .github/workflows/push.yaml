@@ -27,7 +27,7 @@ jobs:
   push:
     runs-on: ubuntu-latest
     outputs:
-      docker-image: ${{ steps.login-ecr.outputs.registry }}/socially-dev-service:${{ inputs.image_tag }}
+      docker-image: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY_NAME }}:${{ inputs.image_tag }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -60,6 +60,6 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ env.ECR_REGISTRY }}/socially-dev-service:${{ inputs.image_tag }}
+          tags: ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY_NAME }}:${{ inputs.image_tag }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
