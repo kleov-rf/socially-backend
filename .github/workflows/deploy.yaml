@@ -1,0 +1,67 @@
+name: Deploy to AWS
+
+on:
+  workflow_call:
+    inputs:
+      docker_image:
+        description: "Docker image URI to deploy"
+        required: true
+        type: string
+      image_tag:
+        description: "Tag of the Docker image"
+        required: true
+        type: string
+    secrets:
+      aws_account_id:
+        description: "AWS Account ID for ECS"
+        required: true
+
+env:
+  ECS_CLUSTER_NAME: socially-dev-cluster
+  ECS_SERVICE_NAME: socially-dev-service
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        env:
+          AWS_ACCOUNT_ID: ${{ secrets.aws_account_id }}
+        with:
+          aws-region: eu-south-2
+          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/github-agent-ecs
+
+      - name: Download latest task definition
+        run: |
+          aws ecs describe-task-definition \
+            --task-definition socially-dev-task \
+            --query 'taskDefinition' > latest-task-definition.json
+
+      - name: Update task definition with new image
+        id: update-task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: latest-task-definition.json
+          container-name: backend
+          image: ${{ inputs.docker_image }}
+
+      - name: Deploy updated task definition to ECS
+        id: deploy-task-def
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          cluster: ${{ env.ECS_CLUSTER_NAME }}
+          service: ${{ env.ECS_SERVICE_NAME }}
+          task-definition: ${{ steps.update-task-def.outputs.task-definition }}
+          wait-for-service-stability: true
+
+      - name: Verify deployment succeeded
+        run: |
+          .github/scripts/verify-deployment.sh \
+            --cluster ${{ env.ECS_CLUSTER_NAME }} \
+            --service ${{ env.ECS_SERVICE_NAME }} \
+            --expected-task-def ${{ steps.deploy-task-def.outputs.task-definition-arn }}
