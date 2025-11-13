@@ -23,8 +23,7 @@ jobs:
     with:
       artifact_name: socially-backend-jar
       image_tag: ${{ github.run_number }}-${{ github.run_attempt }}
-    secrets:
-      aws_account_id: ${{ secrets.AWS_ACCOUNT_ID }}
+      aws_account_id: ${{ vars.AWS_ACCOUNT_ID }}
 
   deploy:
     name: Deploy to AWS
@@ -33,5 +32,4 @@ jobs:
     with:
       docker_image: ${{ needs.push.outputs.docker-image }}
       image_tag: ${{ github.run_number }}-${{ github.run_attempt }}
-    secrets:
-      aws_account_id: ${{ secrets.AWS_ACCOUNT_ID }}
+      aws_account_id: ${{ vars.AWS_ACCOUNT_ID }}
