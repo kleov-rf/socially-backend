@@ -15,24 +15,24 @@ repos:
     hooks:
       - id: spotless-check
         name: Spotless Check
-        entry: ./gradlew spotlessCheck
-        language: system
+        entry: gradlew.bat spotlessCheck
+        language: script
         types: [ java ]
         pass_filenames: false
         stages: [ pre-commit ]
 
       - id: gradle-test
         name: Run Unit Tests
-        entry: ./gradlew test
-        language: system
+        entry: gradlew.bat test
+        language: script
         types: [ java ]
         pass_filenames: false
         stages: [ pre-commit ]
 
       - id: gradle-compile
         name: Gradle Compile
-        entry: ./gradlew compileJava compileTestJava
-        language: system
+        entry: gradlew.bat compileJava compileTestJava
+        language: script
         types: [ java ]
         pass_filenames: false
         stages: [ pre-commit ]
