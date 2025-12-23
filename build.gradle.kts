@@ -20,6 +20,7 @@ spotless {
         importOrder()
         removeUnusedImports()
         googleJavaFormat("1.28.0")
+        lineEndings = com.diffplug.spotless.LineEnding.UNIX
     }
 }
 

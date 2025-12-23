@@ -11,6 +11,6 @@ public class HelloWorldController {
 
   @GetMapping("/hello")
   public Map<String, String> helloWorld() {
-    return Map.of("message", "hello world");
+    return Map.of("message", "Buenos días, mundo!");
   }
 }

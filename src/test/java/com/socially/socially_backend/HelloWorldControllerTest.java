@@ -11,6 +11,6 @@ class HelloWorldControllerTest {
   void helloWorld_should_return_hello_world_message() {
     HelloWorldController controller = new HelloWorldController();
     Map<String, String> response = controller.helloWorld();
-    assertEquals("hello world", response.get("message"));
+    assertEquals("Buenos días, mundo!", response.get("message"));
   }
 }
