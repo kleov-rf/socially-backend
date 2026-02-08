@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class CreateDonationMapper {
-
   public CreateDonationCommand toCommand(CreateDonationRequestDto request) {
     return new CreateDonationCommand(request.id(), request.title(), request.description());
   }

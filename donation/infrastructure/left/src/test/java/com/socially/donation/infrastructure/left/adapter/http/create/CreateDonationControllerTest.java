@@ -31,7 +31,7 @@ class CreateDonationControllerTest {
     var command = new CreateDonationCommand("id-123", "Test Title", "Test Description");
     when(mapper.toCommand(request)).thenReturn(command);
 
-    ResponseEntity<Void> response = controller.create(request);
+    controller.create(request);
 
     verify(commandHandler).handle(command);
   }
