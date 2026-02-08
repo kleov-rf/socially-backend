@@ -6,8 +6,8 @@ import static org.mockito.Mockito.when;
 
 import com.socially.donation.application.create.CreateDonationCommandHandler;
 import com.socially.donation.application.create.input.CreateDonationCommand;
-import com.socially.donation.infrastructure.left.adapter.http.create.input.CreateDonationRequestDto;
-import com.socially.donation.infrastructure.left.adapter.http.create.mapper.CreateDonationMapper;
+import com.socially.donation.infrastructure.left.adapter.http.create.input.CreateDonationRequest;
+import com.socially.donation.infrastructure.left.adapter.http.create.mapper.CreateDonationRequestMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -21,13 +21,13 @@ class CreateDonationControllerTest {
 
   @Mock private CreateDonationCommandHandler commandHandler;
 
-  @Mock private CreateDonationMapper mapper;
+  @Mock private CreateDonationRequestMapper mapper;
 
   @InjectMocks private CreateDonationController controller;
 
   @Test
   void create_should_call_handler_with_command() {
-    var request = new CreateDonationRequestDto("id-123", "Test Title", "Test Description");
+    var request = new CreateDonationRequest("id-123", "Test Title", "Test Description");
     var command = new CreateDonationCommand("id-123", "Test Title", "Test Description");
     when(mapper.toCommand(request)).thenReturn(command);
 
@@ -38,7 +38,7 @@ class CreateDonationControllerTest {
 
   @Test
   void create_should_return_created_status() {
-    var request = new CreateDonationRequestDto("id-123", "Test Title", "Test Description");
+    var request = new CreateDonationRequest("id-123", "Test Title", "Test Description");
     var command = new CreateDonationCommand("id-123", "Test Title", "Test Description");
     when(mapper.toCommand(request)).thenReturn(command);
 

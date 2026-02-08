@@ -3,7 +3,7 @@ package com.socially.donation.application.create;
 import static org.mockito.Mockito.verify;
 
 import com.socially.donation.application.create.input.CreateDonationCommand;
-import com.socially.donation.application.create.mapper.CreateDonationMapper;
+import com.socially.donation.application.create.mapper.CreateDonationCommandMapper;
 import com.socially.donation.domain.port.DonationRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,6 +26,6 @@ class CreateDonationCommandHandlerTest {
 
     handler.handle(command);
 
-    verify(donationRepository).save(CreateDonationMapper.toDonation(command));
+    verify(donationRepository).save(CreateDonationCommandMapper.toDomain(command));
   }
 }

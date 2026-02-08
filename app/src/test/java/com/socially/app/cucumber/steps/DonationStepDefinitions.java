@@ -6,7 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.socially.donation.infrastructure.left.adapter.http.create.input.CreateDonationRequestDto;
+import com.socially.donation.infrastructure.left.adapter.http.create.input.CreateDonationRequest;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -39,7 +39,7 @@ public class DonationStepDefinitions {
   @When("I create the donation")
   public void iCreateTheDonation() throws Exception {
     String requestBody =
-        objectMapper.writeValueAsString(new CreateDonationRequestDto(id, title, description));
+        objectMapper.writeValueAsString(new CreateDonationRequest(id, title, description));
 
     mvcResult =
         mockMvc

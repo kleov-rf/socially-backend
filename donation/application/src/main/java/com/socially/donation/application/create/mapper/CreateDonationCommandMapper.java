@@ -8,8 +8,8 @@ import com.socially.donation.domain.valueobject.Title;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
-public final class CreateDonationMapper {
-  public static Donation toDonation(CreateDonationCommand command) {
+public final class CreateDonationCommandMapper {
+  public static Donation toDomain(CreateDonationCommand command) {
     return Donation.create(
         Id.from(command.id()),
         Title.from(command.title()),
