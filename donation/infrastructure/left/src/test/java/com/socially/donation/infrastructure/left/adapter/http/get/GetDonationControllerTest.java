@@ -52,7 +52,7 @@ class GetDonationControllerTest {
   }
 
   @Test
-  void get_should_return_ok_response_if_found_donation() {
+  void get_should_return_ok_response_if_donation_found() {
     var queryResult =
         new DonationDto(
             Id.from(DONATION_ID), Title.from("Test Title"), Description.from("Test Description"));
@@ -65,5 +65,14 @@ class GetDonationControllerTest {
 
     assertThat(response.getBody()).isEqualTo(expectedResponse);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+  }
+
+  @Test
+  void get_should_return_not_found_response_if_donation_not_found() {
+    when(queryHandler.handle(new FindDonationByIdQuery(DONATION_ID))).thenReturn(Optional.empty());
+
+    var response = controller.get(DONATION_ID);
+
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
   }
 }
