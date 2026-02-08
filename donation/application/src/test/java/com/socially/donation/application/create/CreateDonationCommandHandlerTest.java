@@ -4,7 +4,7 @@ import static org.mockito.Mockito.verify;
 
 import com.socially.donation.application.create.input.CreateDonationCommand;
 import com.socially.donation.application.create.mapper.CreateDonationCommandMapper;
-import com.socially.donation.domain.port.DonationRepository;
+import com.socially.donation.domain.port.right.DonationRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -21,10 +21,10 @@ class CreateDonationCommandHandlerTest {
   @InjectMocks private CreateDonationCommandHandler handler;
 
   @Test
-  void handle_should_call_save_with_donation() {
+  void execute_should_call_save_with_donation() {
     var command = new CreateDonationCommand(DONATION_ID, "Test Title", "Test Description");
 
-    handler.handle(command);
+    handler.execute(command);
 
     verify(donationRepository).save(CreateDonationCommandMapper.toDomain(command));
   }

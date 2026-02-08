@@ -4,8 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.socially.donation.application.create.CreateDonationCommandHandler;
 import com.socially.donation.application.create.input.CreateDonationCommand;
+import com.socially.donation.application.port.left.CreateDonationUseCase;
 import com.socially.donation.infrastructure.left.adapter.http.create.input.CreateDonationRequest;
 import com.socially.donation.infrastructure.left.adapter.http.create.mapper.CreateDonationRequestMapper;
 import org.junit.jupiter.api.Test;
@@ -19,7 +19,7 @@ import org.springframework.http.ResponseEntity;
 @ExtendWith(MockitoExtension.class)
 class CreateDonationControllerTest {
 
-  @Mock private CreateDonationCommandHandler commandHandler;
+  @Mock private CreateDonationUseCase createDonationUseCase;
 
   @Mock private CreateDonationRequestMapper mapper;
 
@@ -33,7 +33,7 @@ class CreateDonationControllerTest {
 
     controller.create(request);
 
-    verify(commandHandler).handle(command);
+    verify(createDonationUseCase).execute(command);
   }
 
   @Test

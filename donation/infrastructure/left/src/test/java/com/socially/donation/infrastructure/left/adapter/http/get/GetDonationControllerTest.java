@@ -4,9 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.socially.donation.application.get.FindDonationByIdQueryHandler;
 import com.socially.donation.application.get.input.FindDonationByIdQuery;
 import com.socially.donation.application.get.output.DonationDto;
+import com.socially.donation.application.port.left.FindDonationByIdUseCase;
 import com.socially.donation.domain.valueobject.Description;
 import com.socially.donation.domain.valueobject.Id;
 import com.socially.donation.domain.valueobject.Title;
@@ -25,7 +25,7 @@ class GetDonationControllerTest {
 
   private static final String DONATION_ID = "550e8400-e29b-41d4-a716-446655440000";
 
-  @Mock private FindDonationByIdQueryHandler queryHandler;
+  @Mock private FindDonationByIdUseCase findDonationByIdUseCase;
 
   @Mock private DonationResponseMapper mapper;
 
@@ -35,7 +35,7 @@ class GetDonationControllerTest {
   void get_should_call_handler_with_query() {
     controller.get(DONATION_ID);
 
-    verify(queryHandler).handle(new FindDonationByIdQuery(DONATION_ID));
+    verify(findDonationByIdUseCase).execute(new FindDonationByIdQuery(DONATION_ID));
   }
 
   @Test
@@ -43,7 +43,7 @@ class GetDonationControllerTest {
     var queryResult =
         new DonationDto(
             Id.from(DONATION_ID), Title.from("Test Title"), Description.from("Test Description"));
-    when(queryHandler.handle(new FindDonationByIdQuery(DONATION_ID)))
+    when(findDonationByIdUseCase.execute(new FindDonationByIdQuery(DONATION_ID)))
         .thenReturn(Optional.of(queryResult));
 
     controller.get(DONATION_ID);
@@ -57,7 +57,7 @@ class GetDonationControllerTest {
         new DonationDto(
             Id.from(DONATION_ID), Title.from("Test Title"), Description.from("Test Description"));
     var expectedResponse = new DonationResponseDto(DONATION_ID, "Test Title", "Test Description");
-    when(queryHandler.handle(new FindDonationByIdQuery(DONATION_ID)))
+    when(findDonationByIdUseCase.execute(new FindDonationByIdQuery(DONATION_ID)))
         .thenReturn(Optional.of(queryResult));
     when(mapper.toResponse(queryResult)).thenReturn(expectedResponse);
 
@@ -69,7 +69,8 @@ class GetDonationControllerTest {
 
   @Test
   void get_should_return_not_found_response_if_donation_not_found() {
-    when(queryHandler.handle(new FindDonationByIdQuery(DONATION_ID))).thenReturn(Optional.empty());
+    when(findDonationByIdUseCase.execute(new FindDonationByIdQuery(DONATION_ID)))
+        .thenReturn(Optional.empty());
 
     var response = controller.get(DONATION_ID);
 

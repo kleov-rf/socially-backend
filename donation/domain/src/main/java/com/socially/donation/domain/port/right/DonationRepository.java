@@ -1,4 +1,4 @@
-package com.socially.donation.domain.port;
+package com.socially.donation.domain.port.right;
 
 import com.socially.donation.domain.entity.Donation;
 import com.socially.donation.domain.valueobject.Id;
