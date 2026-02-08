@@ -1,6 +1,5 @@
 package com.socially.donation.domain.valueobject;
 
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor(access = lombok.AccessLevel.PRIVATE)

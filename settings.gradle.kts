@@ -1,5 +1,6 @@
 rootProject.name = "socially-backend"
 
+include("app")
 include("donation:domain")
 include("donation:application")
 include("donation:infrastructure:left")

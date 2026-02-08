@@ -1,4 +1,4 @@
-package com.socially.socially_backend.cucumber;
+package com.socially.app.cucumber;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.spring.CucumberContextConfiguration;

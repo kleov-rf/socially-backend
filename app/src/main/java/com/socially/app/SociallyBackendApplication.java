@@ -1,12 +1,14 @@
-package com.socially.socially_backend;
+package com.socially.app;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication(
     scanBasePackages = {
-      "com.socially.socially_backend", "com.socially.donation.application",
-      "com.socially.donation.infrastructure.left", "com.socially.donation.infrastructure.right"
+      "com.socially.app",
+      "com.socially.donation.application",
+      "com.socially.donation.infrastructure.left",
+      "com.socially.donation.infrastructure.right"
     })
 public class SociallyBackendApplication {
 

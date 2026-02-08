@@ -3,7 +3,6 @@ package com.socially.donation.domain.entity;
 import com.socially.donation.domain.valueobject.Description;
 import com.socially.donation.domain.valueobject.Id;
 import com.socially.donation.domain.valueobject.Title;
-
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor(access = lombok.AccessLevel.PRIVATE)
