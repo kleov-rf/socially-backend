@@ -48,4 +48,13 @@ class FindDonationByIdQueryHandlerTest {
 
     assertEquals(donationDto, FindDonationByIdMapper.toQueryResult(donation));
   }
+
+  @Test
+  void handle_should_return_empty_if_donation_not_found() {
+    when(donationRepository.findById(any(Id.class))).thenReturn(Optional.empty());
+
+    var result = handler.handle(new FindDonationByIdQuery(DONATION_ID));
+
+    assertEquals(Optional.empty(), result);
+  }
 }
