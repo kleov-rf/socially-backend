@@ -1,0 +1,31 @@
+package com.socially.donation.domain.entity;
+
+import com.socially.donation.domain.valueobject.Description;
+import com.socially.donation.domain.valueobject.Id;
+import com.socially.donation.domain.valueobject.Title;
+
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor(access = lombok.AccessLevel.PRIVATE)
+public final class Donation {
+
+  private final Id id;
+  private final Title title;
+  private final Description description;
+
+  public static Donation create(Id id, Title title, Description description) {
+    return new Donation(id, title, description);
+  }
+
+  public Id id() {
+    return id;
+  }
+
+  public Title title() {
+    return title;
+  }
+
+  public Description description() {
+    return description;
+  }
+}

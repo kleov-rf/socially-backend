@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: socially-backend-test
+
+logging:
+  level:
+    com.socially: DEBUG
+    io.cucumber: INFO
+    io.restassured: DEBUG

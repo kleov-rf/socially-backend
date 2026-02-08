@@ -20,14 +20,10 @@ build/resources
 build/spotless-clean
 build/spotless-lints
 
-# Gradle files
+# Gradle files (keep gradle/wrapper/* for Dockerfile.dev; production Dockerfile does not use gradle)
 .gradle
-gradle/wrapper/gradle-wrapper.jar
 
-# Source files (JAR is already built)
-src
-
-# Test files
+# Test files (Dockerfile.dev needs src/ for build; production Dockerfile only uses build/libs/*.jar)
 *.test.*
 
 # Documentation

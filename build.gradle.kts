@@ -35,12 +35,21 @@ repositories {
 }
 
 dependencies {
+    implementation(project(":donation:infrastructure:left"))
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
+
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
-    testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("com.fasterxml.jackson.core:jackson-databind")
+
+    testImplementation("io.cucumber:cucumber-java:7.22.0")
+    testImplementation("io.cucumber:cucumber-spring:7.22.0")
+    testImplementation("io.cucumber:cucumber-junit-platform-engine:7.22.0")
+    testImplementation("org.junit.platform:junit-platform-suite:1.11.4")
 }
 
 tasks.withType<Test> {
