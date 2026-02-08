@@ -1,5 +1,6 @@
 package com.socially.donation.infrastructure.left.adapter.http.get;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -10,12 +11,14 @@ import com.socially.donation.domain.valueobject.Description;
 import com.socially.donation.domain.valueobject.Id;
 import com.socially.donation.domain.valueobject.Title;
 import com.socially.donation.infrastructure.left.adapter.http.get.mapper.DonationResponseMapper;
+import com.socially.donation.infrastructure.left.adapter.http.get.output.DonationResponseDto;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 
 @ExtendWith(MockitoExtension.class)
 class GetDonationControllerTest {
@@ -46,5 +49,21 @@ class GetDonationControllerTest {
     controller.get(DONATION_ID);
 
     verify(mapper).toResponse(queryResult);
+  }
+
+  @Test
+  void get_should_return_ok_response_if_found_donation() {
+    var queryResult =
+        new DonationDto(
+            Id.from(DONATION_ID), Title.from("Test Title"), Description.from("Test Description"));
+    var expectedResponse = new DonationResponseDto(DONATION_ID, "Test Title", "Test Description");
+    when(queryHandler.handle(new FindDonationByIdQuery(DONATION_ID)))
+        .thenReturn(Optional.of(queryResult));
+    when(mapper.toResponse(queryResult)).thenReturn(expectedResponse);
+
+    var response = controller.get(DONATION_ID);
+
+    assertThat(response.getBody()).isEqualTo(expectedResponse);
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
   }
 }
