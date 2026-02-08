@@ -5,8 +5,8 @@ import com.socially.donation.domain.entity.Donation;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
-public final class FindDonationByIdMapper {
-  public static DonationDto toQueryResult(Donation donation) {
+public final class DonationDtoMapper {
+  public static DonationDto fromDomain(Donation donation) {
     return new DonationDto(donation.id(), donation.title(), donation.description());
   }
 }

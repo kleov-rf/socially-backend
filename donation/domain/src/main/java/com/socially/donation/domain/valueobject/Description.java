@@ -1,7 +1,9 @@
 package com.socially.donation.domain.valueobject;
 
+import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 
+@EqualsAndHashCode
 @RequiredArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public final class Description {
   private final String value;
