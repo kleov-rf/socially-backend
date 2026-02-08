@@ -3,6 +3,7 @@ package com.socially.donation.domain.entity;
 import com.socially.donation.domain.valueobject.Description;
 import com.socially.donation.domain.valueobject.Id;
 import com.socially.donation.domain.valueobject.Title;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor(access = lombok.AccessLevel.PRIVATE)
@@ -26,5 +27,18 @@ public final class Donation {
 
   public Description description() {
     return description;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    Donation donation = (Donation) o;
+    return Objects.equals(id, donation.id);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(id);
   }
 }
