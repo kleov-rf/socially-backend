@@ -1,25 +1,30 @@
 # Multi-stage Dockerfile for local development (builds JAR then runs it)
+# Matches multi-module layout: app (Spring Boot) + donation (domain, application, infrastructure)
 FROM eclipse-temurin:25-jdk-alpine AS builder
 
 WORKDIR /app
 
-# Copy Gradle wrapper and build config
+# Copy Gradle wrapper and root build config
 COPY gradle gradle
 COPY gradlew build.gradle.kts settings.gradle.kts ./
-COPY src src
 
-# Build the application (no daemon, produce JAR)
-RUN ./gradlew bootJar --no-daemon -x test
+# Copy all subprojects (app + donation modules)
+COPY app app
+COPY donation donation
+
+# Build the application (no daemon, produce boot JAR from app module)
+RUN ./gradlew :app:bootJar --no-daemon -x test
 
 # Runtime stage (matches production Dockerfile)
 FROM eclipse-temurin:25-jre-alpine
 
 WORKDIR /app
 
-RUN apk add --no-cache curl && \
+RUN apk add --no-cache wget && \
     addgroup -S spring && adduser -S spring -G spring
 
-COPY --from=builder /app/build/libs/*.jar app.jar
+# Boot JAR is produced by the app module
+COPY --from=builder /app/app/build/libs/*.jar app.jar
 
 RUN chown spring:spring app.jar
 

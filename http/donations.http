@@ -1,0 +1,75 @@
+### Socially Backend - Donation API
+### JetBrains HTTP Client Collection
+### Documentation: https://www.jetbrains.com/help/idea/http-client-in-product-code-editor.html
+
+## Health Check
+### Check if the application is running
+GET {{baseUrl}}/actuator/health
+Accept: application/json
+
+> {%
+    client.test("Health check returns UP", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+        client.assert(response.body.status === "UP", "Application is not UP");
+    });
+%}
+
+###
+
+## ========================================
+## DONATIONS
+## ========================================
+
+### Create a new donation
+POST {{baseUrl}}/api/donations
+Content-Type: {{contentType}}
+
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "title": "Winter Clothes Drive",
+  "description": "Collecting warm clothes for homeless shelters"
+}
+
+> {%
+    client.test("Donation created successfully", function() {
+        client.assert(response.status === 201, "Response status is not 201 Created");
+    });
+%}
+
+###
+
+### Create another donation (Food Drive)
+POST {{baseUrl}}/api/donations
+Content-Type: {{contentType}}
+
+{
+  "id": "550e8400-e29b-41d4-a716-446655440001",
+  "title": "Food Drive",
+  "description": "Collecting non-perishable food items for local food banks"
+}
+
+###
+
+### Get donation by ID
+GET {{baseUrl}}/api/donations/550e8400-e29b-41d4-a716-446655440000
+Accept: application/json
+
+> {%
+    client.test("Donation retrieved successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+###
+
+### Get non-existent donation (should return 404)
+GET {{baseUrl}}/api/donations/00000000-0000-0000-0000-000000000000
+Accept: application/json
+
+> {%
+    client.test("Non-existent donation returns 404", function() {
+        client.assert(response.status === 404, "Response status is not 404");
+    });
+%}
+
+###
