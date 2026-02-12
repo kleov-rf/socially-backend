@@ -6,7 +6,7 @@ RUN apk add --no-cache curl
 
 RUN addgroup -S spring && adduser -S spring -G spring
 
-COPY build/libs/*.jar app.jar
+COPY app/build/libs/*.jar app.jar
 
 RUN chown spring:spring app.jar
 
