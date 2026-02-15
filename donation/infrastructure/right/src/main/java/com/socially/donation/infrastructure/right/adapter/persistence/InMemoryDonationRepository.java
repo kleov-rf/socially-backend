@@ -6,9 +6,11 @@ import com.socially.donation.domain.valueobject.Id;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 @Repository
+@Profile("inmemory")
 public class InMemoryDonationRepository implements DonationRepository {
 
   private final Map<Id, Donation> storage = new ConcurrentHashMap<>();

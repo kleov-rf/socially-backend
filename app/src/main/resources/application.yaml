@@ -8,6 +8,9 @@ spring:
     hikari:
       maximum-pool-size: 10
       connection-timeout: 20000
+  jpa:
+    hibernate:
+      ddl-auto: validate
 
 management:
   endpoints:
