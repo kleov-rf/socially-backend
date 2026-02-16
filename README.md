@@ -69,7 +69,7 @@ This project follows **Hexagonal Architecture** (also known as Ports and Adapter
 │  │  │                INFRASTRUCTURE:RIGHT                       │ │   │
 │  │  │        (Secondary/Driven Adapters - Persistence)          │ │   │
 │  │  │                                                           │ │   │
-│  │  │   • InMemoryDonationRepository                            │ │   │
+│  │  │   • JpaDonationRepository (PostgreSQL)                  │ │   │
 │  │  └──────────────────────────────────────────────────────────┘ │   │
 │  │                                                                │   │
 │  └────────────────────────────────────────────────────────────────┘   │
@@ -135,7 +135,7 @@ socially-backend/
 │       │
 │       └── right/                          # Secondary adapters (driven)
 │           └── src/main/java/.../right/adapter/persistence/
-│               └── InMemoryDonationRepository.java
+│               └── JpaDonationRepository.java
 │
 ├── gradle/                                 # Gradle wrapper
 ├── build.gradle.kts                        # Root build configuration
@@ -206,7 +206,20 @@ The project uses [Spotless](https://github.com/diffplug/spotless) with Google Ja
 
 ## Running the Application
 
-### Local Development
+### Option 1: Docker Compose (recommended for local full-stack)
+
+Starts PostgreSQL + backend; frontend can be added when running from `socially-frontend`:
+
+```bash
+docker compose up --build
+```
+
+- **Backend:** http://localhost:8080
+- **Postgres:** localhost:5432 (user: `postgres`, pass: `postgres`, db: `socially`)
+
+### Option 2: From IDE / Gradle
+
+Requires PostgreSQL running (e.g. `docker compose up postgres -d`):
 
 ```bash
 ./gradlew :app:bootRun
@@ -222,11 +235,21 @@ curl http://localhost:8080/actuator/health
 
 ## Testing
 
-### Run All Tests
+### Unit Tests (fast, H2 in-memory)
 
 ```bash
 ./gradlew test
 ```
+
+Excludes Cucumber; uses H2 for fast feedback.
+
+### Integration Tests (Cucumber + real PostgreSQL via Testcontainers)
+
+```bash
+./gradlew testIntegration
+```
+
+Runs Cucumber BDD tests against a real PostgreSQL container. Requires Docker.
 
 ### Run Specific Module Tests
 
@@ -236,16 +259,14 @@ curl http://localhost:8080/actuator/health
 
 # Application layer tests
 ./gradlew :donation:application:test
-
-# Integration/Cucumber tests
-./gradlew :app:test
 ```
 
 ### Test Reports
 
 After running tests, reports are available at:
 - **Unit Tests:** `app/build/reports/tests/test/index.html`
-- **Cucumber Reports:** `app/build/reports/cucumber/cucumber.html`
+- **Integration Tests:** `app/build/reports/tests/testIntegration/index.html`
+- **Cucumber Reports:** `app/target/cucumber-reports/cucumber.html`
 
 ### Testing Strategy
 
@@ -254,7 +275,7 @@ After running tests, reports are available at:
 | Domain | Unit Tests | JUnit 5 |
 | Application | Unit Tests | JUnit 5, Mockito |
 | Infrastructure | Integration Tests | Spring Boot Test |
-| End-to-End | BDD/Acceptance | Cucumber |
+| End-to-End | BDD/Acceptance | Cucumber + Testcontainers (PostgreSQL) |
 
 ## API Reference
 
@@ -300,7 +321,15 @@ GET /api/donations/{id}
 
 ## Docker
 
-### Build the Image
+### Local Development Stack (Postgres + Backend)
+
+```bash
+docker compose up --build
+```
+
+Starts PostgreSQL and the backend. For frontend + backend + postgres, run `docker compose up` from the `socially-frontend` directory (with backend as a sibling).
+
+### Production Image
 
 ```bash
 # First, build the JAR
@@ -312,15 +341,16 @@ docker build -t socially-backend:latest .
 
 ### Run the Container
 
-```bash
-docker run -p 8080:8080 socially-backend:latest
-```
-
-### Development Container
+Production runs require external PostgreSQL (or managed DB); configure via `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD`:
 
 ```bash
-docker build -f Dockerfile.dev -t socially-backend:dev .
-docker run -p 8080:8080 socially-backend:dev
+docker run -p 8080:8080 \
+  -e DB_HOST=your-db-host \
+  -e DB_PORT=5432 \
+  -e DB_NAME=socially \
+  -e DB_USERNAME=postgres \
+  -e DB_PASSWORD=postgres \
+  socially-backend:latest
 ```
 
 ### Container Features

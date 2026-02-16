@@ -39,8 +39,41 @@ dependencies {
     testImplementation("io.cucumber:cucumber-spring:7.22.0")
     testImplementation("io.cucumber:cucumber-junit-platform-engine:7.22.0")
     testImplementation("org.junit.platform:junit-platform-suite:1.11.4")
+
+    testImplementation("org.testcontainers:testcontainers:2.0.3")
+    testImplementation("org.testcontainers:testcontainers-postgresql:2.0.3")
+    testImplementation("org.testcontainers:testcontainers-junit-jupiter:2.0.3")
 }
 
-tasks.withType<Test> {
+tasks.named<Test>("test") {
     useJUnitPlatform()
+
+    filter {
+        excludeTestsMatching("*CucumberTestRunner*")
+        isFailOnNoMatchingTests = false
+    }
+
+    systemProperty("spring.profiles.active", System.getProperty("spring.profiles.active", "test"))
+
+    testLogging {
+        events("passed", "skipped", "failed")
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+    }
+}
+
+// Task to run Cucumber integration tests with Testcontainers PostgreSQL
+tasks.register<Test>("testIntegration") {
+    group = "verification"
+    description = "Run Cucumber integration tests against real PostgreSQL (Testcontainers)"
+
+    testClassesDirs = sourceSets.test.get().output.classesDirs
+    classpath = sourceSets.test.get().runtimeClasspath
+
+    useJUnitPlatform()
+
+    filter {
+        includeTestsMatching("*CucumberTestRunner*")
+    }
+
+    dependsOn("testClasses")
 }
