@@ -26,6 +26,8 @@ class JpaDonationRepositoryTest {
 
   @Mock private DonationEntityRepository entityRepository;
 
+  @Mock private DonationEntityMapper entityMapper;
+
   @InjectMocks private JpaDonationRepository jpaDonationRepository;
 
   @Test
@@ -33,17 +35,19 @@ class JpaDonationRepositoryTest {
     Donation donation =
         Donation.create(
             Id.from(DONATION_ID), Title.from("Test Title"), Description.from("Test Description"));
+    DonationEntity mappedEntity =
+        new DonationEntity(Id.from(DONATION_ID).value(), "Test Title", "Test Description");
+    when(entityMapper.toEntity(donation)).thenReturn(mappedEntity);
 
     jpaDonationRepository.save(donation);
 
-    DonationEntity expected = DonationEntityMapper.toEntity(donation);
     verify(entityRepository)
         .save(
             argThat(
                 entity ->
-                    entity.getId().equals(expected.getId())
-                        && entity.getTitle().equals(expected.getTitle())
-                        && entity.getDescription().equals(expected.getDescription())));
+                    entity.getId().equals(mappedEntity.getId())
+                        && entity.getTitle().equals(mappedEntity.getTitle())
+                        && entity.getDescription().equals(mappedEntity.getDescription())));
   }
 
   @Test
@@ -61,11 +65,16 @@ class JpaDonationRepositoryTest {
     var entityId = Id.from(DONATION_ID).value();
     DonationEntity entity = new DonationEntity(entityId, "Entity Title", "Entity Description");
     when(entityRepository.findById(entityId)).thenReturn(Optional.of(entity));
+    Donation mappedDonation =
+        Donation.create(
+            Id.from(DONATION_ID),
+            Title.from("Entity Title"),
+            Description.from("Entity Description"));
+    when(entityMapper.toDomain(entity)).thenReturn(mappedDonation);
 
     Optional<Donation> result = jpaDonationRepository.findById(Id.from(DONATION_ID));
 
-    Donation expected = DonationEntityMapper.toDomain(entity);
     assertTrue(result.isPresent());
-    assertEquals(expected, result.get());
+    assertEquals(mappedDonation, result.get());
   }
 }
