@@ -1,10 +1,15 @@
 package com.socially.donation.application.create;
 
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.socially.donation.application.create.input.CreateDonationCommand;
 import com.socially.donation.application.create.mapper.CreateDonationCommandMapper;
+import com.socially.donation.domain.entity.Donation;
 import com.socially.donation.domain.port.right.DonationRepository;
+import com.socially.donation.domain.valueobject.Description;
+import com.socially.donation.domain.valueobject.Id;
+import com.socially.donation.domain.valueobject.Title;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,14 +23,20 @@ class CreateDonationCommandHandlerTest {
 
   @Mock private DonationRepository donationRepository;
 
+  @Mock private CreateDonationCommandMapper createDonationCommandMapper;
+
   @InjectMocks private CreateDonationCommandHandler handler;
 
   @Test
   void execute_should_call_save_with_donation() {
     var command = new CreateDonationCommand(DONATION_ID, "Test Title", "Test Description");
+    Donation mappedDonation =
+        Donation.create(
+            Id.from(DONATION_ID), Title.from("Test Title"), Description.from("Test Description"));
+    when(createDonationCommandMapper.toDomain(command)).thenReturn(mappedDonation);
 
     handler.execute(command);
 
-    verify(donationRepository).save(CreateDonationCommandMapper.toDomain(command));
+    verify(donationRepository).save(mappedDonation);
   }
 }

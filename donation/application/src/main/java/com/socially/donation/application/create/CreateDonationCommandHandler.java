@@ -13,10 +13,11 @@ import org.springframework.stereotype.Service;
 public final class CreateDonationCommandHandler implements CreateDonationUseCase {
 
   private final DonationRepository donationRepository;
+  private final CreateDonationCommandMapper createDonationCommandMapper;
 
   @Override
   public void execute(CreateDonationCommand command) {
-    Donation donation = CreateDonationCommandMapper.toDomain(command);
+    Donation donation = createDonationCommandMapper.toDomain(command);
     donationRepository.save(donation);
   }
 }
