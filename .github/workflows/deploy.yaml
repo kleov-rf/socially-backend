@@ -66,3 +66,11 @@ jobs:
             --cluster ${{ env.ECS_CLUSTER_NAME }} \
             --service ${{ env.ECS_SERVICE_NAME }} \
             --expected-task-def ${{ steps.deploy-task-def.outputs.task-definition-arn }}
+
+      - name: Store deployed version in SSM
+        run: |
+          aws ssm put-parameter \
+            --name "/config/socially/backend/container/image-version" \
+            --type String \
+            --value "${{ inputs.image_tag }}" \
+            --overwrite
