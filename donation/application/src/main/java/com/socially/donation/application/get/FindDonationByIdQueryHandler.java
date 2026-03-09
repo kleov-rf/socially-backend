@@ -16,11 +16,12 @@ import org.springframework.stereotype.Service;
 public final class FindDonationByIdQueryHandler implements FindDonationByIdUseCase {
 
   private final DonationRepository donationRepository;
+  private final DonationDtoMapper donationDtoMapper;
 
   @Override
   public Optional<DonationDto> execute(FindDonationByIdQuery query) {
     Id id = Id.from(query.id());
     Optional<Donation> donation = donationRepository.findById(id);
-    return donation.map(DonationDtoMapper::fromDomain);
+    return donation.map(donationDtoMapper::fromDomain);
   }
 }

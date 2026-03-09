@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import com.socially.donation.application.get.input.FindDonationByIdQuery;
 import com.socially.donation.application.get.mapper.DonationDtoMapper;
+import com.socially.donation.application.get.output.DonationDto;
 import com.socially.donation.domain.entity.Donation;
 import com.socially.donation.domain.port.right.DonationRepository;
 import com.socially.donation.domain.valueobject.Description;
@@ -26,6 +27,8 @@ class FindDonationByIdQueryHandlerTest {
 
   @Mock private DonationRepository donationRepository;
 
+  @Mock private DonationDtoMapper donationDtoMapper;
+
   @InjectMocks private FindDonationByIdQueryHandler handler;
 
   @Test
@@ -43,10 +46,13 @@ class FindDonationByIdQueryHandlerTest {
         Donation.create(
             Id.from(DONATION_ID), Title.from("Test Title"), Description.from("Test Description"));
     when(donationRepository.findById(any(Id.class))).thenReturn(Optional.of(donation));
+    DonationDto mappedDto =
+        new DonationDto(donation.id(), donation.title(), donation.description());
+    when(donationDtoMapper.fromDomain(donation)).thenReturn(mappedDto);
 
     var donationDto = handler.execute(new FindDonationByIdQuery(DONATION_ID)).orElseThrow();
 
-    assertEquals(donationDto, DonationDtoMapper.fromDomain(donation));
+    assertEquals(mappedDto, donationDto);
   }
 
   @Test

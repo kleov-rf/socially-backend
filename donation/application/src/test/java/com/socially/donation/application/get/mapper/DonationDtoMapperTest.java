@@ -8,8 +8,14 @@ import com.socially.donation.domain.valueobject.Description;
 import com.socially.donation.domain.valueobject.Id;
 import com.socially.donation.domain.valueobject.Title;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 class DonationDtoMapperTest {
+
+  @InjectMocks private DonationDtoMapper donationDtoMapper;
 
   private static final String DONATION_ID = "550e8400-e29b-41d4-a716-446655440000";
 
@@ -19,7 +25,7 @@ class DonationDtoMapperTest {
         Donation.create(
             Id.from(DONATION_ID), Title.from("Test Title"), Description.from("Test Description"));
 
-    DonationDto result = DonationDtoMapper.fromDomain(donation);
+    DonationDto result = donationDtoMapper.fromDomain(donation);
 
     assertEquals(Id.from(DONATION_ID), result.id());
     assertEquals(Title.from("Test Title"), result.title());
