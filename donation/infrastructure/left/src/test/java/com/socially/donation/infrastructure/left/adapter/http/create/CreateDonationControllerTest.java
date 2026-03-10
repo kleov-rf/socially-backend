@@ -7,7 +7,7 @@ import static org.mockito.Mockito.when;
 import com.socially.donation.application.create.input.CreateDonationCommand;
 import com.socially.donation.application.port.left.CreateDonationUseCase;
 import com.socially.donation.infrastructure.left.adapter.http.create.input.CreateDonationRequest;
-import com.socially.donation.infrastructure.left.adapter.http.create.mapper.CreateDonationRequestMapper;
+import com.socially.donation.infrastructure.left.adapter.http.create.input.mapper.CreateDonationRequestMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

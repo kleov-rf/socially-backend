@@ -2,8 +2,8 @@ package com.socially.donation.infrastructure.left.adapter.http.get;
 
 import com.socially.donation.application.get.input.FindDonationByIdQuery;
 import com.socially.donation.application.port.left.FindDonationByIdUseCase;
-import com.socially.donation.infrastructure.left.adapter.http.get.mapper.DonationResponseMapper;
 import com.socially.donation.infrastructure.left.adapter.http.get.output.DonationResponseDto;
+import com.socially.donation.infrastructure.left.adapter.http.get.output.mapper.DonationResponseMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

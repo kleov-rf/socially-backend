@@ -6,8 +6,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.socially.donation.application.get.input.FindDonationByIdQuery;
-import com.socially.donation.application.get.mapper.DonationDtoMapper;
 import com.socially.donation.application.get.output.DonationDto;
+import com.socially.donation.application.get.output.mapper.DonationDtoMapper;
 import com.socially.donation.domain.entity.Donation;
 import com.socially.donation.domain.port.right.DonationRepository;
 import com.socially.donation.domain.valueobject.Description;

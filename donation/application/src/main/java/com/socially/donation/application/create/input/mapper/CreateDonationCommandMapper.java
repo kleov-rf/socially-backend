@@ -1,4 +1,4 @@
-package com.socially.donation.application.create.mapper;
+package com.socially.donation.application.create.input.mapper;
 
 import com.socially.donation.application.create.input.CreateDonationCommand;
 import com.socially.donation.domain.entity.Donation;

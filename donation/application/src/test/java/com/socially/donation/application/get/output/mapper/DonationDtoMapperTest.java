@@ -1,4 +1,4 @@
-package com.socially.donation.application.get.mapper;
+package com.socially.donation.application.get.output.mapper;
 
 import static org.junit.jupiter.api.Assertions.*;
 

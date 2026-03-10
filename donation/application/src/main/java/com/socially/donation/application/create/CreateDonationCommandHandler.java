@@ -1,7 +1,7 @@
 package com.socially.donation.application.create;
 
 import com.socially.donation.application.create.input.CreateDonationCommand;
-import com.socially.donation.application.create.mapper.CreateDonationCommandMapper;
+import com.socially.donation.application.create.input.mapper.CreateDonationCommandMapper;
 import com.socially.donation.application.port.left.CreateDonationUseCase;
 import com.socially.donation.domain.entity.Donation;
 import com.socially.donation.domain.port.right.DonationRepository;

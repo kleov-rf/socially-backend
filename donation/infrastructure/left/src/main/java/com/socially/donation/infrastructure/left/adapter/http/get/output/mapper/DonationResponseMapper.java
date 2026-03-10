@@ -1,4 +1,4 @@
-package com.socially.donation.infrastructure.left.adapter.http.get.mapper;
+package com.socially.donation.infrastructure.left.adapter.http.get.output.mapper;
 
 import com.socially.donation.application.get.output.DonationDto;
 import com.socially.donation.infrastructure.left.adapter.http.get.output.DonationResponseDto;

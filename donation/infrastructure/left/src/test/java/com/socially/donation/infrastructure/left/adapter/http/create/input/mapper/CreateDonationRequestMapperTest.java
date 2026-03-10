@@ -1,4 +1,4 @@
-package com.socially.donation.infrastructure.left.adapter.http.create.mapper;
+package com.socially.donation.infrastructure.left.adapter.http.create.input.mapper;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -7,7 +7,7 @@ import com.socially.donation.infrastructure.left.adapter.http.create.input.Creat
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class CreateDonationCommandMapperTest {
+class CreateDonationRequestMapperTest {
   private CreateDonationRequestMapper mapper;
 
   @BeforeEach

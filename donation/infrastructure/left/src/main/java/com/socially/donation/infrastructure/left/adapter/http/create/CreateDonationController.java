@@ -3,7 +3,7 @@ package com.socially.donation.infrastructure.left.adapter.http.create;
 import com.socially.donation.application.create.input.CreateDonationCommand;
 import com.socially.donation.application.port.left.CreateDonationUseCase;
 import com.socially.donation.infrastructure.left.adapter.http.create.input.CreateDonationRequest;
-import com.socially.donation.infrastructure.left.adapter.http.create.mapper.CreateDonationRequestMapper;
+import com.socially.donation.infrastructure.left.adapter.http.create.input.mapper.CreateDonationRequestMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

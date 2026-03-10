@@ -1,4 +1,4 @@
-package com.socially.donation.application.get.mapper;
+package com.socially.donation.application.get.output.mapper;
 
 import com.socially.donation.application.get.output.DonationDto;
 import com.socially.donation.domain.entity.Donation;

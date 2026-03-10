@@ -1,4 +1,4 @@
-package com.socially.donation.application.create.mapper;
+package com.socially.donation.application.create.input.mapper;
 
 import static org.junit.jupiter.api.Assertions.*;
 

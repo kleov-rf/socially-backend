@@ -1,4 +1,4 @@
-package com.socially.donation.infrastructure.left.adapter.http.create.mapper;
+package com.socially.donation.infrastructure.left.adapter.http.create.input.mapper;
 
 import com.socially.donation.application.create.input.CreateDonationCommand;
 import com.socially.donation.infrastructure.left.adapter.http.create.input.CreateDonationRequest;

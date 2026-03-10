@@ -4,7 +4,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.socially.donation.application.create.input.CreateDonationCommand;
-import com.socially.donation.application.create.mapper.CreateDonationCommandMapper;
+import com.socially.donation.application.create.input.mapper.CreateDonationCommandMapper;
 import com.socially.donation.domain.entity.Donation;
 import com.socially.donation.domain.port.right.DonationRepository;
 import com.socially.donation.domain.valueobject.Description;
