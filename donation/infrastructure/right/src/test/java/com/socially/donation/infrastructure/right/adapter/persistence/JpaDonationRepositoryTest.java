@@ -28,7 +28,7 @@ class JpaDonationRepositoryTest {
 
   @Mock private DonationEntityMapper entityMapper;
 
-  @InjectMocks private JpaDonationRepository jpaDonationRepository;
+  @InjectMocks private JpaDonationRepository sut;
 
   @Test
   void save_should_call_entity_repository_save_with_mapped_donation_entity() {
@@ -39,7 +39,7 @@ class JpaDonationRepositoryTest {
         new DonationEntity(Id.from(DONATION_ID).value(), "Test Title", "Test Description");
     when(entityMapper.toEntity(donation)).thenReturn(mappedEntity);
 
-    jpaDonationRepository.save(donation);
+    sut.save(donation);
 
     verify(entityRepository)
         .save(
@@ -55,7 +55,7 @@ class JpaDonationRepositoryTest {
     Id donationId = Id.from(DONATION_ID);
     when(entityRepository.findById(donationId.value())).thenReturn(Optional.empty());
 
-    jpaDonationRepository.findById(donationId);
+    sut.findById(donationId);
 
     verify(entityRepository).findById(donationId.value());
   }
@@ -72,9 +72,18 @@ class JpaDonationRepositoryTest {
             Description.from("Entity Description"));
     when(entityMapper.toDomain(entity)).thenReturn(mappedDonation);
 
-    Optional<Donation> result = jpaDonationRepository.findById(Id.from(DONATION_ID));
+    Optional<Donation> result = sut.findById(Id.from(DONATION_ID));
 
     assertTrue(result.isPresent());
     assertEquals(mappedDonation, result.get());
+  }
+
+  @Test
+  void deleteById_should_call_entity_repository_delete_with_id() {
+    Id donationId = Id.from(DONATION_ID);
+
+    sut.deleteById(donationId);
+
+    verify(entityRepository).deleteById(donationId.value());
   }
 }

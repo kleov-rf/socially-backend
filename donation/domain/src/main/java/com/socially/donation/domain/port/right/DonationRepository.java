@@ -8,4 +8,6 @@ public interface DonationRepository {
   void save(Donation donation);
 
   Optional<Donation> findById(Id id);
+
+  void deleteById(Id id);
 }

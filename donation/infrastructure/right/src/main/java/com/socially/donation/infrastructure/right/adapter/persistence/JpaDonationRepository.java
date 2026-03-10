@@ -24,4 +24,9 @@ public class JpaDonationRepository implements DonationRepository {
   public Optional<Donation> findById(Id id) {
     return entityRepository.findById(id.value()).map(entityMapper::toDomain);
   }
+
+  @Override
+  public void deleteById(Id id) {
+    entityRepository.deleteById(id.value());
+  }
 }
