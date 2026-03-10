@@ -10,3 +10,12 @@ Feature: Donation management
     When I retrieve the donation by id
     Then the response status should be 200
     And the donation should have the expected id, title "Winter Clothes Drive" and description "Collecting warm clothes for homeless shelters"
+
+  Scenario: Create a donation, delete it, and fail to retrieve it afterwards
+    Given I have a donation with random id, title "School Supplies Fund" and description "Raising money for notebooks and backpacks"
+    When I create the donation
+    Then the response status should be 201
+    When I delete the donation by id
+    Then the response status should be 204
+    When I retrieve the donation by id
+    Then the response status should be 404

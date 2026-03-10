@@ -1,6 +1,7 @@
 package com.socially.app.cucumber.steps;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
@@ -46,6 +47,11 @@ public class DonationStepDefinitions {
             .perform(
                 post("/api/donations").contentType(MediaType.APPLICATION_JSON).content(requestBody))
             .andReturn();
+  }
+
+  @When("I delete the donation by id")
+  public void iDeleteTheDonationById() throws Exception {
+    mvcResult = mockMvc.perform(delete("/api/donations/" + id)).andReturn();
   }
 
   @Then("the response status should be {int}")
