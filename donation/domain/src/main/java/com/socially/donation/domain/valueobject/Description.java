@@ -9,7 +9,16 @@ public final class Description {
   private final String value;
 
   public static Description from(String value) {
-    return new Description(value);
+    if (value == null) {
+      throw new IllegalArgumentException("description cannot be null");
+    }
+
+    String normalizedValue = value.trim();
+    if (normalizedValue.isEmpty()) {
+      throw new IllegalArgumentException("description cannot be blank");
+    }
+
+    return new Description(normalizedValue);
   }
 
   public String value() {
