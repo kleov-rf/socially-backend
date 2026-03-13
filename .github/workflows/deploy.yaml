@@ -27,10 +27,10 @@ jobs:
     environment: dev
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         env:
           AWS_ACCOUNT_ID: ${{ inputs.aws_account_id }}
         with:
