@@ -129,3 +129,86 @@ Accept: application/json
 %}
 
 ###
+
+@patchLifecycleDonationId = 550e8400-e29b-41d4-a716-446655440098
+
+### Create donation for patch lifecycle
+POST {{baseUrl}}/api/donations
+Content-Type: {{contentType}}
+
+{
+  "id": "{{patchLifecycleDonationId}}",
+  "title": "Community Garden",
+  "description": "Seeds and tools for local volunteers"
+}
+
+> {%
+    client.test("Patch lifecycle create returns 201", function () {
+        client.assert(response.status === 201, "Response status is not 201 Created");
+    });
+%}
+
+###
+
+### Patch donation by ID
+PATCH {{baseUrl}}/api/donations/{{patchLifecycleDonationId}}
+Content-Type: {{contentType}}
+
+{
+  "title": "Community Garden Expansion",
+  "description": "Additional seeds, compost, and irrigation"
+}
+
+> {%
+    client.test("Patch lifecycle update returns 204", function () {
+        client.assert(response.status === 204, "Response status is not 204 No Content");
+    });
+%}
+
+###
+
+### Retrieve same donation after patch and verify updated values
+GET {{baseUrl}}/api/donations/{{patchLifecycleDonationId}}
+Accept: application/json
+
+> {%
+    client.test("Patch lifecycle retrieve returns 200 with updated payload", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+        client.assert(response.body.id === "{{patchLifecycleDonationId}}", "Donation id does not match");
+        client.assert(response.body.title === "Community Garden Expansion", "Donation title does not match updated value");
+        client.assert(response.body.description === "Additional seeds, compost, and irrigation", "Donation description does not match updated value");
+    });
+%}
+
+###
+
+### Partially patch donation title only
+PATCH {{baseUrl}}/api/donations/{{patchLifecycleDonationId}}
+Content-Type: {{contentType}}
+
+{
+  "title": "Community Garden Phase 2"
+}
+
+> {%
+    client.test("Partial patch returns 204", function () {
+        client.assert(response.status === 204, "Response status is not 204 No Content");
+    });
+%}
+
+###
+
+### Retrieve same donation after partial patch and verify only title changed
+GET {{baseUrl}}/api/donations/{{patchLifecycleDonationId}}
+Accept: application/json
+
+> {%
+    client.test("Retrieve after partial patch returns updated title and preserved description", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+        client.assert(response.body.id === "{{patchLifecycleDonationId}}", "Donation id does not match");
+        client.assert(response.body.title === "Community Garden Phase 2", "Donation title does not match updated value");
+        client.assert(response.body.description === "Additional seeds, compost, and irrigation", "Donation description should remain unchanged");
+    });
+%}
+
+###
