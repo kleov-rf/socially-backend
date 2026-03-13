@@ -21,6 +21,11 @@ public class JpaDonationRepository implements DonationRepository {
   }
 
   @Override
+  public void update(Donation donation) {
+    entityRepository.save(entityMapper.toEntity(donation));
+  }
+
+  @Override
   public Optional<Donation> findById(Id id) {
     return entityRepository.findById(id.value()).map(entityMapper::toDomain);
   }

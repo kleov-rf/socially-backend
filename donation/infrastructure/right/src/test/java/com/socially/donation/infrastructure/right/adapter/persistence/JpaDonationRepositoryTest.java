@@ -31,7 +31,7 @@ class JpaDonationRepositoryTest {
   @InjectMocks private JpaDonationRepository sut;
 
   @Test
-  void save_should_call_entity_repository_create_with_mapped_donation_entity() {
+  void create_should_call_entity_repository_save_with_mapped_donation_entity() {
     Donation donation =
         Donation.create(
             Id.from(DONATION_ID), Title.from("Test Title"), Description.from("Test Description"));
@@ -40,6 +40,28 @@ class JpaDonationRepositoryTest {
     when(entityMapper.toEntity(donation)).thenReturn(mappedEntity);
 
     sut.create(donation);
+
+    verify(entityRepository)
+        .save(
+            argThat(
+                entity ->
+                    entity.getId().equals(mappedEntity.getId())
+                        && entity.getTitle().equals(mappedEntity.getTitle())
+                        && entity.getDescription().equals(mappedEntity.getDescription())));
+  }
+
+  @Test
+  void update_should_call_entity_repository_save_with_mapped_donation_entity() {
+    Donation donation =
+        Donation.create(
+            Id.from(DONATION_ID),
+            Title.from("Updated Title"),
+            Description.from("Updated Description"));
+    DonationEntity mappedEntity =
+        new DonationEntity(Id.from(DONATION_ID).value(), "Updated Title", "Updated Description");
+    when(entityMapper.toEntity(donation)).thenReturn(mappedEntity);
+
+    sut.update(donation);
 
     verify(entityRepository)
         .save(
