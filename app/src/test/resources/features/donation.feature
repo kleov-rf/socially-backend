@@ -19,3 +19,13 @@ Feature: Donation management
     Then the response status should be 204
     When I retrieve the donation by id
     Then the response status should be 404
+
+  Scenario: Create a donation, patch only title, and keep description unchanged
+    Given I have a donation with random id, title "Neighborhood Library" and description "Books and shelves for local students"
+    When I create the donation
+    Then the response status should be 201
+    When I partially update the donation title to "Neighborhood Library Expansion"
+    Then the response status should be 204
+    When I retrieve the donation by id
+    Then the response status should be 200
+    And the donation should have the expected id, title "Neighborhood Library Expansion" and description "Books and shelves for local students"

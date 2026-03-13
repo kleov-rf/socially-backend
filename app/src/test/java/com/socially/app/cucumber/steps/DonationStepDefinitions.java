@@ -3,10 +3,12 @@ package com.socially.app.cucumber.steps;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.socially.donation.infrastructure.left.adapter.http.create.input.CreateDonationRequest;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
@@ -52,6 +54,20 @@ public class DonationStepDefinitions {
   @When("I delete the donation by id")
   public void iDeleteTheDonationById() throws Exception {
     mvcResult = mockMvc.perform(delete("/api/donations/" + id)).andReturn();
+  }
+
+  @When("I partially update the donation title to {string}")
+  public void iPartiallyUpdateTheDonationTitleTo(String updatedTitle) throws Exception {
+    ObjectNode requestBody = objectMapper.createObjectNode();
+    requestBody.put("title", updatedTitle);
+
+    mvcResult =
+        mockMvc
+            .perform(
+                patch("/api/donations/" + id)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(requestBody)))
+            .andReturn();
   }
 
   @Then("the response status should be {int}")
