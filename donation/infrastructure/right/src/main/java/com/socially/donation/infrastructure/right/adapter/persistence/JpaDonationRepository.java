@@ -16,7 +16,7 @@ public class JpaDonationRepository implements DonationRepository {
   private final DonationEntityMapper entityMapper;
 
   @Override
-  public void save(Donation donation) {
+  public void create(Donation donation) {
     entityRepository.save(entityMapper.toEntity(donation));
   }
 

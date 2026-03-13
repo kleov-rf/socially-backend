@@ -18,6 +18,6 @@ public final class CreateDonationCommandHandler implements CreateDonationUseCase
   @Override
   public void execute(CreateDonationCommand command) {
     Donation donation = createDonationCommandMapper.toDomain(command);
-    donationRepository.save(donation);
+    donationRepository.create(donation);
   }
 }

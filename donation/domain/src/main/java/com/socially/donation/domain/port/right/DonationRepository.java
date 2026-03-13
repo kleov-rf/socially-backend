@@ -5,7 +5,7 @@ import com.socially.donation.domain.valueobject.Id;
 import java.util.Optional;
 
 public interface DonationRepository {
-  void save(Donation donation);
+  void create(Donation donation);
 
   Optional<Donation> findById(Id id);
 

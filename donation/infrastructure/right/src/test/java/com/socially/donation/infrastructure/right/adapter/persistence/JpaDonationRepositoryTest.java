@@ -31,7 +31,7 @@ class JpaDonationRepositoryTest {
   @InjectMocks private JpaDonationRepository sut;
 
   @Test
-  void save_should_call_entity_repository_save_with_mapped_donation_entity() {
+  void save_should_call_entity_repository_create_with_mapped_donation_entity() {
     Donation donation =
         Donation.create(
             Id.from(DONATION_ID), Title.from("Test Title"), Description.from("Test Description"));
@@ -39,7 +39,7 @@ class JpaDonationRepositoryTest {
         new DonationEntity(Id.from(DONATION_ID).value(), "Test Title", "Test Description");
     when(entityMapper.toEntity(donation)).thenReturn(mappedEntity);
 
-    sut.save(donation);
+    sut.create(donation);
 
     verify(entityRepository)
         .save(

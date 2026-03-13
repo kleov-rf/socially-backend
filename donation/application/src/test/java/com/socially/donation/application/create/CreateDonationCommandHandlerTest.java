@@ -37,6 +37,6 @@ class CreateDonationCommandHandlerTest {
 
     handler.execute(command);
 
-    verify(donationRepository).save(mappedDonation);
+    verify(donationRepository).create(mappedDonation);
   }
 }
