@@ -21,7 +21,7 @@ on:
         value: ${{ jobs.push.outputs.docker-image }}
 
 env:
-  ECR_REPOSITORY_NAME: socially-backend-ecr
+  ECR_REPOSITORY_NAME: socially-dev-ecr
 
 jobs:
   push:
