@@ -1,4 +1,4 @@
-name: Deploy to AWS
+name: _deploy-image
 
 on:
   workflow_call:

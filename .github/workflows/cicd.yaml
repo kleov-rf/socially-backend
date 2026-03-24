@@ -13,14 +13,14 @@ permissions:
 jobs:
   build:
     name: Build image
-    uses: ./.github/workflows/build.yaml
+    uses: ./.github/workflows/_build-image.yaml
     with:
       artifact_name: socially-backend-jar
 
   push:
     name: Push image to ECR
     needs: [ build ]
-    uses: ./.github/workflows/push.yaml
+    uses: ./.github/workflows/_push-image.yaml
     with:
       artifact_name: socially-backend-jar
       image_tag: ${{ github.run_number }}-${{ github.run_attempt }}
@@ -29,7 +29,7 @@ jobs:
   deploy:
     name: Deploy to AWS
     needs: [ push ]
-    uses: ./.github/workflows/deploy.yaml
+    uses: ./.github/workflows/_deploy-image.yaml
     with:
       docker_image: ${{ needs.push.outputs.docker-image }}
       image_tag: ${{ github.run_number }}-${{ github.run_attempt }}

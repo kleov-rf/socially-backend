@@ -1,4 +1,4 @@
-name: Build image
+name: _build-image
 
 on:
   workflow_call:
