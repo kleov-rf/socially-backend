@@ -20,22 +20,19 @@ permissions:
   id-token: write
   contents: read
 
-env:
-  TARGET_ENVIRONMENT: ${{ (github.event_name == 'workflow_dispatch' && inputs.environment) || 'dev' }}
-
 jobs:
   build:
     name: Build image
     uses: ./.github/workflows/_build-image.yaml
     with:
-      environment: ${{ env.TARGET_ENVIRONMENT }}
+      environment: ${{ (github.event_name == 'workflow_dispatch' && inputs.environment) || 'dev' }}
 
   push:
     name: Push image to ECR
     needs: [ build ]
     uses: ./.github/workflows/_push-image.yaml
     with:
-      environment: ${{ env.TARGET_ENVIRONMENT }}
+      environment: ${{ (github.event_name == 'workflow_dispatch' && inputs.environment) || 'dev' }}
       artifact_name: ${{ needs.build.outputs.image_artifact_name }}
 
   deploy:
@@ -43,6 +40,6 @@ jobs:
     needs: [ push ]
     uses: ./.github/workflows/_deploy-image.yaml
     with:
-      environment: ${{ env.TARGET_ENVIRONMENT }}
+      environment: ${{ (github.event_name == 'workflow_dispatch' && inputs.environment) || 'dev' }}
       image_uri: ${{ needs.push.outputs.image_uri }}
       image_tag: ${{ needs.push.outputs.image_tag }}
