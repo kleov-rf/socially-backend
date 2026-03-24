@@ -22,13 +22,13 @@ permissions:
 
 jobs:
   build:
-    name: Build image
+    name: Image
     uses: ./.github/workflows/_build-image.yaml
     with:
       environment: ${{ (github.event_name == 'workflow_dispatch' && inputs.environment) || 'dev' }}
 
   push:
-    name: Push image to ECR
+    name: Image
     needs: [ build ]
     uses: ./.github/workflows/_push-image.yaml
     with:
@@ -36,7 +36,7 @@ jobs:
       artifact_name: ${{ needs.build.outputs.image_artifact_name }}
 
   deploy:
-    name: Deploy to AWS
+    name: Image
     needs: [ push ]
     uses: ./.github/workflows/_deploy-image.yaml
     with:
