@@ -1,7 +1,17 @@
 name: Continuous Integration
 
+run-name: ${{ github.event_name == 'workflow_dispatch' && format('Continuous Integration @ {0}', inputs.environment) || '' }}
+
 on:
   workflow_dispatch:
+    inputs:
+      environment:
+        description: Deployment environment
+        required: true
+        type: choice
+        options:
+          - dev
+        default: dev
   push:
     branches:
       - main
@@ -10,27 +20,29 @@ permissions:
   id-token: write
   contents: read
 
+env:
+  TARGET_ENVIRONMENT: ${{ (github.event_name == 'workflow_dispatch' && inputs.environment) || 'dev' }}
+
 jobs:
   build:
     name: Build image
     uses: ./.github/workflows/_build-image.yaml
     with:
-      artifact_name: socially-backend-jar
+      environment: ${{ env.TARGET_ENVIRONMENT }}
 
   push:
     name: Push image to ECR
     needs: [ build ]
     uses: ./.github/workflows/_push-image.yaml
     with:
-      artifact_name: socially-backend-jar
-      image_tag: ${{ github.run_number }}-${{ github.run_attempt }}
-      aws_account_id: ${{ vars.AWS_ACCOUNT_ID }}
+      environment: ${{ env.TARGET_ENVIRONMENT }}
+      artifact_name: ${{ needs.build.outputs.image_artifact_name }}
 
   deploy:
     name: Deploy to AWS
     needs: [ push ]
     uses: ./.github/workflows/_deploy-image.yaml
     with:
-      docker_image: ${{ needs.push.outputs.docker-image }}
-      image_tag: ${{ github.run_number }}-${{ github.run_attempt }}
-      aws_account_id: ${{ vars.AWS_ACCOUNT_ID }}
+      environment: ${{ env.TARGET_ENVIRONMENT }}
+      image_uri: ${{ needs.push.outputs.image_uri }}
+      image_tag: ${{ needs.push.outputs.image_tag }}

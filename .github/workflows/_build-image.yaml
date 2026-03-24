@@ -3,15 +3,20 @@ name: _build-image
 on:
   workflow_call:
     inputs:
-      artifact_name:
+      environment:
         required: true
         type: string
-        description: "Name of the JAR artifact to upload"
+        description: "Deployment environment (e.g., dev, stg, prd)"
+    outputs:
+      image_artifact_name:
+        description: "Name of the uploaded image artifact"
+        value: ${{ jobs.build.outputs.image_artifact_name }}
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    outputs:
+      image_artifact_name: ${{ steps.image_artifact_metadata.outputs.artifact_name }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -26,9 +31,13 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew --no-daemon spotlessCheck bootJar
 
+      - name: Generate image artifact name
+        id: image_artifact_metadata
+        run: echo "artifact_name=image-${{ inputs.environment }}-${{ github.run_number }}-${{ github.run_attempt }}" >> "$GITHUB_OUTPUT"
+
       - name: Upload JAR artifact
         uses: actions/upload-artifact@v6
         with:
-          name: ${{ inputs.artifact_name }}
+          name: ${{ steps.image_artifact_metadata.outputs.artifact_name }}
           path: app/build/libs/*.jar
           retention-days: 1

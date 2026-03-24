@@ -3,31 +3,32 @@ name: _push-image
 on:
   workflow_call:
     inputs:
+      environment:
+        required: true
+        type: string
+        description: "Deployment environment (e.g., dev, stg, prd)"
       artifact_name:
         required: true
         type: string
         description: "Name of the JAR artifact to download"
-      image_tag:
-        required: true
-        type: string
-        description: "Tag for the Docker image"
-      aws_account_id:
-        required: true
-        type: string
-        description: "AWS Account ID for ECR"
     outputs:
-      docker-image:
+      image_uri:
         description: "URI of the pushed Docker image"
-        value: ${{ jobs.push.outputs.docker-image }}
+        value: ${{ jobs.push.outputs.image_uri }}
+      image_tag:
+        description: "Tag of the pushed Docker image"
+        value: ${{ jobs.push.outputs.image_tag }}
 
 env:
-  ECR_REPOSITORY_NAME: socially-dev-ecr
+  ECR_REPOSITORY_NAME: socially-${{ inputs.environment }}-ecr
 
 jobs:
   push:
+    environment: ${{ inputs.environment }}
     runs-on: ubuntu-latest
     outputs:
-      docker-image: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY_NAME }}:${{ inputs.image_tag }}
+      image_uri: ${{ steps.image_metadata.outputs.uri }}
+      image_tag: ${{ steps.image_metadata.outputs.tag }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -40,11 +41,9 @@ jobs:
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v6
-        env:
-          AWS_ACCOUNT_ID: ${{ vars.aws_account_id }}
         with:
           aws-region: eu-south-2
-          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/github-agent-ecr
+          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/github-agent-ecr
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -53,13 +52,20 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
-      - name: Build and push image to Amazon ECR
-        uses: docker/build-push-action@v7
+      - name: Generate image uri
+        id: image_metadata
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ inputs.environment }}-${{ github.sha }}
+        run: |
+          echo "uri=${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY_NAME }}:${{ env.IMAGE_TAG }}" >> "$GITHUB_OUTPUT"
+          echo "tag=${{ env.IMAGE_TAG }}" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push image to Amazon ECR
+        uses: docker/build-push-action@v7
         with:
           context: .
           push: true
-          tags: ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY_NAME }}:${{ inputs.image_tag }}
+          tags: ${{ steps.image_metadata.outputs.uri }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
