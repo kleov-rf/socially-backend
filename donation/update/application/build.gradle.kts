@@ -1,0 +1,43 @@
+plugins {
+    java
+    id("io.spring.dependency-management") version "1.1.7"
+}
+
+group = "com.socially.donation.update.application"
+version = "0.0.1-SNAPSHOT"
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencyManagement {
+    imports {
+        mavenBom("org.springframework.boot:spring-boot-dependencies:4.0.0-RC2")
+    }
+}
+
+dependencies {
+    implementation(project(":donation:update:domain"))
+    implementation(project(":donation:get-by-id:domain"))
+
+    implementation("org.springframework:spring-context")
+    compileOnly("jakarta.validation:jakarta.validation-api:3.0.2")
+
+    compileOnly("org.projectlombok:lombok")
+    annotationProcessor("org.projectlombok:lombok")
+
+    testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
+    testImplementation("org.mockito:mockito-core:5.15.2")
+    testImplementation("org.mockito:mockito-junit-jupiter:5.15.2")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
+}
