@@ -18,6 +18,11 @@ allprojects {
 subprojects {
     apply(plugin = "java")
 
+    // Use project path as artifact name to avoid filename collisions (e.g., multiple left/right/domain modules).
+    base {
+        archivesName = path.removePrefix(":").replace(':', '-')
+    }
+
     java {
         toolchain {
             languageVersion = JavaLanguageVersion.of(25)
