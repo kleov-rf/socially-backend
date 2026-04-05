@@ -30,6 +30,7 @@ subprojects {
     sonar {
         properties {
             property("sonar.sources", "src/main")
+            property("sonar.exclusions", "**/*.sql")
             // Only set test and coverage report paths when tests exist in this module.
             if (project.file("src/test").exists()) {
                 property("sonar.tests", "src/test")

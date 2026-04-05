@@ -28,14 +28,13 @@ jobs:
 
   build:
     name: Image
-    needs: [ sonar-scan ]
     uses: ./.github/workflows/_build-image.yaml
     with:
       environment: ${{ (github.event_name == 'workflow_dispatch' && inputs.environment) || 'dev' }}
 
   push:
     name: Image
-    needs: [ build ]
+    needs: [ sonar-scan, build ]
     uses: ./.github/workflows/_push-image.yaml
     with:
       environment: ${{ (github.event_name == 'workflow_dispatch' && inputs.environment) || 'dev' }}
