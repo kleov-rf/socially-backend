@@ -21,8 +21,14 @@ permissions:
   contents: read
 
 jobs:
+  sonar-scan:
+    name: Pre-checks
+    uses: ./.github/workflows/_sonar-scan.yaml
+    secrets: inherit
+
   build:
     name: Image
+    needs: [ sonar-scan ]
     uses: ./.github/workflows/_build-image.yaml
     with:
       environment: ${{ (github.event_name == 'workflow_dispatch' && inputs.environment) || 'dev' }}

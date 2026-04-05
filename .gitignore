@@ -39,3 +39,6 @@ out/
 ### HTTP Client (JetBrains) ###
 # Private environment file contains secrets (tokens, API keys)
 http-client.private.env.json
+
+# Cucumber reports
+**/cucumber-reports/
