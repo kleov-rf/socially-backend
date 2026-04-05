@@ -25,6 +25,21 @@ sonar {
 
 subprojects {
     apply(plugin = "java")
+    apply(plugin = "jacoco")
+
+    sonar {
+        properties {
+            property("sonar.sources", "src/main")
+            // Only set test and coverage report paths when tests exist in this module.
+            if (project.file("src/test").exists()) {
+                property("sonar.tests", "src/test")
+                property(
+                    "sonar.coverage.jacoco.xmlReportPaths",
+                    layout.buildDirectory.file("reports/jacoco/test/jacocoTestReport.xml").get().asFile.path,
+                )
+            }
+        }
+    }
 
     // Use project path as artifact name to avoid filename collisions (e.g., multiple left/right/domain modules).
     base {
@@ -45,6 +60,17 @@ subprojects {
 
     tasks.withType<Test> {
         useJUnitPlatform()
+        // Always generate the XML report after unit tests so Sonar can import coverage.
+        finalizedBy("jacocoTestReport")
+    }
+
+    tasks.named("jacocoTestReport") {
+        dependsOn("test")
+        (this as org.gradle.testing.jacoco.tasks.JacocoReport).reports {
+            xml.required.set(true)
+            html.required.set(true)
+            csv.required.set(false)
+        }
     }
 }
 
