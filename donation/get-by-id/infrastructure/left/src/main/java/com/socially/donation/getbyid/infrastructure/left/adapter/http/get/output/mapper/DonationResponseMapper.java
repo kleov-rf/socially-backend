@@ -8,6 +8,9 @@ import org.springframework.stereotype.Component;
 public class DonationResponseMapper {
   public DonationResponseDto toResponse(DonationDto result) {
     return new DonationResponseDto(
-        result.id().value().toString(), result.title().value(), result.description().value());
+        result.id().value().toString(),
+        result.title().value(),
+        result.description().value(),
+        result.createdAt());
   }
 }

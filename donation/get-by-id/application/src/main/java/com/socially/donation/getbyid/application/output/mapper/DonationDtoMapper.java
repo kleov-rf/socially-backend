@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 @Component
 public final class DonationDtoMapper {
   public DonationDto fromDomain(Donation donation) {
-    return new DonationDto(donation.id(), donation.title(), donation.description());
+    return new DonationDto(
+        donation.id(), donation.title(), donation.description(), donation.createdAt());
   }
 }

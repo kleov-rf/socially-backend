@@ -52,7 +52,8 @@ class FindDonationByIdQueryHandlerTest {
             CREATED_AT);
     when(donationRepository.findById(any(Id.class))).thenReturn(Optional.of(donation));
     DonationDto mappedDto =
-        new DonationDto(donation.id(), donation.title(), donation.description());
+        new DonationDto(
+            donation.id(), donation.title(), donation.description(), donation.createdAt());
     when(donationDtoMapper.fromDomain(donation)).thenReturn(mappedDto);
 
     var donationDto = handler.execute(new FindDonationByIdQuery(DONATION_ID)).orElseThrow();

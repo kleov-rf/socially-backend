@@ -35,5 +35,6 @@ class DonationDtoMapperTest {
     assertEquals(Id.from(DONATION_ID), result.id());
     assertEquals(Title.from("Test Title"), result.title());
     assertEquals(Description.from("Test Description"), result.description());
+    assertEquals(CREATED_AT, result.createdAt());
   }
 }

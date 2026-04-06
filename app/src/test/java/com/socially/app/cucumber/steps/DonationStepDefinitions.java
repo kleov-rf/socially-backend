@@ -1,6 +1,7 @@
 package com.socially.app.cucumber.steps;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -14,6 +15,7 @@ import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import java.time.Instant;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -89,5 +91,9 @@ public class DonationStepDefinitions {
     assertThat(jsonNode.get("id").asText()).isEqualTo(id);
     assertThat(jsonNode.get("title").asText()).isEqualTo(expectedTitle);
     assertThat(jsonNode.get("description").asText()).isEqualTo(expectedDescription);
+    assertThat(jsonNode.has("createdAt")).isTrue();
+    assertThat(jsonNode.get("createdAt").asText()).isNotBlank();
+    assertThatCode(() -> Instant.parse(jsonNode.get("createdAt").asText()))
+        .doesNotThrowAnyException();
   }
 }
