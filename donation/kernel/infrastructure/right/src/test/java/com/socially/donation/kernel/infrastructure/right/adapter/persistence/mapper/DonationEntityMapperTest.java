@@ -7,6 +7,7 @@ import com.socially.donation.kernel.domain.valueobject.Description;
 import com.socially.donation.kernel.domain.valueobject.Id;
 import com.socially.donation.kernel.domain.valueobject.Title;
 import com.socially.donation.kernel.infrastructure.right.adapter.persistence.entity.DonationEntity;
+import java.time.Instant;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,12 +20,18 @@ class DonationEntityMapperTest {
   @InjectMocks private DonationEntityMapper donationEntityMapper;
 
   private static final String DONATION_ID = "550e8400-e29b-41d4-a716-446655440000";
+  private static final Instant CREATED_AT = Instant.parse("2024-06-01T12:00:00Z");
   private static final Donation DONATION =
       Donation.create(
-          Id.from(DONATION_ID), Title.from("Test Title"), Description.from("Test Description"));
+          Id.from(DONATION_ID),
+          Title.from("Test Title"),
+          Description.from("Test Description"),
+          CREATED_AT);
 
+  private static final Instant ENTITY_CREATED_AT = Instant.parse("2025-01-01T00:00:00Z");
   private static final DonationEntity ENTITY =
-      new DonationEntity(UUID.fromString(DONATION_ID), "Entity Title", "Entity Description");
+      new DonationEntity(
+          UUID.fromString(DONATION_ID), "Entity Title", "Entity Description", ENTITY_CREATED_AT);
 
   @Test
   void toEntity_should_map_id() {
@@ -48,6 +55,13 @@ class DonationEntityMapperTest {
   }
 
   @Test
+  void toEntity_should_map_created_at() {
+    DonationEntity result = donationEntityMapper.toEntity(DONATION);
+
+    assertEquals(CREATED_AT, result.getCreatedAt());
+  }
+
+  @Test
   void toDomain_should_map_id() {
     Donation result = donationEntityMapper.toDomain(ENTITY);
 
@@ -66,5 +80,12 @@ class DonationEntityMapperTest {
     Donation result = donationEntityMapper.toDomain(ENTITY);
 
     assertEquals(Description.from("Entity Description"), result.description());
+  }
+
+  @Test
+  void toDomain_should_map_created_at() {
+    Donation result = donationEntityMapper.toDomain(ENTITY);
+
+    assertEquals(ENTITY_CREATED_AT, result.createdAt());
   }
 }

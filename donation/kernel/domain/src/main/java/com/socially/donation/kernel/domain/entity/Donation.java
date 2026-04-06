@@ -3,6 +3,7 @@ package com.socially.donation.kernel.domain.entity;
 import com.socially.donation.kernel.domain.valueobject.Description;
 import com.socially.donation.kernel.domain.valueobject.Id;
 import com.socially.donation.kernel.domain.valueobject.Title;
+import java.time.Instant;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 
@@ -12,17 +13,18 @@ public final class Donation {
   private final Id id;
   private final Title title;
   private final Description description;
+  private final Instant createdAt;
 
-  public static Donation create(Id id, Title title, Description description) {
-    return new Donation(id, title, description);
+  public static Donation create(Id id, Title title, Description description, Instant createdAt) {
+    return new Donation(id, title, description, createdAt);
   }
 
   public Donation withTitle(Title title) {
-    return create(id, title, description);
+    return create(id, title, description, createdAt);
   }
 
   public Donation withDescription(Description description) {
-    return create(id, title, description);
+    return create(id, title, description, createdAt);
   }
 
   public Id id() {
@@ -35,6 +37,10 @@ public final class Donation {
 
   public Description description() {
     return description;
+  }
+
+  public Instant createdAt() {
+    return createdAt;
   }
 
   @Override

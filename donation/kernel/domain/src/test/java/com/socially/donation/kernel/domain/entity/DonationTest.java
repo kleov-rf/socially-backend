@@ -5,21 +5,29 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.socially.donation.kernel.domain.valueobject.Description;
 import com.socially.donation.kernel.domain.valueobject.Id;
 import com.socially.donation.kernel.domain.valueobject.Title;
+import java.time.Instant;
 import org.junit.jupiter.api.Test;
 
 class DonationTest {
 
   private static final String DONATION_ID = "550e8400-e29b-41d4-a716-446655440000";
   private static final String DIFFERENT_ID = "550e8400-e29b-41d4-a716-446655440001";
+  private static final Instant CREATED_AT = Instant.parse("2024-06-01T12:00:00Z");
 
   @Test
   void equals_should_return_true_when_ids_are_equal() {
     Donation donation1 =
         Donation.create(
-            Id.from(DONATION_ID), Title.from("Title 1"), Description.from("Description 1"));
+            Id.from(DONATION_ID),
+            Title.from("Title 1"),
+            Description.from("Description 1"),
+            CREATED_AT);
     Donation donation2 =
         Donation.create(
-            Id.from(DONATION_ID), Title.from("Title 2"), Description.from("Description 2"));
+            Id.from(DONATION_ID),
+            Title.from("Title 2"),
+            Description.from("Description 2"),
+            Instant.parse("2025-01-01T00:00:00Z"));
 
     assertEquals(donation1, donation2);
   }
@@ -28,10 +36,16 @@ class DonationTest {
   void equals_should_return_false_when_ids_are_different() {
     Donation donation1 =
         Donation.create(
-            Id.from(DONATION_ID), Title.from("Same Title"), Description.from("Same Description"));
+            Id.from(DONATION_ID),
+            Title.from("Same Title"),
+            Description.from("Same Description"),
+            CREATED_AT);
     Donation donation2 =
         Donation.create(
-            Id.from(DIFFERENT_ID), Title.from("Same Title"), Description.from("Same Description"));
+            Id.from(DIFFERENT_ID),
+            Title.from("Same Title"),
+            Description.from("Same Description"),
+            CREATED_AT);
 
     assertNotEquals(donation1, donation2);
   }
@@ -40,25 +54,33 @@ class DonationTest {
   void withTitle_should_replace_title_and_keep_description_and_id() {
     Donation donation =
         Donation.create(
-            Id.from(DONATION_ID), Title.from("Old Title"), Description.from("Old Description"));
+            Id.from(DONATION_ID),
+            Title.from("Old Title"),
+            Description.from("Old Description"),
+            CREATED_AT);
 
     Donation updated = donation.withTitle(Title.from("New Title"));
 
     assertEquals(Title.from("New Title"), updated.title());
     assertEquals(Description.from("Old Description"), updated.description());
     assertEquals(Id.from(DONATION_ID), updated.id());
+    assertEquals(CREATED_AT, updated.createdAt());
   }
 
   @Test
   void withDescription_should_replace_description_and_keep_title_and_id() {
     Donation donation =
         Donation.create(
-            Id.from(DONATION_ID), Title.from("Old Title"), Description.from("Old Description"));
+            Id.from(DONATION_ID),
+            Title.from("Old Title"),
+            Description.from("Old Description"),
+            CREATED_AT);
 
     Donation updated = donation.withDescription(Description.from("New Description"));
 
     assertEquals(Title.from("Old Title"), updated.title());
     assertEquals(Description.from("New Description"), updated.description());
     assertEquals(Id.from(DONATION_ID), updated.id());
+    assertEquals(CREATED_AT, updated.createdAt());
   }
 }

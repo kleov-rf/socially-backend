@@ -12,6 +12,7 @@ import com.socially.donation.kernel.domain.valueobject.Id;
 import com.socially.donation.kernel.domain.valueobject.Title;
 import com.socially.donation.update.application.input.UpdateDonationCommand;
 import com.socially.donation.update.domain.port.right.UpdateDonationRepository;
+import java.time.Instant;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class UpdateDonationCommandHandlerTest {
 
   private static final String DONATION_ID = "550e8400-e29b-41d4-a716-446655440000";
+  private static final Instant CREATED_AT = Instant.parse("2024-06-01T12:00:00Z");
 
   @Mock private FindDonationByIdRepository findDonationByIdRepository;
 
@@ -35,7 +37,10 @@ class UpdateDonationCommandHandlerTest {
     var command = new UpdateDonationCommand(DONATION_ID, "Updated Title", "Updated Description");
     Donation existingDonation =
         Donation.create(
-            Id.from(DONATION_ID), Title.from("Old Title"), Description.from("Old Description"));
+            Id.from(DONATION_ID),
+            Title.from("Old Title"),
+            Description.from("Old Description"),
+            CREATED_AT);
 
     when(findDonationByIdRepository.findById(Id.from(DONATION_ID)))
         .thenReturn(Optional.of(existingDonation));
@@ -71,7 +76,10 @@ class UpdateDonationCommandHandlerTest {
     var command = new UpdateDonationCommand(DONATION_ID, "Updated Title", "Updated Description");
     Donation existingDonation =
         Donation.create(
-            Id.from(DONATION_ID), Title.from("Old Title"), Description.from("Old Description"));
+            Id.from(DONATION_ID),
+            Title.from("Old Title"),
+            Description.from("Old Description"),
+            CREATED_AT);
 
     when(findDonationByIdRepository.findById(Id.from(DONATION_ID)))
         .thenReturn(Optional.of(existingDonation));
@@ -87,7 +95,10 @@ class UpdateDonationCommandHandlerTest {
     var command = new UpdateDonationCommand(DONATION_ID, "Updated Title", null);
     Donation existingDonation =
         Donation.create(
-            Id.from(DONATION_ID), Title.from("Old Title"), Description.from("Old Description"));
+            Id.from(DONATION_ID),
+            Title.from("Old Title"),
+            Description.from("Old Description"),
+            CREATED_AT);
 
     when(findDonationByIdRepository.findById(Id.from(DONATION_ID)))
         .thenReturn(Optional.of(existingDonation));
@@ -104,7 +115,10 @@ class UpdateDonationCommandHandlerTest {
     var command = new UpdateDonationCommand(DONATION_ID, null, "Updated Description");
     Donation existingDonation =
         Donation.create(
-            Id.from(DONATION_ID), Title.from("Old Title"), Description.from("Old Description"));
+            Id.from(DONATION_ID),
+            Title.from("Old Title"),
+            Description.from("Old Description"),
+            CREATED_AT);
 
     when(findDonationByIdRepository.findById(Id.from(DONATION_ID)))
         .thenReturn(Optional.of(existingDonation));
@@ -124,7 +138,10 @@ class UpdateDonationCommandHandlerTest {
     var command = new UpdateDonationCommand(DONATION_ID, "Updated Title", "Updated Description");
     Donation existingDonation =
         Donation.create(
-            Id.from(DONATION_ID), Title.from("Old Title"), Description.from("Old Description"));
+            Id.from(DONATION_ID),
+            Title.from("Old Title"),
+            Description.from("Old Description"),
+            CREATED_AT);
 
     when(findDonationByIdRepository.findById(Id.from(DONATION_ID)))
         .thenReturn(Optional.of(existingDonation));

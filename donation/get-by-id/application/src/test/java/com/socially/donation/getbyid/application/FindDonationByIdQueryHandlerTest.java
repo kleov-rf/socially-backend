@@ -13,6 +13,7 @@ import com.socially.donation.kernel.domain.entity.Donation;
 import com.socially.donation.kernel.domain.valueobject.Description;
 import com.socially.donation.kernel.domain.valueobject.Id;
 import com.socially.donation.kernel.domain.valueobject.Title;
+import java.time.Instant;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,6 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class FindDonationByIdQueryHandlerTest {
 
   private static final String DONATION_ID = "550e8400-e29b-41d4-a716-446655440000";
+  private static final Instant CREATED_AT = Instant.parse("2024-06-01T12:00:00Z");
 
   @Mock private FindDonationByIdRepository donationRepository;
 
@@ -44,7 +46,10 @@ class FindDonationByIdQueryHandlerTest {
   void execute_should_return_donation_dto_if_donation_found() {
     Donation donation =
         Donation.create(
-            Id.from(DONATION_ID), Title.from("Test Title"), Description.from("Test Description"));
+            Id.from(DONATION_ID),
+            Title.from("Test Title"),
+            Description.from("Test Description"),
+            CREATED_AT);
     when(donationRepository.findById(any(Id.class))).thenReturn(Optional.of(donation));
     DonationDto mappedDto =
         new DonationDto(donation.id(), donation.title(), donation.description());

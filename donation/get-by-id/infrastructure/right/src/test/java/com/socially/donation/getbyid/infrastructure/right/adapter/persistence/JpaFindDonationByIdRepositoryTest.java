@@ -12,6 +12,7 @@ import com.socially.donation.kernel.domain.valueobject.Title;
 import com.socially.donation.kernel.infrastructure.right.adapter.persistence.DonationEntityRepository;
 import com.socially.donation.kernel.infrastructure.right.adapter.persistence.entity.DonationEntity;
 import com.socially.donation.kernel.infrastructure.right.adapter.persistence.mapper.DonationEntityMapper;
+import java.time.Instant;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class JpaFindDonationByIdRepositoryTest {
 
   private static final String DONATION_ID = "550e8400-e29b-41d4-a716-446655440000";
+  private static final Instant CREATED_AT = Instant.parse("2024-06-01T12:00:00Z");
 
   @Mock private DonationEntityRepository entityRepository;
   @Mock private DonationEntityMapper entityMapper;
@@ -42,13 +44,15 @@ class JpaFindDonationByIdRepositoryTest {
   @Test
   void findById_should_return_mapped_donation() {
     var entityId = Id.from(DONATION_ID).value();
-    DonationEntity entity = new DonationEntity(entityId, "Entity Title", "Entity Description");
+    DonationEntity entity =
+        new DonationEntity(entityId, "Entity Title", "Entity Description", CREATED_AT);
     when(entityRepository.findById(entityId)).thenReturn(Optional.of(entity));
     Donation mappedDonation =
         Donation.create(
             Id.from(DONATION_ID),
             Title.from("Entity Title"),
-            Description.from("Entity Description"));
+            Description.from("Entity Description"),
+            CREATED_AT);
     when(entityMapper.toDomain(entity)).thenReturn(mappedDonation);
 
     Optional<Donation> result = sut.findById(Id.from(DONATION_ID));

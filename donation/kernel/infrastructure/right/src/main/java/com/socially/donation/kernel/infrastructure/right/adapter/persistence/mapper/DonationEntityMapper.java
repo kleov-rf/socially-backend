@@ -12,13 +12,17 @@ public final class DonationEntityMapper {
 
   public DonationEntity toEntity(Donation donation) {
     return new DonationEntity(
-        donation.id().value(), donation.title().value(), donation.description().value());
+        donation.id().value(),
+        donation.title().value(),
+        donation.description().value(),
+        donation.createdAt());
   }
 
   public Donation toDomain(DonationEntity entity) {
     return Donation.create(
         Id.from(entity.getId().toString()),
         Title.from(entity.getTitle()),
-        Description.from(entity.getDescription()));
+        Description.from(entity.getDescription()),
+        entity.getCreatedAt());
   }
 }

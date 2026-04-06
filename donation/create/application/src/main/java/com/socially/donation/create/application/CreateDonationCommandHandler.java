@@ -5,6 +5,7 @@ import com.socially.donation.create.application.input.mapper.CreateDonationComma
 import com.socially.donation.create.application.port.left.CreateDonationUseCase;
 import com.socially.donation.create.domain.port.right.CreateDonationRepository;
 import com.socially.donation.kernel.domain.entity.Donation;
+import java.time.Clock;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -14,10 +15,11 @@ public final class CreateDonationCommandHandler implements CreateDonationUseCase
 
   private final CreateDonationRepository donationRepository;
   private final CreateDonationCommandMapper createDonationCommandMapper;
+  private final Clock clock;
 
   @Override
   public void execute(CreateDonationCommand command) {
-    Donation donation = createDonationCommandMapper.toDomain(command);
+    Donation donation = createDonationCommandMapper.toDomain(command, clock.instant());
     donationRepository.create(donation);
   }
 }
