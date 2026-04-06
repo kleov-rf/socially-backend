@@ -35,4 +35,30 @@ class DonationTest {
 
     assertNotEquals(donation1, donation2);
   }
+
+  @Test
+  void withTitle_should_replace_title_and_keep_description_and_id() {
+    Donation donation =
+        Donation.create(
+            Id.from(DONATION_ID), Title.from("Old Title"), Description.from("Old Description"));
+
+    Donation updated = donation.withTitle(Title.from("New Title"));
+
+    assertEquals(Title.from("New Title"), updated.title());
+    assertEquals(Description.from("Old Description"), updated.description());
+    assertEquals(Id.from(DONATION_ID), updated.id());
+  }
+
+  @Test
+  void withDescription_should_replace_description_and_keep_title_and_id() {
+    Donation donation =
+        Donation.create(
+            Id.from(DONATION_ID), Title.from("Old Title"), Description.from("Old Description"));
+
+    Donation updated = donation.withDescription(Description.from("New Description"));
+
+    assertEquals(Title.from("Old Title"), updated.title());
+    assertEquals(Description.from("New Description"), updated.description());
+    assertEquals(Id.from(DONATION_ID), updated.id());
+  }
 }

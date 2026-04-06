@@ -17,6 +17,14 @@ public final class Donation {
     return new Donation(id, title, description);
   }
 
+  public Donation withTitle(Title title) {
+    return create(id, title, description);
+  }
+
+  public Donation withDescription(Description description) {
+    return create(id, title, description);
+  }
+
   public Id id() {
     return id;
   }

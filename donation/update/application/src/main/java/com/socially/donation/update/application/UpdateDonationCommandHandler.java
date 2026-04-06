@@ -22,23 +22,19 @@ public final class UpdateDonationCommandHandler implements UpdateDonationUseCase
   @Override
   public void execute(UpdateDonationCommand command) {
     Id donationId = Id.from(command.id());
-    Donation existingDonation =
+    Donation donation =
         findDonationByIdRepository
             .findById(donationId)
             .orElseThrow(() -> new DonationNotFoundException(command.id()));
 
-    Donation updatedDonation = buildUpdatedDonation(command, existingDonation);
-    updateDonationRepository.update(updatedDonation);
-  }
+    if (Objects.nonNull(command.title())) {
+      donation = donation.withTitle(Title.from(command.title()));
+    }
 
-  private Donation buildUpdatedDonation(UpdateDonationCommand command, Donation existingDonation) {
-    Title updatedTitle =
-        Objects.isNull(command.title()) ? existingDonation.title() : Title.from(command.title());
-    Description updatedDescription =
-        Objects.isNull(command.description())
-            ? existingDonation.description()
-            : Description.from(command.description());
+    if (Objects.nonNull(command.description())) {
+      donation = donation.withDescription(Description.from(command.description()));
+    }
 
-    return Donation.create(existingDonation.id(), updatedTitle, updatedDescription);
+    updateDonationRepository.update(donation);
   }
 }
