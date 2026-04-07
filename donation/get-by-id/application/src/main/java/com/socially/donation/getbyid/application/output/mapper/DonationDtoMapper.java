@@ -8,6 +8,10 @@ import org.springframework.stereotype.Component;
 public final class DonationDtoMapper {
   public DonationDto fromDomain(Donation donation) {
     return new DonationDto(
-        donation.id(), donation.title(), donation.description(), donation.createdAt());
+        donation.id(),
+        donation.title(),
+        donation.description(),
+        donation.createdAt(),
+        donation.lastUpdatedAt());
   }
 }

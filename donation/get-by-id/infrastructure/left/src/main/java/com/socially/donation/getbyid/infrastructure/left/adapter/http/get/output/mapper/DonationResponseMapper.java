@@ -11,6 +11,7 @@ public class DonationResponseMapper {
         result.id().value().toString(),
         result.title().value(),
         result.description().value(),
-        result.createdAt());
+        result.createdAt(),
+        result.lastUpdatedAt());
   }
 }

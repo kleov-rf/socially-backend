@@ -20,6 +20,7 @@ class DonationDtoMapperTest {
 
   private static final String DONATION_ID = "550e8400-e29b-41d4-a716-446655440000";
   private static final Instant CREATED_AT = Instant.parse("2024-06-01T12:00:00Z");
+  private static final Instant LAST_UPDATED_AT = Instant.parse("2024-06-20T09:00:00Z");
 
   @Test
   void fromDomain_should_map_donation_to_dto() {
@@ -29,7 +30,7 @@ class DonationDtoMapperTest {
             Title.from("Test Title"),
             Description.from("Test Description"),
             CREATED_AT,
-            CREATED_AT);
+            LAST_UPDATED_AT);
 
     DonationDto result = donationDtoMapper.fromDomain(donation);
 
@@ -37,5 +38,6 @@ class DonationDtoMapperTest {
     assertEquals(Title.from("Test Title"), result.title());
     assertEquals(Description.from("Test Description"), result.description());
     assertEquals(CREATED_AT, result.createdAt());
+    assertEquals(LAST_UPDATED_AT, result.lastUpdatedAt());
   }
 }

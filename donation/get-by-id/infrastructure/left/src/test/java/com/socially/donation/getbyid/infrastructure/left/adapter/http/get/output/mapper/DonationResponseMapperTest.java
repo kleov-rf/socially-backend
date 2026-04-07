@@ -14,6 +14,7 @@ class DonationResponseMapperTest {
 
   private static final String DONATION_ID = "550e8400-e29b-41d4-a716-446655440000";
   private static final Instant CREATED_AT = Instant.parse("2024-06-01T12:00:00Z");
+  private static final Instant LAST_UPDATED_AT = Instant.parse("2024-06-20T09:00:00Z");
 
   private final DonationResponseMapper mapper = new DonationResponseMapper();
 
@@ -24,7 +25,8 @@ class DonationResponseMapperTest {
             Id.from(DONATION_ID),
             Title.from("Test Title"),
             Description.from("Test Description"),
-            CREATED_AT);
+            CREATED_AT,
+            LAST_UPDATED_AT);
 
     DonationResponseDto response = mapper.toResponse(donationDto);
 
@@ -32,5 +34,6 @@ class DonationResponseMapperTest {
     assertEquals("Test Title", response.title());
     assertEquals("Test Description", response.description());
     assertEquals(CREATED_AT, response.createdAt());
+    assertEquals(LAST_UPDATED_AT, response.lastUpdatedAt());
   }
 }

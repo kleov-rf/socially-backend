@@ -26,6 +26,7 @@ class GetDonationControllerTest {
 
   private static final String DONATION_ID = "550e8400-e29b-41d4-a716-446655440000";
   private static final Instant CREATED_AT = Instant.parse("2024-06-01T12:00:00Z");
+  private static final Instant LAST_UPDATED_AT = Instant.parse("2024-06-20T09:00:00Z");
 
   @Mock private FindDonationByIdUseCase findDonationByIdUseCase;
 
@@ -47,7 +48,8 @@ class GetDonationControllerTest {
             Id.from(DONATION_ID),
             Title.from("Test Title"),
             Description.from("Test Description"),
-            CREATED_AT);
+            CREATED_AT,
+            LAST_UPDATED_AT);
     when(findDonationByIdUseCase.execute(new FindDonationByIdQuery(DONATION_ID)))
         .thenReturn(Optional.of(queryResult));
 
@@ -63,9 +65,11 @@ class GetDonationControllerTest {
             Id.from(DONATION_ID),
             Title.from("Test Title"),
             Description.from("Test Description"),
-            CREATED_AT);
+            CREATED_AT,
+            LAST_UPDATED_AT);
     var expectedResponse =
-        new DonationResponseDto(DONATION_ID, "Test Title", "Test Description", CREATED_AT);
+        new DonationResponseDto(
+            DONATION_ID, "Test Title", "Test Description", CREATED_AT, LAST_UPDATED_AT);
     when(findDonationByIdUseCase.execute(new FindDonationByIdQuery(DONATION_ID)))
         .thenReturn(Optional.of(queryResult));
     when(mapper.toResponse(queryResult)).thenReturn(expectedResponse);

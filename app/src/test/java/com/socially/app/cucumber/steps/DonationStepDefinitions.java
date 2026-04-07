@@ -95,5 +95,9 @@ public class DonationStepDefinitions {
     assertThat(jsonNode.get("createdAt").asText()).isNotBlank();
     assertThatCode(() -> Instant.parse(jsonNode.get("createdAt").asText()))
         .doesNotThrowAnyException();
+    assertThat(jsonNode.has("lastUpdatedAt")).isTrue();
+    assertThat(jsonNode.get("lastUpdatedAt").asText()).isNotBlank();
+    assertThatCode(() -> Instant.parse(jsonNode.get("lastUpdatedAt").asText()))
+        .doesNotThrowAnyException();
   }
 }
