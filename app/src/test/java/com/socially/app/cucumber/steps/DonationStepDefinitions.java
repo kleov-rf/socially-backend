@@ -100,4 +100,15 @@ public class DonationStepDefinitions {
     assertThatCode(() -> Instant.parse(jsonNode.get("lastUpdatedAt").asText()))
         .doesNotThrowAnyException();
   }
+
+  @And("the donation last updated time should be after the created time")
+  public void theDonationLastUpdatedTimeShouldBeAfterTheCreatedTime() throws Exception {
+    String responseBody = mvcResult.getResponse().getContentAsString();
+    JsonNode jsonNode = objectMapper.readTree(responseBody);
+
+    Instant createdAt = Instant.parse(jsonNode.get("createdAt").asText());
+    Instant lastUpdatedAt = Instant.parse(jsonNode.get("lastUpdatedAt").asText());
+
+    assertThat(lastUpdatedAt).isAfter(createdAt);
+  }
 }

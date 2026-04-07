@@ -8,6 +8,8 @@ import com.socially.donation.kernel.domain.valueobject.Title;
 import com.socially.donation.update.application.input.UpdateDonationCommand;
 import com.socially.donation.update.application.port.left.UpdateDonationUseCase;
 import com.socially.donation.update.domain.port.right.UpdateDonationRepository;
+import java.time.Clock;
+import java.time.Instant;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,7 @@ public final class UpdateDonationCommandHandler implements UpdateDonationUseCase
 
   private final FindDonationByIdRepository findDonationByIdRepository;
   private final UpdateDonationRepository updateDonationRepository;
+  private final Clock clock;
 
   @Override
   public void execute(UpdateDonationCommand command) {
@@ -27,14 +30,20 @@ public final class UpdateDonationCommandHandler implements UpdateDonationUseCase
             .findById(donationId)
             .orElseThrow(() -> new DonationNotFoundException(command.id()));
 
+    Instant now = null;
     if (Objects.nonNull(command.title())) {
-      donation = donation.withTitle(Title.from(command.title()));
+      now = nowOrRead(now);
+      donation = donation.withTitle(Title.from(command.title()), now);
     }
-
     if (Objects.nonNull(command.description())) {
-      donation = donation.withDescription(Description.from(command.description()));
+      now = nowOrRead(now);
+      donation = donation.withDescription(Description.from(command.description()), now);
     }
 
     updateDonationRepository.update(donation);
+  }
+
+  private Instant nowOrRead(Instant cached) {
+    return cached == null ? clock.instant() : cached;
   }
 }

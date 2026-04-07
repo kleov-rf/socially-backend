@@ -15,6 +15,7 @@ class DonationTest {
   private static final Instant CREATED_AT = Instant.parse("2024-06-01T12:00:00Z");
   private static final Instant LAST_UPDATED_AT = Instant.parse("2024-06-15T08:00:00Z");
   private static final Instant OTHER_INSTANT = Instant.parse("2025-01-01T00:00:00Z");
+  private static final Instant NEW_LAST_UPDATED_AT = Instant.parse("2025-03-10T14:30:00Z");
 
   @Test
   void equals_should_return_true_when_ids_are_equal() {
@@ -66,13 +67,13 @@ class DonationTest {
             CREATED_AT,
             LAST_UPDATED_AT);
 
-    Donation updated = donation.withTitle(Title.from("New Title"));
+    Donation updated = donation.withTitle(Title.from("New Title"), NEW_LAST_UPDATED_AT);
 
     assertEquals(Title.from("New Title"), updated.title());
     assertEquals(Description.from("Old Description"), updated.description());
     assertEquals(Id.from(DONATION_ID), updated.id());
     assertEquals(CREATED_AT, updated.createdAt());
-    assertEquals(LAST_UPDATED_AT, updated.lastUpdatedAt());
+    assertEquals(NEW_LAST_UPDATED_AT, updated.lastUpdatedAt());
   }
 
   @Test
@@ -85,12 +86,13 @@ class DonationTest {
             CREATED_AT,
             LAST_UPDATED_AT);
 
-    Donation updated = donation.withDescription(Description.from("New Description"));
+    Donation updated =
+        donation.withDescription(Description.from("New Description"), NEW_LAST_UPDATED_AT);
 
     assertEquals(Title.from("Old Title"), updated.title());
     assertEquals(Description.from("New Description"), updated.description());
     assertEquals(Id.from(DONATION_ID), updated.id());
     assertEquals(CREATED_AT, updated.createdAt());
-    assertEquals(LAST_UPDATED_AT, updated.lastUpdatedAt());
+    assertEquals(NEW_LAST_UPDATED_AT, updated.lastUpdatedAt());
   }
 }

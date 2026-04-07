@@ -12,6 +12,7 @@ import com.socially.donation.kernel.domain.valueobject.Id;
 import com.socially.donation.kernel.domain.valueobject.Title;
 import com.socially.donation.update.application.input.UpdateDonationCommand;
 import com.socially.donation.update.domain.port.right.UpdateDonationRepository;
+import java.time.Clock;
 import java.time.Instant;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -25,10 +26,14 @@ class UpdateDonationCommandHandlerTest {
 
   private static final String DONATION_ID = "550e8400-e29b-41d4-a716-446655440000";
   private static final Instant CREATED_AT = Instant.parse("2024-06-01T12:00:00Z");
+  private static final Instant LAST_UPDATED_AT = Instant.parse("2024-06-15T08:00:00Z");
+  private static final Instant PATCH_AT = Instant.parse("2025-01-15T10:00:00Z");
 
   @Mock private FindDonationByIdRepository findDonationByIdRepository;
 
   @Mock private UpdateDonationRepository updateDonationRepository;
+
+  @Mock private Clock clock;
 
   @InjectMocks private UpdateDonationCommandHandler handler;
 
@@ -41,10 +46,11 @@ class UpdateDonationCommandHandlerTest {
             Title.from("Old Title"),
             Description.from("Old Description"),
             CREATED_AT,
-            CREATED_AT);
+            LAST_UPDATED_AT);
 
     when(findDonationByIdRepository.findById(Id.from(DONATION_ID)))
         .thenReturn(Optional.of(existingDonation));
+    when(clock.instant()).thenReturn(PATCH_AT);
 
     handler.execute(command);
 
@@ -81,10 +87,11 @@ class UpdateDonationCommandHandlerTest {
             Title.from("Old Title"),
             Description.from("Old Description"),
             CREATED_AT,
-            CREATED_AT);
+            LAST_UPDATED_AT);
 
     when(findDonationByIdRepository.findById(Id.from(DONATION_ID)))
         .thenReturn(Optional.of(existingDonation));
+    when(clock.instant()).thenReturn(PATCH_AT);
 
     handler.execute(command);
 
@@ -101,15 +108,20 @@ class UpdateDonationCommandHandlerTest {
             Title.from("Old Title"),
             Description.from("Old Description"),
             CREATED_AT,
-            CREATED_AT);
+            LAST_UPDATED_AT);
 
     when(findDonationByIdRepository.findById(Id.from(DONATION_ID)))
         .thenReturn(Optional.of(existingDonation));
+    when(clock.instant()).thenReturn(PATCH_AT);
 
     handler.execute(command);
 
     verify(updateDonationRepository)
-        .update(argThat(donation -> donation.title().equals(Title.from("Updated Title"))));
+        .update(
+            argThat(
+                donation ->
+                    donation.title().equals(Title.from("Updated Title"))
+                        && donation.lastUpdatedAt().equals(PATCH_AT)));
   }
 
   @Test
@@ -122,10 +134,11 @@ class UpdateDonationCommandHandlerTest {
             Title.from("Old Title"),
             Description.from("Old Description"),
             CREATED_AT,
-            CREATED_AT);
+            LAST_UPDATED_AT);
 
     when(findDonationByIdRepository.findById(Id.from(DONATION_ID)))
         .thenReturn(Optional.of(existingDonation));
+    when(clock.instant()).thenReturn(PATCH_AT);
 
     handler.execute(command);
 
@@ -133,7 +146,8 @@ class UpdateDonationCommandHandlerTest {
         .update(
             argThat(
                 donation ->
-                    donation.description().equals(Description.from("Updated Description"))));
+                    donation.description().equals(Description.from("Updated Description"))
+                        && donation.lastUpdatedAt().equals(PATCH_AT)));
   }
 
   @Test
@@ -146,10 +160,11 @@ class UpdateDonationCommandHandlerTest {
             Title.from("Old Title"),
             Description.from("Old Description"),
             CREATED_AT,
-            CREATED_AT);
+            LAST_UPDATED_AT);
 
     when(findDonationByIdRepository.findById(Id.from(DONATION_ID)))
         .thenReturn(Optional.of(existingDonation));
+    when(clock.instant()).thenReturn(PATCH_AT);
 
     handler.execute(command);
 
@@ -158,6 +173,29 @@ class UpdateDonationCommandHandlerTest {
             argThat(
                 donation ->
                     donation.title().equals(Title.from("Updated Title"))
-                        && donation.description().equals(Description.from("Updated Description"))));
+                        && donation.description().equals(Description.from("Updated Description"))
+                        && donation.lastUpdatedAt().equals(PATCH_AT)));
+    verify(clock, times(1)).instant();
+  }
+
+  @Test
+  void execute_should_not_call_clock_when_no_fields_are_provided() {
+    var command = new UpdateDonationCommand(DONATION_ID, null, null);
+    Donation existingDonation =
+        Donation.create(
+            Id.from(DONATION_ID),
+            Title.from("Old Title"),
+            Description.from("Old Description"),
+            CREATED_AT,
+            LAST_UPDATED_AT);
+
+    when(findDonationByIdRepository.findById(Id.from(DONATION_ID)))
+        .thenReturn(Optional.of(existingDonation));
+
+    handler.execute(command);
+
+    verify(clock, never()).instant();
+    verify(updateDonationRepository)
+        .update(argThat(donation -> donation.lastUpdatedAt().equals(LAST_UPDATED_AT)));
   }
 }

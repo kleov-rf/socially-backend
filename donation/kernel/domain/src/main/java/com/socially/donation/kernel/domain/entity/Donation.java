@@ -21,11 +21,11 @@ public final class Donation {
     return new Donation(id, title, description, createdAt, lastUpdatedAt);
   }
 
-  public Donation withTitle(Title title) {
+  public Donation withTitle(Title title, Instant lastUpdatedAt) {
     return create(id, title, description, createdAt, lastUpdatedAt);
   }
 
-  public Donation withDescription(Description description) {
+  public Donation withDescription(Description description, Instant lastUpdatedAt) {
     return create(id, title, description, createdAt, lastUpdatedAt);
   }
 

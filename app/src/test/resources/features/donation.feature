@@ -29,3 +29,4 @@ Feature: Donation management
     When I retrieve the donation by id
     Then the response status should be 200
     And the donation should have the expected id, title "Neighborhood Library Expansion" and description "Books and shelves for local students"
+    And the donation last updated time should be after the created time
