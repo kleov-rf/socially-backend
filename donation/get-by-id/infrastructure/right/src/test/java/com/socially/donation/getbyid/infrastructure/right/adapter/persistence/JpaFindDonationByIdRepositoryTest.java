@@ -45,13 +45,14 @@ class JpaFindDonationByIdRepositoryTest {
   void findById_should_return_mapped_donation() {
     var entityId = Id.from(DONATION_ID).value();
     DonationEntity entity =
-        new DonationEntity(entityId, "Entity Title", "Entity Description", CREATED_AT);
+        new DonationEntity(entityId, "Entity Title", "Entity Description", CREATED_AT, CREATED_AT);
     when(entityRepository.findById(entityId)).thenReturn(Optional.of(entity));
     Donation mappedDonation =
         Donation.create(
             Id.from(DONATION_ID),
             Title.from("Entity Title"),
             Description.from("Entity Description"),
+            CREATED_AT,
             CREATED_AT);
     when(entityMapper.toDomain(entity)).thenReturn(mappedDonation);
 

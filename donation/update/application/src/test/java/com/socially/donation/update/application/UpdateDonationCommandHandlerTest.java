@@ -40,6 +40,7 @@ class UpdateDonationCommandHandlerTest {
             Id.from(DONATION_ID),
             Title.from("Old Title"),
             Description.from("Old Description"),
+            CREATED_AT,
             CREATED_AT);
 
     when(findDonationByIdRepository.findById(Id.from(DONATION_ID)))
@@ -79,6 +80,7 @@ class UpdateDonationCommandHandlerTest {
             Id.from(DONATION_ID),
             Title.from("Old Title"),
             Description.from("Old Description"),
+            CREATED_AT,
             CREATED_AT);
 
     when(findDonationByIdRepository.findById(Id.from(DONATION_ID)))
@@ -98,6 +100,7 @@ class UpdateDonationCommandHandlerTest {
             Id.from(DONATION_ID),
             Title.from("Old Title"),
             Description.from("Old Description"),
+            CREATED_AT,
             CREATED_AT);
 
     when(findDonationByIdRepository.findById(Id.from(DONATION_ID)))
@@ -118,6 +121,7 @@ class UpdateDonationCommandHandlerTest {
             Id.from(DONATION_ID),
             Title.from("Old Title"),
             Description.from("Old Description"),
+            CREATED_AT,
             CREATED_AT);
 
     when(findDonationByIdRepository.findById(Id.from(DONATION_ID)))
@@ -141,6 +145,7 @@ class UpdateDonationCommandHandlerTest {
             Id.from(DONATION_ID),
             Title.from("Old Title"),
             Description.from("Old Description"),
+            CREATED_AT,
             CREATED_AT);
 
     when(findDonationByIdRepository.findById(Id.from(DONATION_ID)))

@@ -36,10 +36,15 @@ class JpaUpdateDonationRepositoryTest {
             Id.from(DONATION_ID),
             Title.from("Updated Title"),
             Description.from("Updated Description"),
+            CREATED_AT,
             CREATED_AT);
     DonationEntity mappedEntity =
         new DonationEntity(
-            Id.from(DONATION_ID).value(), "Updated Title", "Updated Description", CREATED_AT);
+            Id.from(DONATION_ID).value(),
+            "Updated Title",
+            "Updated Description",
+            CREATED_AT,
+            CREATED_AT);
     when(entityMapper.toEntity(donation)).thenReturn(mappedEntity);
 
     sut.update(donation);
@@ -51,6 +56,7 @@ class JpaUpdateDonationRepositoryTest {
                     entity.getId().equals(mappedEntity.getId())
                         && entity.getTitle().equals(mappedEntity.getTitle())
                         && entity.getDescription().equals(mappedEntity.getDescription())
-                        && entity.getCreatedAt().equals(mappedEntity.getCreatedAt())));
+                        && entity.getCreatedAt().equals(mappedEntity.getCreatedAt())
+                        && entity.getLastUpdatedAt().equals(mappedEntity.getLastUpdatedAt())));
   }
 }

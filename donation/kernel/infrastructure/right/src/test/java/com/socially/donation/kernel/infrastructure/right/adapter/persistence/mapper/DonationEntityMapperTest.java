@@ -21,17 +21,24 @@ class DonationEntityMapperTest {
 
   private static final String DONATION_ID = "550e8400-e29b-41d4-a716-446655440000";
   private static final Instant CREATED_AT = Instant.parse("2024-06-01T12:00:00Z");
+  private static final Instant LAST_UPDATED_AT = Instant.parse("2024-06-20T09:30:00Z");
   private static final Donation DONATION =
       Donation.create(
           Id.from(DONATION_ID),
           Title.from("Test Title"),
           Description.from("Test Description"),
-          CREATED_AT);
+          CREATED_AT,
+          LAST_UPDATED_AT);
 
   private static final Instant ENTITY_CREATED_AT = Instant.parse("2025-01-01T00:00:00Z");
+  private static final Instant ENTITY_LAST_UPDATED_AT = Instant.parse("2025-02-01T18:00:00Z");
   private static final DonationEntity ENTITY =
       new DonationEntity(
-          UUID.fromString(DONATION_ID), "Entity Title", "Entity Description", ENTITY_CREATED_AT);
+          UUID.fromString(DONATION_ID),
+          "Entity Title",
+          "Entity Description",
+          ENTITY_CREATED_AT,
+          ENTITY_LAST_UPDATED_AT);
 
   @Test
   void toEntity_should_map_id() {
@@ -62,6 +69,13 @@ class DonationEntityMapperTest {
   }
 
   @Test
+  void toEntity_should_map_last_updated_at() {
+    DonationEntity result = donationEntityMapper.toEntity(DONATION);
+
+    assertEquals(LAST_UPDATED_AT, result.getLastUpdatedAt());
+  }
+
+  @Test
   void toDomain_should_map_id() {
     Donation result = donationEntityMapper.toDomain(ENTITY);
 
@@ -87,5 +101,12 @@ class DonationEntityMapperTest {
     Donation result = donationEntityMapper.toDomain(ENTITY);
 
     assertEquals(ENTITY_CREATED_AT, result.createdAt());
+  }
+
+  @Test
+  void toDomain_should_map_last_updated_at() {
+    Donation result = donationEntityMapper.toDomain(ENTITY);
+
+    assertEquals(ENTITY_LAST_UPDATED_AT, result.lastUpdatedAt());
   }
 }

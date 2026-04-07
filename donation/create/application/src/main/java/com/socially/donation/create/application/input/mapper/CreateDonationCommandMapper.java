@@ -10,11 +10,12 @@ import org.springframework.stereotype.Component;
 
 @Component
 public final class CreateDonationCommandMapper {
-  public Donation toDomain(CreateDonationCommand command, Instant createdAt) {
+  public Donation toDomain(CreateDonationCommand command, Instant now) {
     return Donation.create(
         Id.from(command.id()),
         Title.from(command.title()),
         Description.from(command.description()),
-        createdAt);
+        now,
+        now);
   }
 }

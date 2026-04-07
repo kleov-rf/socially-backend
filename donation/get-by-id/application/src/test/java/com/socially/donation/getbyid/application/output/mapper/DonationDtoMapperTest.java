@@ -28,6 +28,7 @@ class DonationDtoMapperTest {
             Id.from(DONATION_ID),
             Title.from("Test Title"),
             Description.from("Test Description"),
+            CREATED_AT,
             CREATED_AT);
 
     DonationDto result = donationDtoMapper.fromDomain(donation);

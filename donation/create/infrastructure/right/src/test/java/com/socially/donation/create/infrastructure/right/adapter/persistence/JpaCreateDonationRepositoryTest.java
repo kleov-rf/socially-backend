@@ -36,10 +36,11 @@ class JpaCreateDonationRepositoryTest {
             Id.from(DONATION_ID),
             Title.from("Test Title"),
             Description.from("Test Description"),
+            CREATED_AT,
             CREATED_AT);
     DonationEntity mappedEntity =
         new DonationEntity(
-            Id.from(DONATION_ID).value(), "Test Title", "Test Description", CREATED_AT);
+            Id.from(DONATION_ID).value(), "Test Title", "Test Description", CREATED_AT, CREATED_AT);
     when(entityMapper.toEntity(donation)).thenReturn(mappedEntity);
 
     sut.create(donation);
@@ -51,6 +52,7 @@ class JpaCreateDonationRepositoryTest {
                     entity.getId().equals(mappedEntity.getId())
                         && entity.getTitle().equals(mappedEntity.getTitle())
                         && entity.getDescription().equals(mappedEntity.getDescription())
-                        && entity.getCreatedAt().equals(mappedEntity.getCreatedAt())));
+                        && entity.getCreatedAt().equals(mappedEntity.getCreatedAt())
+                        && entity.getLastUpdatedAt().equals(mappedEntity.getLastUpdatedAt())));
   }
 }

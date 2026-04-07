@@ -40,6 +40,7 @@ class CreateDonationCommandHandlerTest {
             Id.from(DONATION_ID),
             Title.from("Test Title"),
             Description.from("Test Description"),
+            CREATED_AT,
             CREATED_AT);
     when(clock.instant()).thenReturn(CREATED_AT);
     when(createDonationCommandMapper.toDomain(command, CREATED_AT)).thenReturn(mappedDonation);

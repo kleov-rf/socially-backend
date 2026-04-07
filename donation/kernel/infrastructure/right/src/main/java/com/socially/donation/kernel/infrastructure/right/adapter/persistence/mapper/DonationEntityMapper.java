@@ -15,7 +15,8 @@ public final class DonationEntityMapper {
         donation.id().value(),
         donation.title().value(),
         donation.description().value(),
-        donation.createdAt());
+        donation.createdAt(),
+        donation.lastUpdatedAt());
   }
 
   public Donation toDomain(DonationEntity entity) {
@@ -23,6 +24,7 @@ public final class DonationEntityMapper {
         Id.from(entity.getId().toString()),
         Title.from(entity.getTitle()),
         Description.from(entity.getDescription()),
-        entity.getCreatedAt());
+        entity.getCreatedAt(),
+        entity.getLastUpdatedAt());
   }
 }

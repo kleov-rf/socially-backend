@@ -14,17 +14,19 @@ public final class Donation {
   private final Title title;
   private final Description description;
   private final Instant createdAt;
+  private final Instant lastUpdatedAt;
 
-  public static Donation create(Id id, Title title, Description description, Instant createdAt) {
-    return new Donation(id, title, description, createdAt);
+  public static Donation create(
+      Id id, Title title, Description description, Instant createdAt, Instant lastUpdatedAt) {
+    return new Donation(id, title, description, createdAt, lastUpdatedAt);
   }
 
   public Donation withTitle(Title title) {
-    return create(id, title, description, createdAt);
+    return create(id, title, description, createdAt, lastUpdatedAt);
   }
 
   public Donation withDescription(Description description) {
-    return create(id, title, description, createdAt);
+    return create(id, title, description, createdAt, lastUpdatedAt);
   }
 
   public Id id() {
@@ -41,6 +43,10 @@ public final class Donation {
 
   public Instant createdAt() {
     return createdAt;
+  }
+
+  public Instant lastUpdatedAt() {
+    return lastUpdatedAt;
   }
 
   @Override

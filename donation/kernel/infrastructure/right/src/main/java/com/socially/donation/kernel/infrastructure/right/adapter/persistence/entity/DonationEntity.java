@@ -26,4 +26,7 @@ public class DonationEntity {
 
   @Column(name = "created_at", nullable = false)
   private Instant createdAt;
+
+  @Column(name = "last_updated_at", nullable = false)
+  private Instant lastUpdatedAt;
 }

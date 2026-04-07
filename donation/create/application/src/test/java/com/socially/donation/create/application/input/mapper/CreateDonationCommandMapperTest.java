@@ -19,20 +19,21 @@ class CreateDonationCommandMapperTest {
   @InjectMocks private CreateDonationCommandMapper mapper;
 
   private static final String DONATION_ID = "550e8400-e29b-41d4-a716-446655440000";
-  private static final Instant CREATED_AT = Instant.parse("2024-06-01T12:00:00Z");
+  private static final Instant NOW = Instant.parse("2024-06-01T12:00:00Z");
 
   @Test
   void toDonation_should_map_command_to_domain() {
     var command = new CreateDonationCommand(DONATION_ID, "Test Title", "Test Description");
 
-    Donation actual = mapper.toDomain(command, CREATED_AT);
+    Donation actual = mapper.toDomain(command, NOW);
 
     Donation expected =
         Donation.create(
             Id.from(DONATION_ID),
             Title.from("Test Title"),
             Description.from("Test Description"),
-            CREATED_AT);
+            NOW,
+            NOW);
     assertEquals(expected, actual);
   }
 }

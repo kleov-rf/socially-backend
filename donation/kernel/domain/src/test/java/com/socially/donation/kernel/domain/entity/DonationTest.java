@@ -13,6 +13,8 @@ class DonationTest {
   private static final String DONATION_ID = "550e8400-e29b-41d4-a716-446655440000";
   private static final String DIFFERENT_ID = "550e8400-e29b-41d4-a716-446655440001";
   private static final Instant CREATED_AT = Instant.parse("2024-06-01T12:00:00Z");
+  private static final Instant LAST_UPDATED_AT = Instant.parse("2024-06-15T08:00:00Z");
+  private static final Instant OTHER_INSTANT = Instant.parse("2025-01-01T00:00:00Z");
 
   @Test
   void equals_should_return_true_when_ids_are_equal() {
@@ -21,13 +23,15 @@ class DonationTest {
             Id.from(DONATION_ID),
             Title.from("Title 1"),
             Description.from("Description 1"),
-            CREATED_AT);
+            CREATED_AT,
+            LAST_UPDATED_AT);
     Donation donation2 =
         Donation.create(
             Id.from(DONATION_ID),
             Title.from("Title 2"),
             Description.from("Description 2"),
-            Instant.parse("2025-01-01T00:00:00Z"));
+            OTHER_INSTANT,
+            OTHER_INSTANT);
 
     assertEquals(donation1, donation2);
   }
@@ -39,13 +43,15 @@ class DonationTest {
             Id.from(DONATION_ID),
             Title.from("Same Title"),
             Description.from("Same Description"),
-            CREATED_AT);
+            CREATED_AT,
+            LAST_UPDATED_AT);
     Donation donation2 =
         Donation.create(
             Id.from(DIFFERENT_ID),
             Title.from("Same Title"),
             Description.from("Same Description"),
-            CREATED_AT);
+            CREATED_AT,
+            LAST_UPDATED_AT);
 
     assertNotEquals(donation1, donation2);
   }
@@ -57,7 +63,8 @@ class DonationTest {
             Id.from(DONATION_ID),
             Title.from("Old Title"),
             Description.from("Old Description"),
-            CREATED_AT);
+            CREATED_AT,
+            LAST_UPDATED_AT);
 
     Donation updated = donation.withTitle(Title.from("New Title"));
 
@@ -65,6 +72,7 @@ class DonationTest {
     assertEquals(Description.from("Old Description"), updated.description());
     assertEquals(Id.from(DONATION_ID), updated.id());
     assertEquals(CREATED_AT, updated.createdAt());
+    assertEquals(LAST_UPDATED_AT, updated.lastUpdatedAt());
   }
 
   @Test
@@ -74,7 +82,8 @@ class DonationTest {
             Id.from(DONATION_ID),
             Title.from("Old Title"),
             Description.from("Old Description"),
-            CREATED_AT);
+            CREATED_AT,
+            LAST_UPDATED_AT);
 
     Donation updated = donation.withDescription(Description.from("New Description"));
 
@@ -82,5 +91,6 @@ class DonationTest {
     assertEquals(Description.from("New Description"), updated.description());
     assertEquals(Id.from(DONATION_ID), updated.id());
     assertEquals(CREATED_AT, updated.createdAt());
+    assertEquals(LAST_UPDATED_AT, updated.lastUpdatedAt());
   }
 }
