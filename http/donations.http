@@ -20,12 +20,15 @@ Accept: application/json
 ## DONATIONS
 ## ========================================
 
+@firstDonationId = 550e8400-e29b-41d4-a716-446655440000
+@secondDonationId = 550e8400-e29b-41d4-a716-446655440001
+
 ### Create a new donation
 POST {{baseUrl}}/api/donations
 Content-Type: {{contentType}}
 
 {
-  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "id": "{{firstDonationId}}",
   "title": "Winter Clothes Drive",
   "description": "Collecting warm clothes for homeless shelters"
 }
@@ -43,15 +46,33 @@ POST {{baseUrl}}/api/donations
 Content-Type: {{contentType}}
 
 {
-  "id": "550e8400-e29b-41d4-a716-446655440001",
+  "id": "{{secondDonationId}}",
   "title": "Food Drive",
   "description": "Collecting non-perishable food items for local food banks"
 }
 
 ###
 
+### List all donations
+GET {{baseUrl}}/api/donations
+Accept: application/json
+
+> {%
+    client.test("List donations returns exactly the two created donation ids", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+        client.assert(Array.isArray(response.body), "Response body should be a JSON array");
+
+        const ids = response.body.map(donation => donation.id);
+        client.assert(response.body.length === 2, "Response body should contain exactly 2 donations");
+        client.assert(ids.includes("{{firstDonationId}}"), "First created donation id is missing");
+        client.assert(ids.includes("{{secondDonationId}}"), "Second created donation id is missing");
+    });
+%}
+
+###
+
 ### Get donation by ID
-GET {{baseUrl}}/api/donations/550e8400-e29b-41d4-a716-446655440000
+GET {{baseUrl}}/api/donations/{{firstDonationId}}
 Accept: application/json
 
 > {%
