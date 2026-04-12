@@ -34,6 +34,9 @@ public class DonationStepDefinitions {
   private String description;
   private MvcResult mvcResult;
 
+  private String firstDonationId;
+  private String secondDonationId;
+
   @Given("I have a donation with random id, title {string} and description {string}")
   public void iHaveADonationWithRandomIdTitleAndDescription(String title, String description) {
     this.id = UUID.randomUUID().toString();
@@ -80,6 +83,32 @@ public class DonationStepDefinitions {
   @When("I retrieve the donation by id")
   public void iRetrieveTheDonationById() throws Exception {
     mvcResult = mockMvc.perform(get("/api/donations/" + id)).andReturn();
+  }
+
+  @When("I retrieve all donations")
+  public void iRetrieveAllDonations() throws Exception {
+    mvcResult = mockMvc.perform(get("/api/donations")).andReturn();
+  }
+
+  @And("I record this donation as donation {int}")
+  public void iRecordThisDonationAsDonation(int donationNumber) {
+    if (donationNumber == 1) {
+      firstDonationId = id;
+    } else if (donationNumber == 2) {
+      secondDonationId = id;
+    } else {
+      throw new IllegalArgumentException(
+          "Only donation 1 or 2 is supported, got: " + donationNumber);
+    }
+  }
+
+  @And("the donations list should include both recorded donation ids")
+  public void theDonationsListShouldIncludeBothRecordedDonationIds() throws Exception {
+    String responseBody = mvcResult.getResponse().getContentAsString();
+    JsonNode root = objectMapper.readTree(responseBody);
+    assertThat(root.isArray()).isTrue();
+
+    assertThat(root.findValuesAsText("id")).contains(firstDonationId, secondDonationId);
   }
 
   @And("the donation should have the expected id, title {string} and description {string}")

@@ -11,6 +11,19 @@ Feature: Donation management
     Then the response status should be 200
     And the donation should have the expected id, title "Winter Clothes Drive" and description "Collecting warm clothes for homeless shelters"
 
+  Scenario: List donations returns both created donations
+    Given I have a donation with random id, title "First List Donation" and description "First list description"
+    When I create the donation
+    Then the response status should be 201
+    And I record this donation as donation 1
+    Given I have a donation with random id, title "Second List Donation" and description "Second list description"
+    When I create the donation
+    Then the response status should be 201
+    And I record this donation as donation 2
+    When I retrieve all donations
+    Then the response status should be 200
+    And the donations list should include both recorded donation ids
+
   Scenario: Create a donation, delete it, and fail to retrieve it afterwards
     Given I have a donation with random id, title "School Supplies Fund" and description "Raising money for notebooks and backpacks"
     When I create the donation
