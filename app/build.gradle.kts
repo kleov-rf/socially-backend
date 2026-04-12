@@ -23,6 +23,7 @@ dependencies {
     implementation(project(":donation:delete:infrastructure:left"))
     implementation(project(":donation:get-by-id:infrastructure:left"))
     implementation(project(":donation:update:infrastructure:left"))
+    implementation(project(":donation:find:infrastructure:left"))
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-validation")
