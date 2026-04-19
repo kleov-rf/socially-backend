@@ -1,3 +1,5 @@
 package com.socially.donation.find.application.input;
 
-public record FindDonationsQuery() {}
+import com.socially.donation.find.domain.pagination.PaginationCriteria;
+
+public record FindDonationsQuery(PaginationCriteria paginationCriteria) {}

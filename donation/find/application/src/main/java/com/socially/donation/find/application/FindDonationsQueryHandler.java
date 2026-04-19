@@ -4,8 +4,9 @@ import com.socially.donation.find.application.input.FindDonationsQuery;
 import com.socially.donation.find.application.output.FindDonationDto;
 import com.socially.donation.find.application.output.mapper.FindDonationDtoMapper;
 import com.socially.donation.find.application.port.left.FindDonationsUseCase;
+import com.socially.donation.find.domain.pagination.Page;
 import com.socially.donation.find.domain.port.right.FindDonationsRepository;
-import java.util.List;
+import com.socially.donation.kernel.domain.entity.Donation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +18,10 @@ public final class FindDonationsQueryHandler implements FindDonationsUseCase {
   private final FindDonationDtoMapper donationDtoMapper;
 
   @Override
-  public List<FindDonationDto> execute(FindDonationsQuery query) {
-    return donationRepository.find().stream().map(donationDtoMapper::fromDomain).toList();
+  public Page<FindDonationDto> execute(FindDonationsQuery query) {
+    Page<Donation> donations = donationRepository.find(query.paginationCriteria());
+    return Page.create(
+        donations.items().stream().map(donationDtoMapper::fromDomain).toList(),
+        donations.metadata());
   }
 }

@@ -1,12 +1,16 @@
 package com.socially.donation.find.application;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.socially.donation.find.application.input.FindDonationsQuery;
 import com.socially.donation.find.application.output.FindDonationDto;
 import com.socially.donation.find.application.output.mapper.FindDonationDtoMapper;
+import com.socially.donation.find.domain.pagination.Metadata;
+import com.socially.donation.find.domain.pagination.Page;
+import com.socially.donation.find.domain.pagination.PaginationCriteria;
 import com.socially.donation.find.domain.port.right.FindDonationsRepository;
 import com.socially.donation.kernel.domain.entity.Donation;
 import com.socially.donation.kernel.domain.valueobject.Description;
@@ -34,14 +38,19 @@ class FindDonationsQueryHandlerTest {
   @InjectMocks private FindDonationsQueryHandler handler;
 
   @Test
-  void execute_should_call_find() {
-    handler.execute(new FindDonationsQuery());
+  void execute_should_call_repository_with_received_query() {
+    FindDonationsQuery query =
+        new FindDonationsQuery(PaginationCriteria.create(null, PaginationCriteria.DEFAULT_SIZE));
+    when(donationRepository.find(query.paginationCriteria()))
+        .thenReturn(Page.create(List.of(), Metadata.create(null, false, 20)));
 
-    verify(donationRepository).find();
+    handler.execute(query);
+
+    verify(donationRepository).find(query.paginationCriteria());
   }
 
   @Test
-  void execute_should_call_mapper_with_each_retrieved_donation() {
+  void execute_should_call_donation_dto_mapper_for_every_retrieved_item() {
     Donation firstDonation =
         Donation.create(
             Id.from(DONATION_ID),
@@ -56,16 +65,20 @@ class FindDonationsQueryHandlerTest {
             Description.from("Second Test Description"),
             CREATED_AT,
             LAST_UPDATED_AT);
-    when(donationRepository.find()).thenReturn(List.of(firstDonation, secondDonation));
+    FindDonationsQuery query = new FindDonationsQuery(PaginationCriteria.create(null, 10));
+    when(donationRepository.find(query.paginationCriteria()))
+        .thenReturn(
+            Page.create(
+                List.of(firstDonation, secondDonation), Metadata.create("next-cursor", true, 10)));
 
-    handler.execute(new FindDonationsQuery());
+    handler.execute(query);
 
     verify(donationDtoMapper).fromDomain(firstDonation);
     verify(donationDtoMapper).fromDomain(secondDonation);
   }
 
   @Test
-  void execute_should_return_mapped_donations() {
+  void execute_should_return_page_with_donation_page_items() {
     Donation donation =
         Donation.create(
             Id.from(DONATION_ID),
@@ -73,7 +86,6 @@ class FindDonationsQueryHandlerTest {
             Description.from("Test Description"),
             CREATED_AT,
             LAST_UPDATED_AT);
-    when(donationRepository.find()).thenReturn(List.of(donation));
     FindDonationDto mappedDto =
         new FindDonationDto(
             donation.id(),
@@ -81,10 +93,41 @@ class FindDonationsQueryHandlerTest {
             donation.description(),
             donation.createdAt(),
             donation.lastUpdatedAt());
+    FindDonationsQuery query = new FindDonationsQuery(PaginationCriteria.create(null, 10));
+    when(donationRepository.find(query.paginationCriteria()))
+        .thenReturn(Page.create(List.of(donation), Metadata.create("next-cursor", true, 10)));
     when(donationDtoMapper.fromDomain(donation)).thenReturn(mappedDto);
 
-    List<FindDonationDto> result = handler.execute(new FindDonationsQuery());
+    Page<FindDonationDto> result = handler.execute(query);
 
-    assertEquals(List.of(mappedDto), result);
+    assertEquals(List.of(mappedDto), result.items());
+  }
+
+  @Test
+  void execute_should_return_page_with_donation_page_metadata() {
+    Donation donation =
+        Donation.create(
+            Id.from(DONATION_ID),
+            Title.from("Test Title"),
+            Description.from("Test Description"),
+            CREATED_AT,
+            LAST_UPDATED_AT);
+    FindDonationDto mappedDto =
+        new FindDonationDto(
+            donation.id(),
+            donation.title(),
+            donation.description(),
+            donation.createdAt(),
+            donation.lastUpdatedAt());
+    FindDonationsQuery query = new FindDonationsQuery(PaginationCriteria.create(null, 10));
+    when(donationRepository.find(query.paginationCriteria()))
+        .thenReturn(Page.create(List.of(donation), Metadata.create("next-cursor", true, 10)));
+    when(donationDtoMapper.fromDomain(donation)).thenReturn(mappedDto);
+
+    Page<FindDonationDto> result = handler.execute(query);
+
+    assertEquals("next-cursor", result.metadata().nextCursor());
+    assertTrue(result.metadata().hasNext());
+    assertEquals(10, result.metadata().size());
   }
 }
