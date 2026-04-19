@@ -22,7 +22,27 @@ Feature: Donation management
     And I record this donation as donation 2
     When I retrieve all donations
     Then the response status should be 200
-    And the donations list should include both recorded donation ids
+    And the donations page should include both recorded donation ids
+    And the response should include pagination metadata
+
+  Scenario: Retrieve donations using cursor pagination
+    Given I have a donation with random id, title "New Donation" and description "Cursor description one"
+    When I create the donation
+    Then the response status should be 201
+    And I record this donation as donation 1
+    Given I have a donation with random id, title "Newer Donation" and description "Cursor description two"
+    When I create the donation
+    Then the response status should be 201
+    And I record this donation as donation 2
+    When I retrieve donations with page size 1
+    Then the response status should be 200
+    And the current page should include donation id of donation 2
+    And the response should include pagination metadata
+    And the pagination should indicate a next page
+    When I retrieve next donations page using the returned cursor
+    Then the response status should be 200
+    And the response should include pagination metadata
+    And the next page should include donation id of donation 1
 
   Scenario: Create a donation, delete it, and fail to retrieve it afterwards
     Given I have a donation with random id, title "School Supplies Fund" and description "Raising money for notebooks and backpacks"

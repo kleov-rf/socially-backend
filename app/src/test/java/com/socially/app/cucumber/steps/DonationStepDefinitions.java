@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.socially.donation.create.infrastructure.left.adapter.http.create.input.CreateDonationRequest;
+import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -19,6 +20,7 @@ import java.time.Instant;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -29,6 +31,8 @@ public class DonationStepDefinitions {
 
   @Autowired private ObjectMapper objectMapper;
 
+  @Autowired private JdbcTemplate jdbcTemplate;
+
   private String id;
   private String title;
   private String description;
@@ -36,6 +40,17 @@ public class DonationStepDefinitions {
 
   private String firstDonationId;
   private String secondDonationId;
+  private String lastCursor;
+  private Integer lastPageSize;
+
+  @Before
+  public void resetScenarioState() {
+    jdbcTemplate.execute("DELETE FROM donations");
+    firstDonationId = null;
+    secondDonationId = null;
+    lastCursor = null;
+    lastPageSize = null;
+  }
 
   @Given("I have a donation with random id, title {string} and description {string}")
   public void iHaveADonationWithRandomIdTitleAndDescription(String title, String description) {
@@ -87,7 +102,30 @@ public class DonationStepDefinitions {
 
   @When("I retrieve all donations")
   public void iRetrieveAllDonations() throws Exception {
+    lastPageSize = null;
     mvcResult = mockMvc.perform(get("/api/donations")).andReturn();
+  }
+
+  @When("I retrieve donations with page size {int}")
+  public void iRetrieveDonationsWithPageSize(int size) throws Exception {
+    lastPageSize = size;
+    mvcResult =
+        mockMvc.perform(get("/api/donations").param("size", String.valueOf(size))).andReturn();
+  }
+
+  @When("I retrieve next donations page using the returned cursor")
+  public void iRetrieveNextDonationsPageUsingTheReturnedCursor() throws Exception {
+    String responseBody = mvcResult.getResponse().getContentAsString();
+    JsonNode root = objectMapper.readTree(responseBody);
+    lastCursor = root.path("page").path("nextCursor").asText();
+    assertThat(lastCursor).isNotBlank();
+
+    var request = get("/api/donations").param("cursor", lastCursor);
+    if (lastPageSize != null) {
+      request = request.param("size", String.valueOf(lastPageSize));
+    }
+
+    mvcResult = mockMvc.perform(request).andReturn();
   }
 
   @And("I record this donation as donation {int}")
@@ -102,13 +140,51 @@ public class DonationStepDefinitions {
     }
   }
 
-  @And("the donations list should include both recorded donation ids")
-  public void theDonationsListShouldIncludeBothRecordedDonationIds() throws Exception {
+  @And("the donations page should include both recorded donation ids")
+  public void theDonationsPageShouldIncludeBothRecordedDonationIds() throws Exception {
+    assertMvcItemsContainDonationIds(firstDonationId, secondDonationId);
+  }
+
+  @And("the response should include pagination metadata")
+  public void theResponseShouldIncludePaginationMetadata() throws Exception {
     String responseBody = mvcResult.getResponse().getContentAsString();
     JsonNode root = objectMapper.readTree(responseBody);
-    assertThat(root.isArray()).isTrue();
+    JsonNode page = root.path("page");
 
-    assertThat(root.findValuesAsText("id")).contains(firstDonationId, secondDonationId);
+    assertThat(root.has("items")).isTrue();
+    assertThat(page.isMissingNode()).isFalse();
+    assertThat(page.has("nextCursor")).isTrue();
+    assertThat(page.has("hasNext")).isTrue();
+    assertThat(page.has("size")).isTrue();
+  }
+
+  @And("the pagination should indicate a next page")
+  public void thePaginationShouldIndicateANextPage() throws Exception {
+    String responseBody = mvcResult.getResponse().getContentAsString();
+    JsonNode root = objectMapper.readTree(responseBody);
+    JsonNode page = root.path("page");
+
+    assertThat(page.path("hasNext").asBoolean()).isTrue();
+    assertThat(page.path("nextCursor").asText()).isNotBlank();
+  }
+
+  @And("the current page should include donation id of donation {int}")
+  @And("the next page should include donation id of donation {int}")
+  public void theCurrentPageShouldIncludeDonationIdOfDonation(int donationNumber) throws Exception {
+    assertMvcItemsContainDonationIds(expectedDonationId(donationNumber));
+  }
+
+  private String expectedDonationId(int donationNumber) {
+    return donationNumber == 1 ? firstDonationId : secondDonationId;
+  }
+
+  private void assertMvcItemsContainDonationIds(String... expectedIds) throws Exception {
+    String responseBody = mvcResult.getResponse().getContentAsString();
+    JsonNode root = objectMapper.readTree(responseBody);
+    JsonNode items = root.path("items");
+    assertThat(items.isArray()).isTrue();
+
+    assertThat(items.findValuesAsText("id")).contains(expectedIds);
   }
 
   @And("the donation should have the expected id, title {string} and description {string}")
