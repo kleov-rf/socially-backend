@@ -31,8 +31,9 @@ public class JpaFindDonationsRepository implements FindDonationsRepository {
     List<DonationEntity> pageEntities = getPageDonations(nextPageExists, entities, pageSize);
 
     String nextCursor = getNextCursor(nextPageExists, pageEntities);
+    String previousCursor = getPreviousCursor(paginationCriteria.cursor(), pageEntities);
     List<Donation> donations = pageEntities.stream().map(entityMapper::toDomain).toList();
-    Metadata metadata = Metadata.create(nextCursor, nextPageExists, pageSize);
+    Metadata metadata = Metadata.create(nextCursor, previousCursor, nextPageExists, pageSize);
 
     return Page.create(donations, metadata);
   }
@@ -63,5 +64,14 @@ public class JpaFindDonationsRepository implements FindDonationsRepository {
 
     DonationEntity lastEntity = donations.getLast();
     return cursorCodec.encode(lastEntity.getCreatedAt(), lastEntity.getId());
+  }
+
+  private String getPreviousCursor(String cursor, List<DonationEntity> donations) {
+    if (Objects.isNull(cursor) || donations.isEmpty()) {
+      return null;
+    }
+
+    DonationEntity firstEntity = donations.getFirst();
+    return cursorCodec.encode(firstEntity.getCreatedAt(), firstEntity.getId());
   }
 }

@@ -20,7 +20,10 @@ public class PageResponseMapper {
 
     MetadataResponse metadata =
         new MetadataResponse(
-            page.metadata().nextCursor(), page.metadata().hasNext(), page.metadata().size());
+            page.metadata().nextCursor(),
+            page.metadata().previousCursor(),
+            page.metadata().hasNext(),
+            page.metadata().size());
 
     return new PageResponse<>(items, metadata);
   }

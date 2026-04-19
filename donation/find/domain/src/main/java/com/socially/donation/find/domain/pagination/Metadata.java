@@ -6,12 +6,15 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Metadata {
   private final String nextCursor;
+  private final String previousCursor;
   private final boolean hasNext;
   private final int size;
 
-  public static Metadata create(String nextCursor, Boolean hasNext, Integer size) {
+  public static Metadata create(
+      String nextCursor, String previousCursor, Boolean hasNext, Integer size) {
     validate(nextCursor, hasNext, size);
-    return new Metadata(normalizeCursor(nextCursor), hasNext, size);
+    return new Metadata(
+        normalizeCursor(nextCursor), normalizeCursor(previousCursor), hasNext, size);
   }
 
   private static void validate(String nextCursor, Boolean hasNext, Integer size) {
@@ -32,6 +35,10 @@ public final class Metadata {
 
   public String nextCursor() {
     return nextCursor;
+  }
+
+  public String previousCursor() {
+    return previousCursor;
   }
 
   public boolean hasNext() {

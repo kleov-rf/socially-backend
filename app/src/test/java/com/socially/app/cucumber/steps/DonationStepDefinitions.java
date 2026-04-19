@@ -154,6 +154,7 @@ public class DonationStepDefinitions {
     assertThat(root.has("items")).isTrue();
     assertThat(page.isMissingNode()).isFalse();
     assertThat(page.has("nextCursor")).isTrue();
+    assertThat(page.has("previousCursor")).isTrue();
     assertThat(page.has("hasNext")).isTrue();
     assertThat(page.has("size")).isTrue();
   }

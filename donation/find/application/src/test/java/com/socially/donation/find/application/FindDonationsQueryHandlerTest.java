@@ -42,7 +42,7 @@ class FindDonationsQueryHandlerTest {
     FindDonationsQuery query =
         new FindDonationsQuery(PaginationCriteria.create(null, PaginationCriteria.DEFAULT_SIZE));
     when(donationRepository.find(query.paginationCriteria()))
-        .thenReturn(Page.create(List.of(), Metadata.create(null, false, 20)));
+        .thenReturn(Page.create(List.of(), Metadata.create(null, null, false, 20)));
 
     handler.execute(query);
 
@@ -69,7 +69,8 @@ class FindDonationsQueryHandlerTest {
     when(donationRepository.find(query.paginationCriteria()))
         .thenReturn(
             Page.create(
-                List.of(firstDonation, secondDonation), Metadata.create("next-cursor", true, 10)));
+                List.of(firstDonation, secondDonation),
+                Metadata.create("next-cursor", null, true, 10)));
 
     handler.execute(query);
 
@@ -95,7 +96,9 @@ class FindDonationsQueryHandlerTest {
             donation.lastUpdatedAt());
     FindDonationsQuery query = new FindDonationsQuery(PaginationCriteria.create(null, 10));
     when(donationRepository.find(query.paginationCriteria()))
-        .thenReturn(Page.create(List.of(donation), Metadata.create("next-cursor", true, 10)));
+        .thenReturn(
+            Page.create(
+                List.of(donation), Metadata.create("next-cursor", "previous-cursor", true, 10)));
     when(donationDtoMapper.fromDomain(donation)).thenReturn(mappedDto);
 
     Page<FindDonationDto> result = handler.execute(query);
@@ -121,12 +124,15 @@ class FindDonationsQueryHandlerTest {
             donation.lastUpdatedAt());
     FindDonationsQuery query = new FindDonationsQuery(PaginationCriteria.create(null, 10));
     when(donationRepository.find(query.paginationCriteria()))
-        .thenReturn(Page.create(List.of(donation), Metadata.create("next-cursor", true, 10)));
+        .thenReturn(
+            Page.create(
+                List.of(donation), Metadata.create("next-cursor", "previous-cursor", true, 10)));
     when(donationDtoMapper.fromDomain(donation)).thenReturn(mappedDto);
 
     Page<FindDonationDto> result = handler.execute(query);
 
     assertEquals("next-cursor", result.metadata().nextCursor());
+    assertEquals("previous-cursor", result.metadata().previousCursor());
     assertTrue(result.metadata().hasNext());
     assertEquals(10, result.metadata().size());
   }

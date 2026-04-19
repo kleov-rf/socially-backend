@@ -26,6 +26,7 @@ class PageResponseMapperTest {
   private static final Instant CREATED_AT = Instant.parse("2024-06-01T12:00:00Z");
   private static final Instant LAST_UPDATED_AT = Instant.parse("2024-06-20T09:00:00Z");
   private static final String NEXT_CURSOR = "next-cursor";
+  private static final String PREVIOUS_CURSOR = "previous-cursor";
   private static final boolean HAS_NEXT = true;
   private static final int PAGE_SIZE = 20;
 
@@ -76,6 +77,16 @@ class PageResponseMapperTest {
   }
 
   @Test
+  void toResponse_should_map_metadata_previous_cursor() {
+    FindDonationDto donationDto = givenDonationDto();
+    when(donationResponseMapper.toResponse(donationDto)).thenReturn(givenDonationResponse());
+
+    var result = mapper.toResponse(givenPage(donationDto));
+
+    assertEquals(PREVIOUS_CURSOR, result.page().previousCursor());
+  }
+
+  @Test
   void toResponse_should_map_metadata_size() {
     FindDonationDto donationDto = givenDonationDto();
     when(donationResponseMapper.toResponse(donationDto)).thenReturn(givenDonationResponse());
@@ -100,6 +111,7 @@ class PageResponseMapperTest {
   }
 
   private Page<FindDonationDto> givenPage(FindDonationDto donationDto) {
-    return Page.create(List.of(donationDto), Metadata.create(NEXT_CURSOR, HAS_NEXT, PAGE_SIZE));
+    return Page.create(
+        List.of(donationDto), Metadata.create(NEXT_CURSOR, PREVIOUS_CURSOR, HAS_NEXT, PAGE_SIZE));
   }
 }
