@@ -1,5 +1,6 @@
 package com.socially.donation.find.domain.pagination;
 
+import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
@@ -7,35 +8,16 @@ import lombok.RequiredArgsConstructor;
 public final class Metadata {
   private final String nextCursor;
   private final String previousCursor;
-  private final boolean hasNext;
-  private final boolean hasPrevious;
   private final int size;
 
-  public static Metadata create(
-      String nextCursor,
-      String previousCursor,
-      Boolean hasNext,
-      Boolean hasPrevious,
-      Integer size) {
-    validate(nextCursor, previousCursor, hasNext, hasPrevious, size);
-    return new Metadata(
-        normalizeCursor(nextCursor), normalizeCursor(previousCursor), hasNext, hasPrevious, size);
+  public static Metadata create(String nextCursor, String previousCursor, Integer size) {
+    validate(size);
+    return new Metadata(normalizeCursor(nextCursor), normalizeCursor(previousCursor), size);
   }
 
-  private static void validate(
-      String nextCursor,
-      String previousCursor,
-      Boolean hasNext,
-      Boolean hasPrevious,
-      Integer size) {
+  private static void validate(Integer size) {
     if (size <= 0) {
       throw new IllegalArgumentException("Size must be greater than zero");
-    }
-    if (hasNext && normalizeCursor(nextCursor) == null) {
-      throw new IllegalArgumentException("Next cursor is required when hasNext is true");
-    }
-    if (hasPrevious && normalizeCursor(previousCursor) == null) {
-      throw new IllegalArgumentException("Previous cursor is required when hasPrevious is true");
     }
   }
 
@@ -55,11 +37,11 @@ public final class Metadata {
   }
 
   public boolean hasNext() {
-    return hasNext;
+    return Objects.nonNull(nextCursor);
   }
 
   public boolean hasPrevious() {
-    return hasPrevious;
+    return Objects.nonNull(previousCursor);
   }
 
   public int size() {

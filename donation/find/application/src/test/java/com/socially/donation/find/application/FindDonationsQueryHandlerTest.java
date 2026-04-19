@@ -42,7 +42,7 @@ class FindDonationsQueryHandlerTest {
     FindDonationsQuery query =
         new FindDonationsQuery(PaginationCriteria.create(null, PaginationCriteria.DEFAULT_SIZE));
     when(donationRepository.find(query.paginationCriteria()))
-        .thenReturn(Page.create(List.of(), Metadata.create(null, null, false, false, 20)));
+        .thenReturn(Page.create(List.of(), Metadata.create(null, null, 20)));
 
     handler.execute(query);
 
@@ -69,8 +69,7 @@ class FindDonationsQueryHandlerTest {
     when(donationRepository.find(query.paginationCriteria()))
         .thenReturn(
             Page.create(
-                List.of(firstDonation, secondDonation),
-                Metadata.create("next-cursor", null, true, false, 10)));
+                List.of(firstDonation, secondDonation), Metadata.create("next-cursor", null, 10)));
 
     handler.execute(query);
 
@@ -97,9 +96,7 @@ class FindDonationsQueryHandlerTest {
     FindDonationsQuery query = new FindDonationsQuery(PaginationCriteria.create(null, 10));
     when(donationRepository.find(query.paginationCriteria()))
         .thenReturn(
-            Page.create(
-                List.of(donation),
-                Metadata.create("next-cursor", "previous-cursor", true, true, 10)));
+            Page.create(List.of(donation), Metadata.create("next-cursor", "previous-cursor", 10)));
     when(donationDtoMapper.fromDomain(donation)).thenReturn(mappedDto);
 
     Page<FindDonationDto> result = handler.execute(query);
@@ -126,9 +123,7 @@ class FindDonationsQueryHandlerTest {
     FindDonationsQuery query = new FindDonationsQuery(PaginationCriteria.create(null, 10));
     when(donationRepository.find(query.paginationCriteria()))
         .thenReturn(
-            Page.create(
-                List.of(donation),
-                Metadata.create("next-cursor", "previous-cursor", true, true, 10)));
+            Page.create(List.of(donation), Metadata.create("next-cursor", "previous-cursor", 10)));
     when(donationDtoMapper.fromDomain(donation)).thenReturn(mappedDto);
 
     Page<FindDonationDto> result = handler.execute(query);

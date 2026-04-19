@@ -27,8 +27,6 @@ class PageResponseMapperTest {
   private static final Instant LAST_UPDATED_AT = Instant.parse("2024-06-20T09:00:00Z");
   private static final String NEXT_CURSOR = "next-cursor";
   private static final String PREVIOUS_CURSOR = "previous-cursor";
-  private static final boolean HAS_NEXT = true;
-  private static final boolean HAS_PREVIOUS = true;
   private static final int PAGE_SIZE = 20;
 
   @Mock private FindDonationResponseMapper donationResponseMapper;
@@ -74,7 +72,7 @@ class PageResponseMapperTest {
 
     var result = mapper.toResponse(givenPage(donationDto));
 
-    assertEquals(HAS_NEXT, result.page().hasNext());
+    assertEquals(true, result.page().hasNext());
   }
 
   @Test
@@ -94,7 +92,7 @@ class PageResponseMapperTest {
 
     var result = mapper.toResponse(givenPage(donationDto));
 
-    assertEquals(HAS_PREVIOUS, result.page().hasPrevious());
+    assertEquals(true, result.page().hasPrevious());
   }
 
   @Test
@@ -123,7 +121,6 @@ class PageResponseMapperTest {
 
   private Page<FindDonationDto> givenPage(FindDonationDto donationDto) {
     return Page.create(
-        List.of(donationDto),
-        Metadata.create(NEXT_CURSOR, PREVIOUS_CURSOR, HAS_NEXT, HAS_PREVIOUS, PAGE_SIZE));
+        List.of(donationDto), Metadata.create(NEXT_CURSOR, PREVIOUS_CURSOR, PAGE_SIZE));
   }
 }
