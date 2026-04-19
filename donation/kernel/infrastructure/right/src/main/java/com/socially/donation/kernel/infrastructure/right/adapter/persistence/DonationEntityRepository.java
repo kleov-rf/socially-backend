@@ -23,4 +23,15 @@ public interface DonationEntityRepository extends JpaRepository<DonationEntity, 
       """)
   List<DonationEntity> findNextPage(
       @Param("createdAt") Instant createdAt, @Param("id") UUID id, Pageable pageable);
+
+  @Query(
+      """
+      select d
+      from DonationEntity d
+      where d.createdAt > :createdAt
+         or (d.createdAt = :createdAt and d.id > :id)
+      order by d.createdAt asc, d.id asc
+      """)
+  List<DonationEntity> findPreviousPage(
+      @Param("createdAt") Instant createdAt, @Param("id") UUID id, Pageable pageable);
 }

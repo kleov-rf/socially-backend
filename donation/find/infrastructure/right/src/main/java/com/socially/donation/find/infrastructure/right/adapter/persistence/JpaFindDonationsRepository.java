@@ -8,6 +8,8 @@ import com.socially.donation.kernel.domain.entity.Donation;
 import com.socially.donation.kernel.infrastructure.right.adapter.persistence.DonationEntityRepository;
 import com.socially.donation.kernel.infrastructure.right.adapter.persistence.entity.DonationEntity;
 import com.socially.donation.kernel.infrastructure.right.adapter.persistence.mapper.DonationEntityMapper;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
@@ -25,10 +27,15 @@ public class JpaFindDonationsRepository implements FindDonationsRepository {
   @Override
   public Page<Donation> find(PaginationCriteria paginationCriteria) {
     int pageSize = paginationCriteria.size();
-    List<DonationEntity> entities = fetchEntities(paginationCriteria.cursor(), pageSize + 1);
+    boolean previousCursorRequest =
+        Objects.nonNull(paginationCriteria.cursor())
+            && cursorCodec.isPreviousCursor(paginationCriteria.cursor());
+    List<DonationEntity> entities =
+        fetchEntities(paginationCriteria.cursor(), pageSize + 1, previousCursorRequest);
     boolean nextPageExists = entities.size() > pageSize;
 
-    List<DonationEntity> pageEntities = getPageDonations(nextPageExists, entities, pageSize);
+    List<DonationEntity> pageEntities =
+        getPageDonations(nextPageExists, entities, pageSize, previousCursorRequest);
 
     String nextCursor = getNextCursor(nextPageExists, pageEntities);
     String previousCursor = getPreviousCursor(paginationCriteria.cursor(), pageEntities);
@@ -38,7 +45,8 @@ public class JpaFindDonationsRepository implements FindDonationsRepository {
     return Page.create(donations, metadata);
   }
 
-  private List<DonationEntity> fetchEntities(String cursor, int fetchSize) {
+  private List<DonationEntity> fetchEntities(
+      String cursor, int fetchSize, boolean previousCursorRequest) {
     PageRequest pageRequest = PageRequest.of(0, fetchSize);
 
     if (Objects.isNull(cursor)) {
@@ -46,11 +54,32 @@ public class JpaFindDonationsRepository implements FindDonationsRepository {
     }
 
     KeysetCursorCodec.CursorBoundary boundary = cursorCodec.decode(cursor);
+    if (previousCursorRequest) {
+      return entityRepository.findPreviousPage(boundary.createdAt(), boundary.id(), pageRequest);
+    }
     return entityRepository.findNextPage(boundary.createdAt(), boundary.id(), pageRequest);
   }
 
   private static List<DonationEntity> getPageDonations(
-      boolean nextPageExists, List<DonationEntity> fetchedEntities, int pageSize) {
+      boolean nextPageExists,
+      List<DonationEntity> fetchedEntities,
+      int pageSize,
+      boolean previousCursorRequest) {
+    if (fetchedEntities.isEmpty()) {
+      return fetchedEntities;
+    }
+
+    if (previousCursorRequest) {
+      List<DonationEntity> entitiesAscending = fetchedEntities;
+      if (nextPageExists) {
+        entitiesAscending = fetchedEntities.subList(0, pageSize);
+      }
+
+      List<DonationEntity> entitiesDescending = new ArrayList<>(entitiesAscending);
+      Collections.reverse(entitiesDescending);
+      return entitiesDescending;
+    }
+
     if (!nextPageExists) {
       return fetchedEntities;
     }
@@ -72,6 +101,6 @@ public class JpaFindDonationsRepository implements FindDonationsRepository {
     }
 
     DonationEntity firstEntity = donations.getFirst();
-    return cursorCodec.encode(firstEntity.getCreatedAt(), firstEntity.getId());
+    return cursorCodec.encodePrevious(firstEntity.getCreatedAt(), firstEntity.getId());
   }
 }

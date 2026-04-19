@@ -1,7 +1,9 @@
 package com.socially.donation.find.infrastructure.right.adapter.persistence;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -24,6 +26,20 @@ class KeysetCursorCodecTest {
             .encodeToString(expectedPayload.getBytes(StandardCharsets.UTF_8));
 
     String encoded = codec.encode(CREATED_AT, ID);
+
+    assertEquals(expectedEncoded, encoded);
+  }
+
+  @Test
+  void
+      encodePrevious_should_call_encodeToString_with_prefixed_and_delimited_received_createdAt_and_id() {
+    String expectedPayload = "P:" + CREATED_AT + "|" + ID;
+    String expectedEncoded =
+        Base64.getUrlEncoder()
+            .withoutPadding()
+            .encodeToString(expectedPayload.getBytes(StandardCharsets.UTF_8));
+
+    String encoded = codec.encodePrevious(CREATED_AT, ID);
 
     assertEquals(expectedEncoded, encoded);
   }
@@ -59,6 +75,30 @@ class KeysetCursorCodecTest {
 
     assertEquals(CREATED_AT, boundary.createdAt());
     assertEquals(ID, boundary.id());
+  }
+
+  @Test
+  void decode_should_strip_previous_prefix_if_received_cursor_is_previous_cursor() {
+    String encoded = codec.encodePrevious(CREATED_AT, ID);
+
+    KeysetCursorCodec.CursorBoundary boundary = codec.decode(encoded);
+
+    assertEquals(CREATED_AT, boundary.createdAt());
+    assertEquals(ID, boundary.id());
+  }
+
+  @Test
+  void isPreviousCursor_should_return_true_if_first_part_starts_by_prefix() {
+    String encoded = codec.encodePrevious(CREATED_AT, ID);
+
+    assertTrue(codec.isPreviousCursor(encoded));
+  }
+
+  @Test
+  void isPreviousCursor_should_return_false_if_first_part_not_starts_by_prefix() {
+    String encoded = codec.encode(CREATED_AT, ID);
+
+    assertFalse(codec.isPreviousCursor(encoded));
   }
 
   @Test

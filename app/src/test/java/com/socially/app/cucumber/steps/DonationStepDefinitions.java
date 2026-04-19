@@ -115,17 +115,12 @@ public class DonationStepDefinitions {
 
   @When("I retrieve next donations page using the returned cursor")
   public void iRetrieveNextDonationsPageUsingTheReturnedCursor() throws Exception {
-    String responseBody = mvcResult.getResponse().getContentAsString();
-    JsonNode root = objectMapper.readTree(responseBody);
-    lastCursor = root.path("page").path("nextCursor").asText();
-    assertThat(lastCursor).isNotBlank();
+    retrieveDonationsPageUsingReturnedCursor("nextCursor");
+  }
 
-    var request = get("/api/donations").param("cursor", lastCursor);
-    if (lastPageSize != null) {
-      request = request.param("size", String.valueOf(lastPageSize));
-    }
-
-    mvcResult = mockMvc.perform(request).andReturn();
+  @When("I retrieve previous donations page using the returned cursor")
+  public void iRetrievePreviousDonationsPageUsingTheReturnedCursor() throws Exception {
+    retrieveDonationsPageUsingReturnedCursor("previousCursor");
   }
 
   @And("I record this donation as donation {int}")
@@ -178,6 +173,20 @@ public class DonationStepDefinitions {
 
   private String expectedDonationId(int donationNumber) {
     return donationNumber == 1 ? firstDonationId : secondDonationId;
+  }
+
+  private void retrieveDonationsPageUsingReturnedCursor(String cursorFieldName) throws Exception {
+    String responseBody = mvcResult.getResponse().getContentAsString();
+    JsonNode root = objectMapper.readTree(responseBody);
+    lastCursor = root.path("page").path(cursorFieldName).asText();
+    assertThat(lastCursor).isNotBlank();
+
+    var request = get("/api/donations").param("cursor", lastCursor);
+    if (lastPageSize != null) {
+      request = request.param("size", String.valueOf(lastPageSize));
+    }
+
+    mvcResult = mockMvc.perform(request).andReturn();
   }
 
   private void assertMvcItemsContainDonationIds(String... expectedIds) throws Exception {

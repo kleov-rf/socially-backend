@@ -43,6 +43,10 @@ Feature: Donation management
     Then the response status should be 200
     And the response should include pagination metadata
     And the next page should include donation id of donation 1
+    When I retrieve previous donations page using the returned cursor
+    Then the response status should be 200
+    And the response should include pagination metadata
+    And the current page should include donation id of donation 2
 
   Scenario: Create a donation, delete it, and fail to retrieve it afterwards
     Given I have a donation with random id, title "School Supplies Fund" and description "Raising money for notebooks and backpacks"
