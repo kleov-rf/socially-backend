@@ -275,6 +275,7 @@ class JpaFindDonationsRepositoryTest {
     Page<Donation> result = sut.find(query);
 
     assertEquals("previous-cursor", result.metadata().previousCursor());
+    assertTrue(result.metadata().hasPrevious());
   }
 
   @Test
@@ -292,6 +293,7 @@ class JpaFindDonationsRepositoryTest {
     Page<Donation> result = sut.find(query);
 
     assertNull(result.metadata().previousCursor());
+    assertFalse(result.metadata().hasPrevious());
   }
 
   @Test
@@ -308,6 +310,7 @@ class JpaFindDonationsRepositoryTest {
     Page<Donation> result = sut.find(query);
 
     assertNull(result.metadata().previousCursor());
+    assertFalse(result.metadata().hasPrevious());
   }
 
   @Test

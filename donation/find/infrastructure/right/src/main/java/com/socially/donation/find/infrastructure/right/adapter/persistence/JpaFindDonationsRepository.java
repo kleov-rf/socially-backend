@@ -32,8 +32,10 @@ public class JpaFindDonationsRepository implements FindDonationsRepository {
 
     String nextCursor = getNextCursor(nextPageExists, pageEntities);
     String previousCursor = getPreviousCursor(paginationCriteria.cursor(), pageEntities);
+    boolean previousPageExists = Objects.nonNull(previousCursor);
     List<Donation> donations = pageEntities.stream().map(entityMapper::toDomain).toList();
-    Metadata metadata = Metadata.create(nextCursor, previousCursor, nextPageExists, pageSize);
+    Metadata metadata =
+        Metadata.create(nextCursor, previousCursor, nextPageExists, previousPageExists, pageSize);
 
     return Page.create(donations, metadata);
   }

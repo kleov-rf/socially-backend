@@ -8,21 +8,34 @@ public final class Metadata {
   private final String nextCursor;
   private final String previousCursor;
   private final boolean hasNext;
+  private final boolean hasPrevious;
   private final int size;
 
   public static Metadata create(
-      String nextCursor, String previousCursor, Boolean hasNext, Integer size) {
-    validate(nextCursor, hasNext, size);
+      String nextCursor,
+      String previousCursor,
+      Boolean hasNext,
+      Boolean hasPrevious,
+      Integer size) {
+    validate(nextCursor, previousCursor, hasNext, hasPrevious, size);
     return new Metadata(
-        normalizeCursor(nextCursor), normalizeCursor(previousCursor), hasNext, size);
+        normalizeCursor(nextCursor), normalizeCursor(previousCursor), hasNext, hasPrevious, size);
   }
 
-  private static void validate(String nextCursor, Boolean hasNext, Integer size) {
+  private static void validate(
+      String nextCursor,
+      String previousCursor,
+      Boolean hasNext,
+      Boolean hasPrevious,
+      Integer size) {
     if (size <= 0) {
       throw new IllegalArgumentException("Size must be greater than zero");
     }
     if (hasNext && normalizeCursor(nextCursor) == null) {
       throw new IllegalArgumentException("Next cursor is required when hasNext is true");
+    }
+    if (hasPrevious && normalizeCursor(previousCursor) == null) {
+      throw new IllegalArgumentException("Previous cursor is required when hasPrevious is true");
     }
   }
 
@@ -43,6 +56,10 @@ public final class Metadata {
 
   public boolean hasNext() {
     return hasNext;
+  }
+
+  public boolean hasPrevious() {
+    return hasPrevious;
   }
 
   public int size() {

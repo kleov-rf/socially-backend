@@ -28,6 +28,7 @@ class PageResponseMapperTest {
   private static final String NEXT_CURSOR = "next-cursor";
   private static final String PREVIOUS_CURSOR = "previous-cursor";
   private static final boolean HAS_NEXT = true;
+  private static final boolean HAS_PREVIOUS = true;
   private static final int PAGE_SIZE = 20;
 
   @Mock private FindDonationResponseMapper donationResponseMapper;
@@ -87,6 +88,16 @@ class PageResponseMapperTest {
   }
 
   @Test
+  void toResponse_should_map_metadata_has_previous() {
+    FindDonationDto donationDto = givenDonationDto();
+    when(donationResponseMapper.toResponse(donationDto)).thenReturn(givenDonationResponse());
+
+    var result = mapper.toResponse(givenPage(donationDto));
+
+    assertEquals(HAS_PREVIOUS, result.page().hasPrevious());
+  }
+
+  @Test
   void toResponse_should_map_metadata_size() {
     FindDonationDto donationDto = givenDonationDto();
     when(donationResponseMapper.toResponse(donationDto)).thenReturn(givenDonationResponse());
@@ -112,6 +123,7 @@ class PageResponseMapperTest {
 
   private Page<FindDonationDto> givenPage(FindDonationDto donationDto) {
     return Page.create(
-        List.of(donationDto), Metadata.create(NEXT_CURSOR, PREVIOUS_CURSOR, HAS_NEXT, PAGE_SIZE));
+        List.of(donationDto),
+        Metadata.create(NEXT_CURSOR, PREVIOUS_CURSOR, HAS_NEXT, HAS_PREVIOUS, PAGE_SIZE));
   }
 }

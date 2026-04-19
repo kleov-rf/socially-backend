@@ -23,6 +23,7 @@ public class PageResponseMapper {
             page.metadata().nextCursor(),
             page.metadata().previousCursor(),
             page.metadata().hasNext(),
+            page.metadata().hasPrevious(),
             page.metadata().size());
 
     return new PageResponse<>(items, metadata);

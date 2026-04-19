@@ -42,7 +42,7 @@ class FindDonationsQueryHandlerTest {
     FindDonationsQuery query =
         new FindDonationsQuery(PaginationCriteria.create(null, PaginationCriteria.DEFAULT_SIZE));
     when(donationRepository.find(query.paginationCriteria()))
-        .thenReturn(Page.create(List.of(), Metadata.create(null, null, false, 20)));
+        .thenReturn(Page.create(List.of(), Metadata.create(null, null, false, false, 20)));
 
     handler.execute(query);
 
@@ -70,7 +70,7 @@ class FindDonationsQueryHandlerTest {
         .thenReturn(
             Page.create(
                 List.of(firstDonation, secondDonation),
-                Metadata.create("next-cursor", null, true, 10)));
+                Metadata.create("next-cursor", null, true, false, 10)));
 
     handler.execute(query);
 
@@ -98,7 +98,8 @@ class FindDonationsQueryHandlerTest {
     when(donationRepository.find(query.paginationCriteria()))
         .thenReturn(
             Page.create(
-                List.of(donation), Metadata.create("next-cursor", "previous-cursor", true, 10)));
+                List.of(donation),
+                Metadata.create("next-cursor", "previous-cursor", true, true, 10)));
     when(donationDtoMapper.fromDomain(donation)).thenReturn(mappedDto);
 
     Page<FindDonationDto> result = handler.execute(query);
@@ -126,7 +127,8 @@ class FindDonationsQueryHandlerTest {
     when(donationRepository.find(query.paginationCriteria()))
         .thenReturn(
             Page.create(
-                List.of(donation), Metadata.create("next-cursor", "previous-cursor", true, 10)));
+                List.of(donation),
+                Metadata.create("next-cursor", "previous-cursor", true, true, 10)));
     when(donationDtoMapper.fromDomain(donation)).thenReturn(mappedDto);
 
     Page<FindDonationDto> result = handler.execute(query);
@@ -134,6 +136,7 @@ class FindDonationsQueryHandlerTest {
     assertEquals("next-cursor", result.metadata().nextCursor());
     assertEquals("previous-cursor", result.metadata().previousCursor());
     assertTrue(result.metadata().hasNext());
+    assertTrue(result.metadata().hasPrevious());
     assertEquals(10, result.metadata().size());
   }
 }
