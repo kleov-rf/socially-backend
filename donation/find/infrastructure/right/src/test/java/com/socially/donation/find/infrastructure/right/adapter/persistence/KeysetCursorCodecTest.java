@@ -71,7 +71,7 @@ class KeysetCursorCodecTest {
   void decode_should_return_cursor_boundary_with_correct_values() {
     String encoded = codec.encode(CREATED_AT, ID);
 
-    KeysetCursorCodec.CursorBoundary boundary = codec.decode(encoded);
+    KeysetCursor boundary = codec.decode(encoded);
 
     assertEquals(CREATED_AT, boundary.createdAt());
     assertEquals(ID, boundary.id());
@@ -81,7 +81,7 @@ class KeysetCursorCodecTest {
   void decode_should_strip_previous_prefix_if_received_cursor_is_previous_cursor() {
     String encoded = codec.encodePrevious(CREATED_AT, ID);
 
-    KeysetCursorCodec.CursorBoundary boundary = codec.decode(encoded);
+    KeysetCursor boundary = codec.decode(encoded);
 
     assertEquals(CREATED_AT, boundary.createdAt());
     assertEquals(ID, boundary.id());
@@ -115,7 +115,7 @@ class KeysetCursorCodecTest {
   void decode_should_return_same_encoded_values_round_trip() {
     String firstEncoded = codec.encode(CREATED_AT, ID);
 
-    KeysetCursorCodec.CursorBoundary boundary = codec.decode(firstEncoded);
+    KeysetCursor boundary = codec.decode(firstEncoded);
     String secondEncoded = codec.encode(boundary.createdAt(), boundary.id());
 
     assertEquals(firstEncoded, secondEncoded);

@@ -27,14 +27,14 @@ public class KeysetCursorCodec {
         .encodeToString(payload.getBytes(StandardCharsets.UTF_8));
   }
 
-  public CursorBoundary decode(String encodedCursor) {
+  public KeysetCursor decode(String encodedCursor) {
     try {
       String[] parts = decodePayloadParts(encodedCursor);
 
       String createdAtPart = parts[0];
       String idPart = parts[1];
 
-      return new CursorBoundary(
+      return new KeysetCursor(
           Instant.parse(stripPreviousPrefix(createdAtPart)), UUID.fromString(idPart));
     } catch (DateTimeParseException exception) {
       throw new IllegalArgumentException("Cursor is malformed", exception);
@@ -62,6 +62,4 @@ public class KeysetCursorCodec {
     }
     return createdAtPart;
   }
-
-  public record CursorBoundary(Instant createdAt, UUID id) {}
 }

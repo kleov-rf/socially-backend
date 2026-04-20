@@ -53,7 +53,7 @@ public class JpaFindDonationsRepository implements FindDonationsRepository {
       return entityRepository.findByOrderByCreatedAtDescIdDesc(pageRequest);
     }
 
-    KeysetCursorCodec.CursorBoundary boundary = cursorCodec.decode(cursor);
+    KeysetCursor boundary = cursorCodec.decode(cursor);
     if (previousCursorRequest) {
       return entityRepository.findPreviousPage(boundary.createdAt(), boundary.id(), pageRequest);
     }
