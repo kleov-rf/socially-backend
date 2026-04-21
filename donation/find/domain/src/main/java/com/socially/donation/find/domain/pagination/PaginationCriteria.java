@@ -1,6 +1,7 @@
 package com.socially.donation.find.domain.pagination;
 
 import java.util.Objects;
+import java.util.Set;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 
@@ -8,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public final class PaginationCriteria {
   public static final int DEFAULT_SIZE = 5;
-  public static final int MAX_SIZE = 100;
+  private static final Set<Integer> ALLOWED_SIZES = Set.of(5, 10, 20);
 
   private final String cursor;
   private final int size;
@@ -22,8 +23,8 @@ public final class PaginationCriteria {
   }
 
   private static void validate(Integer size) {
-    if (size <= 0 || size > MAX_SIZE) {
-      throw new IllegalArgumentException("Size must be between 1 and " + MAX_SIZE);
+    if (!ALLOWED_SIZES.contains(size)) {
+      throw new IllegalArgumentException("Size must be one of: 5, 10, 20");
     }
   }
 

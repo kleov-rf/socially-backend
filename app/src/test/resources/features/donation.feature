@@ -34,7 +34,8 @@ Feature: Donation management
     When I create the donation
     Then the response status should be 201
     And I record this donation as donation 2
-    When I retrieve donations with page size 1
+    And I create 4 additional donations for pagination
+    When I retrieve donations with page size 5
     Then the response status should be 200
     And the current page should include donation id of donation 2
     And the response should include pagination metadata

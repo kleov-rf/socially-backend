@@ -47,11 +47,11 @@ class JpaFindDonationsRepositoryTest {
 
   @Test
   void find_should_call_to_decode_cursor() {
-    PaginationCriteria query = PaginationCriteria.create("cursor-token", 2);
+    PaginationCriteria query = PaginationCriteria.create("cursor-token", 5);
     UUID boundaryId = Id.from(DONATION_ID_1).value();
     KeysetCursor boundary = new KeysetCursor(CREATED_AT, boundaryId);
     when(cursorCodec.decode("cursor-token")).thenReturn(boundary);
-    when(entityRepository.findNextPage(CREATED_AT, boundaryId, PageRequest.of(0, 3)))
+    when(entityRepository.findNextPage(CREATED_AT, boundaryId, PageRequest.of(0, 6)))
         .thenReturn(List.of());
 
     sut.find(query);
@@ -61,7 +61,7 @@ class JpaFindDonationsRepositoryTest {
 
   @Test
   void find_should_call_find_previous_page_when_cursor_is_previous_cursor() {
-    int pageSize = 2;
+    int pageSize = 5;
     PaginationCriteria query = PaginationCriteria.create("previous-cursor-token", pageSize);
     UUID boundaryId = Id.from(DONATION_ID_1).value();
     KeysetCursor boundary = new KeysetCursor(CREATED_AT, boundaryId);
@@ -78,33 +78,65 @@ class JpaFindDonationsRepositoryTest {
 
   @Test
   void find_should_return_items_in_descending_creation_date_when_cursor_is_previous_cursor() {
-    int pageSize = 2;
+    int pageSize = 5;
     PaginationCriteria query = PaginationCriteria.create("previous-cursor-token", pageSize);
     UUID boundaryId = Id.from(DONATION_ID_3).value();
     KeysetCursor boundary = new KeysetCursor(CREATED_AT.minusSeconds(3), boundaryId);
     DonationEntity oldestEntity =
-        donationEntity(DONATION_ID_1, "Title 1", "Description 1", CREATED_AT.minusSeconds(2));
+        donationEntity(
+            "550e8400-e29b-41d4-a716-446655440010",
+            "Title 1",
+            "Description 1",
+            CREATED_AT.minusSeconds(4));
+    DonationEntity secondOldestEntity =
+        donationEntity(
+            "550e8400-e29b-41d4-a716-446655440011",
+            "Title 2",
+            "Description 2",
+            CREATED_AT.minusSeconds(3));
     DonationEntity middleEntity =
-        donationEntity(DONATION_ID_2, "Title 2", "Description 2", CREATED_AT.minusSeconds(1));
+        donationEntity(
+            "550e8400-e29b-41d4-a716-446655440012",
+            "Title 3",
+            "Description 3",
+            CREATED_AT.minusSeconds(2));
+    DonationEntity secondNewestEntity =
+        donationEntity(
+            "550e8400-e29b-41d4-a716-446655440013",
+            "Title 4",
+            "Description 4",
+            CREATED_AT.minusSeconds(1));
     DonationEntity newestEntity =
-        donationEntity(DONATION_ID_3, "Title 3", "Description 3", CREATED_AT);
+        donationEntity(
+            "550e8400-e29b-41d4-a716-446655440014", "Title 5", "Description 5", CREATED_AT);
     when(cursorCodec.isPreviousCursor("previous-cursor-token")).thenReturn(true);
     when(cursorCodec.decode("previous-cursor-token")).thenReturn(boundary);
     when(entityRepository.findPreviousPage(
             CREATED_AT.minusSeconds(3), boundaryId, PageRequest.of(0, pageSize + 1)))
-        .thenReturn(List.of(oldestEntity, middleEntity, newestEntity));
+        .thenReturn(
+            List.of(
+                oldestEntity, secondOldestEntity, middleEntity, secondNewestEntity, newestEntity));
     when(entityMapper.toDomain(oldestEntity)).thenReturn(mappedDonation(oldestEntity));
+    when(entityMapper.toDomain(secondOldestEntity)).thenReturn(mappedDonation(secondOldestEntity));
     when(entityMapper.toDomain(middleEntity)).thenReturn(mappedDonation(middleEntity));
+    when(entityMapper.toDomain(secondNewestEntity)).thenReturn(mappedDonation(secondNewestEntity));
+    when(entityMapper.toDomain(newestEntity)).thenReturn(mappedDonation(newestEntity));
 
     Page<Donation> result = sut.find(query);
 
     assertEquals(
-        List.of(mappedDonation(middleEntity), mappedDonation(oldestEntity)), result.items());
+        List.of(
+            mappedDonation(newestEntity),
+            mappedDonation(secondNewestEntity),
+            mappedDonation(middleEntity),
+            mappedDonation(secondOldestEntity),
+            mappedDonation(oldestEntity)),
+        result.items());
   }
 
   @Test
   void find_should_call_find_with_cursor_and_one_more_item_than_given_page_size() {
-    int pageSize = 2;
+    int pageSize = 5;
     PaginationCriteria query = PaginationCriteria.create("cursor-token", pageSize);
     UUID boundaryId = Id.from(DONATION_ID_1).value();
     KeysetCursor boundary = new KeysetCursor(CREATED_AT, boundaryId);
@@ -119,7 +151,7 @@ class JpaFindDonationsRepositoryTest {
 
   @Test
   void find_should_call_find_with_one_more_item_than_given_page_size_when_cursor_not_present() {
-    int pageSize = 2;
+    int pageSize = 5;
     PaginationCriteria query = PaginationCriteria.create(null, pageSize);
     when(entityRepository.findByOrderByCreatedAtDescIdDesc(PageRequest.of(0, pageSize + 1)))
         .thenReturn(List.of());
@@ -131,12 +163,12 @@ class JpaFindDonationsRepositoryTest {
 
   @Test
   void find_should_map_total_count() {
-    PaginationCriteria query = PaginationCriteria.create(null, 2);
+    PaginationCriteria query = PaginationCriteria.create(null, 5);
     DonationEntity firstEntity =
         donationEntity(DONATION_ID_1, "Title 1", "Description 1", CREATED_AT);
     DonationEntity secondEntity =
         donationEntity(DONATION_ID_2, "Title 2", "Description 2", CREATED_AT.minusSeconds(1));
-    when(entityRepository.findByOrderByCreatedAtDescIdDesc(PageRequest.of(0, 3)))
+    when(entityRepository.findByOrderByCreatedAtDescIdDesc(PageRequest.of(0, 6)))
         .thenReturn(List.of(firstEntity, secondEntity));
     when(entityMapper.toDomain(firstEntity)).thenReturn(mappedDonation(firstEntity));
     when(entityMapper.toDomain(secondEntity)).thenReturn(mappedDonation(secondEntity));
@@ -149,33 +181,60 @@ class JpaFindDonationsRepositoryTest {
 
   @Test
   void find_should_call_to_encode_last_item_if_next_page_exists() {
-    PaginationCriteria query = PaginationCriteria.create(null, 2);
+    PaginationCriteria query = PaginationCriteria.create(null, 5);
     DonationEntity firstEntity =
         donationEntity(DONATION_ID_1, "Title 1", "Description 1", CREATED_AT);
     DonationEntity secondEntity =
         donationEntity(DONATION_ID_2, "Title 2", "Description 2", CREATED_AT.minusSeconds(1));
+    DonationEntity thirdEntity =
+        donationEntity(
+            "550e8400-e29b-41d4-a716-446655440020",
+            "Title 3",
+            "Description 3",
+            CREATED_AT.minusSeconds(2));
+    DonationEntity fourthEntity =
+        donationEntity(
+            "550e8400-e29b-41d4-a716-446655440021",
+            "Title 4",
+            "Description 4",
+            CREATED_AT.minusSeconds(3));
+    DonationEntity fifthEntity =
+        donationEntity(
+            "550e8400-e29b-41d4-a716-446655440022",
+            "Title 5",
+            "Description 5",
+            CREATED_AT.minusSeconds(4));
     DonationEntity overflowEntity =
-        donationEntity(DONATION_ID_3, "Title 3", "Description 3", CREATED_AT.minusSeconds(2));
-    when(entityRepository.findByOrderByCreatedAtDescIdDesc(PageRequest.of(0, 3)))
-        .thenReturn(List.of(firstEntity, secondEntity, overflowEntity));
+        donationEntity(
+            "550e8400-e29b-41d4-a716-446655440023",
+            "Title 6",
+            "Description 6",
+            CREATED_AT.minusSeconds(5));
+    when(entityRepository.findByOrderByCreatedAtDescIdDesc(PageRequest.of(0, 6)))
+        .thenReturn(
+            List.of(
+                firstEntity, secondEntity, thirdEntity, fourthEntity, fifthEntity, overflowEntity));
     when(entityMapper.toDomain(firstEntity)).thenReturn(mappedDonation(firstEntity));
     when(entityMapper.toDomain(secondEntity)).thenReturn(mappedDonation(secondEntity));
-    when(cursorCodec.encode(secondEntity.getCreatedAt(), secondEntity.getId()))
+    when(entityMapper.toDomain(thirdEntity)).thenReturn(mappedDonation(thirdEntity));
+    when(entityMapper.toDomain(fourthEntity)).thenReturn(mappedDonation(fourthEntity));
+    when(entityMapper.toDomain(fifthEntity)).thenReturn(mappedDonation(fifthEntity));
+    when(cursorCodec.encode(fifthEntity.getCreatedAt(), fifthEntity.getId()))
         .thenReturn("next-cursor");
 
     sut.find(query);
 
-    verify(cursorCodec).encode(secondEntity.getCreatedAt(), secondEntity.getId());
+    verify(cursorCodec).encode(fifthEntity.getCreatedAt(), fifthEntity.getId());
   }
 
   @Test
   void find_should_not_call_to_encode_if_next_page_does_not_exist() {
-    PaginationCriteria query = PaginationCriteria.create(null, 2);
+    PaginationCriteria query = PaginationCriteria.create(null, 5);
     DonationEntity firstEntity =
         donationEntity(DONATION_ID_1, "Title 1", "Description 1", CREATED_AT);
     DonationEntity secondEntity =
         donationEntity(DONATION_ID_2, "Title 2", "Description 2", CREATED_AT.minusSeconds(1));
-    when(entityRepository.findByOrderByCreatedAtDescIdDesc(PageRequest.of(0, 3)))
+    when(entityRepository.findByOrderByCreatedAtDescIdDesc(PageRequest.of(0, 6)))
         .thenReturn(List.of(firstEntity, secondEntity));
     when(entityMapper.toDomain(firstEntity)).thenReturn(mappedDonation(firstEntity));
     when(entityMapper.toDomain(secondEntity)).thenReturn(mappedDonation(secondEntity));
@@ -188,7 +247,7 @@ class JpaFindDonationsRepositoryTest {
 
   @Test
   void find_should_call_to_encode_first_item_if_cursor_is_present_and_donations_found() {
-    PaginationCriteria query = PaginationCriteria.create("cursor-token", 2);
+    PaginationCriteria query = PaginationCriteria.create("cursor-token", 5);
     UUID boundaryId = Id.from(DONATION_ID_3).value();
     KeysetCursor boundary = new KeysetCursor(CREATED_AT.minusSeconds(3), boundaryId);
     DonationEntity firstEntity =
@@ -211,8 +270,8 @@ class JpaFindDonationsRepositoryTest {
 
   @Test
   void find_should_return_empty_list_if_no_donations_were_found() {
-    PaginationCriteria query = PaginationCriteria.create(null, 2);
-    when(entityRepository.findByOrderByCreatedAtDescIdDesc(PageRequest.of(0, 3)))
+    PaginationCriteria query = PaginationCriteria.create(null, 5);
+    when(entityRepository.findByOrderByCreatedAtDescIdDesc(PageRequest.of(0, 6)))
         .thenReturn(List.of());
 
     Page<Donation> result = sut.find(query);
@@ -222,12 +281,12 @@ class JpaFindDonationsRepositoryTest {
 
   @Test
   void find_should_return_null_previous_and_next_cursors_if_no_donations_were_found() {
-    PaginationCriteria query = PaginationCriteria.create("previous-cursor-token", 2);
+    PaginationCriteria query = PaginationCriteria.create("previous-cursor-token", 5);
     UUID boundaryId = Id.from(DONATION_ID_1).value();
     KeysetCursor boundary = new KeysetCursor(CREATED_AT, boundaryId);
     when(cursorCodec.isPreviousCursor("previous-cursor-token")).thenReturn(true);
     when(cursorCodec.decode("previous-cursor-token")).thenReturn(boundary);
-    when(entityRepository.findPreviousPage(CREATED_AT, boundaryId, PageRequest.of(0, 3)))
+    when(entityRepository.findPreviousPage(CREATED_AT, boundaryId, PageRequest.of(0, 6)))
         .thenReturn(List.of());
 
     Page<Donation> result = sut.find(query);
@@ -238,38 +297,68 @@ class JpaFindDonationsRepositoryTest {
 
   @Test
   void find_should_call_entity_mapper_with_given_page_size_times_the_retrieved_items() {
-    PaginationCriteria query = PaginationCriteria.create(null, 2);
+    PaginationCriteria query = PaginationCriteria.create(null, 5);
     DonationEntity firstEntity =
         donationEntity(DONATION_ID_1, "Title 1", "Description 1", CREATED_AT);
     DonationEntity secondEntity =
         donationEntity(DONATION_ID_2, "Title 2", "Description 2", CREATED_AT.minusSeconds(1));
+    DonationEntity thirdEntity =
+        donationEntity(
+            "550e8400-e29b-41d4-a716-446655440024",
+            "Title 3",
+            "Description 3",
+            CREATED_AT.minusSeconds(2));
+    DonationEntity fourthEntity =
+        donationEntity(
+            "550e8400-e29b-41d4-a716-446655440025",
+            "Title 4",
+            "Description 4",
+            CREATED_AT.minusSeconds(3));
+    DonationEntity fifthEntity =
+        donationEntity(
+            "550e8400-e29b-41d4-a716-446655440026",
+            "Title 5",
+            "Description 5",
+            CREATED_AT.minusSeconds(4));
     DonationEntity overflowEntity =
-        donationEntity(DONATION_ID_3, "Title 3", "Description 3", CREATED_AT.minusSeconds(2));
-    when(entityRepository.findByOrderByCreatedAtDescIdDesc(PageRequest.of(0, 3)))
-        .thenReturn(List.of(firstEntity, secondEntity, overflowEntity));
+        donationEntity(
+            "550e8400-e29b-41d4-a716-446655440027",
+            "Title 6",
+            "Description 6",
+            CREATED_AT.minusSeconds(5));
+    when(entityRepository.findByOrderByCreatedAtDescIdDesc(PageRequest.of(0, 6)))
+        .thenReturn(
+            List.of(
+                firstEntity, secondEntity, thirdEntity, fourthEntity, fifthEntity, overflowEntity));
     when(entityMapper.toDomain(firstEntity)).thenReturn(mappedDonation(firstEntity));
     when(entityMapper.toDomain(secondEntity)).thenReturn(mappedDonation(secondEntity));
-    when(cursorCodec.encode(secondEntity.getCreatedAt(), secondEntity.getId()))
+    when(entityMapper.toDomain(thirdEntity)).thenReturn(mappedDonation(thirdEntity));
+    when(entityMapper.toDomain(fourthEntity)).thenReturn(mappedDonation(fourthEntity));
+    when(entityMapper.toDomain(fifthEntity)).thenReturn(mappedDonation(fifthEntity));
+    when(cursorCodec.encode(fifthEntity.getCreatedAt(), fifthEntity.getId()))
         .thenReturn("next-cursor");
 
     sut.find(query);
 
     verify(entityMapper).toDomain(firstEntity);
     verify(entityMapper).toDomain(secondEntity);
+    verify(entityMapper).toDomain(thirdEntity);
+    verify(entityMapper).toDomain(fourthEntity);
+    verify(entityMapper).toDomain(fifthEntity);
     verify(entityMapper, never()).toDomain(overflowEntity);
-    verify(entityMapper, times(2)).toDomain(any(DonationEntity.class));
+    verify(entityMapper, times(5)).toDomain(any(DonationEntity.class));
   }
 
   @Test
   void find_should_return_mapped_donations() {
-    PaginationCriteria query = PaginationCriteria.create(null, 2);
+    PaginationCriteria query = PaginationCriteria.create(null, 5);
     DonationEntity firstEntity =
         donationEntity(DONATION_ID_1, "Title 1", "Description 1", CREATED_AT);
     DonationEntity secondEntity =
         donationEntity(DONATION_ID_2, "Title 2", "Description 2", CREATED_AT.minusSeconds(1));
     Donation mappedFirstDonation = mappedDonation(firstEntity);
     Donation mappedSecondDonation = mappedDonation(secondEntity);
-    when(entityRepository.findByOrderByCreatedAtDescIdDesc(PageRequest.of(0, 3)))
+    when(entityRepository.findByOrderByCreatedAtDescIdDesc(PageRequest.of(0, 6)))
         .thenReturn(List.of(firstEntity, secondEntity));
     when(entityMapper.toDomain(firstEntity)).thenReturn(mappedFirstDonation);
     when(entityMapper.toDomain(secondEntity)).thenReturn(mappedSecondDonation);
@@ -281,18 +370,45 @@ class JpaFindDonationsRepositoryTest {
 
   @Test
   void find_should_return_metadata_next_cursor_when_next_page_exists() {
-    PaginationCriteria query = PaginationCriteria.create(null, 2);
+    PaginationCriteria query = PaginationCriteria.create(null, 5);
     DonationEntity firstEntity =
         donationEntity(DONATION_ID_1, "Title 1", "Description 1", CREATED_AT);
     DonationEntity secondEntity =
         donationEntity(DONATION_ID_2, "Title 2", "Description 2", CREATED_AT.minusSeconds(1));
+    DonationEntity thirdEntity =
+        donationEntity(
+            "550e8400-e29b-41d4-a716-446655440028",
+            "Title 3",
+            "Description 3",
+            CREATED_AT.minusSeconds(2));
+    DonationEntity fourthEntity =
+        donationEntity(
+            "550e8400-e29b-41d4-a716-446655440029",
+            "Title 4",
+            "Description 4",
+            CREATED_AT.minusSeconds(3));
+    DonationEntity fifthEntity =
+        donationEntity(
+            "550e8400-e29b-41d4-a716-446655440030",
+            "Title 5",
+            "Description 5",
+            CREATED_AT.minusSeconds(4));
     DonationEntity overflowEntity =
-        donationEntity(DONATION_ID_3, "Title 3", "Description 3", CREATED_AT.minusSeconds(2));
-    when(entityRepository.findByOrderByCreatedAtDescIdDesc(PageRequest.of(0, 3)))
-        .thenReturn(List.of(firstEntity, secondEntity, overflowEntity));
+        donationEntity(
+            "550e8400-e29b-41d4-a716-446655440031",
+            "Title 6",
+            "Description 6",
+            CREATED_AT.minusSeconds(5));
+    when(entityRepository.findByOrderByCreatedAtDescIdDesc(PageRequest.of(0, 6)))
+        .thenReturn(
+            List.of(
+                firstEntity, secondEntity, thirdEntity, fourthEntity, fifthEntity, overflowEntity));
     when(entityMapper.toDomain(firstEntity)).thenReturn(mappedDonation(firstEntity));
     when(entityMapper.toDomain(secondEntity)).thenReturn(mappedDonation(secondEntity));
-    when(cursorCodec.encode(secondEntity.getCreatedAt(), secondEntity.getId()))
+    when(entityMapper.toDomain(thirdEntity)).thenReturn(mappedDonation(thirdEntity));
+    when(entityMapper.toDomain(fourthEntity)).thenReturn(mappedDonation(fourthEntity));
+    when(entityMapper.toDomain(fifthEntity)).thenReturn(mappedDonation(fifthEntity));
+    when(cursorCodec.encode(fifthEntity.getCreatedAt(), fifthEntity.getId()))
         .thenReturn("next-cursor");
 
     Page<Donation> result = sut.find(query);
@@ -302,12 +418,12 @@ class JpaFindDonationsRepositoryTest {
 
   @Test
   void find_should_return_metadata_next_cursor_as_null_when_next_page_not_exists() {
-    PaginationCriteria query = PaginationCriteria.create(null, 2);
+    PaginationCriteria query = PaginationCriteria.create(null, 5);
     DonationEntity firstEntity =
         donationEntity(DONATION_ID_1, "Title 1", "Description 1", CREATED_AT);
     DonationEntity secondEntity =
         donationEntity(DONATION_ID_2, "Title 2", "Description 2", CREATED_AT.minusSeconds(1));
-    when(entityRepository.findByOrderByCreatedAtDescIdDesc(PageRequest.of(0, 3)))
+    when(entityRepository.findByOrderByCreatedAtDescIdDesc(PageRequest.of(0, 6)))
         .thenReturn(List.of(firstEntity, secondEntity));
     when(entityMapper.toDomain(firstEntity)).thenReturn(mappedDonation(firstEntity));
     when(entityMapper.toDomain(secondEntity)).thenReturn(mappedDonation(secondEntity));
@@ -319,18 +435,45 @@ class JpaFindDonationsRepositoryTest {
 
   @Test
   void find_should_return_metadata_next_page_exists() {
-    PaginationCriteria query = PaginationCriteria.create(null, 2);
+    PaginationCriteria query = PaginationCriteria.create(null, 5);
     DonationEntity firstEntity =
         donationEntity(DONATION_ID_1, "Title 1", "Description 1", CREATED_AT);
     DonationEntity secondEntity =
         donationEntity(DONATION_ID_2, "Title 2", "Description 2", CREATED_AT.minusSeconds(1));
+    DonationEntity thirdEntity =
+        donationEntity(
+            "550e8400-e29b-41d4-a716-446655440032",
+            "Title 3",
+            "Description 3",
+            CREATED_AT.minusSeconds(2));
+    DonationEntity fourthEntity =
+        donationEntity(
+            "550e8400-e29b-41d4-a716-446655440033",
+            "Title 4",
+            "Description 4",
+            CREATED_AT.minusSeconds(3));
+    DonationEntity fifthEntity =
+        donationEntity(
+            "550e8400-e29b-41d4-a716-446655440034",
+            "Title 5",
+            "Description 5",
+            CREATED_AT.minusSeconds(4));
     DonationEntity overflowEntity =
-        donationEntity(DONATION_ID_3, "Title 3", "Description 3", CREATED_AT.minusSeconds(2));
-    when(entityRepository.findByOrderByCreatedAtDescIdDesc(PageRequest.of(0, 3)))
-        .thenReturn(List.of(firstEntity, secondEntity, overflowEntity));
+        donationEntity(
+            "550e8400-e29b-41d4-a716-446655440035",
+            "Title 6",
+            "Description 6",
+            CREATED_AT.minusSeconds(5));
+    when(entityRepository.findByOrderByCreatedAtDescIdDesc(PageRequest.of(0, 6)))
+        .thenReturn(
+            List.of(
+                firstEntity, secondEntity, thirdEntity, fourthEntity, fifthEntity, overflowEntity));
     when(entityMapper.toDomain(firstEntity)).thenReturn(mappedDonation(firstEntity));
     when(entityMapper.toDomain(secondEntity)).thenReturn(mappedDonation(secondEntity));
-    when(cursorCodec.encode(secondEntity.getCreatedAt(), secondEntity.getId()))
+    when(entityMapper.toDomain(thirdEntity)).thenReturn(mappedDonation(thirdEntity));
+    when(entityMapper.toDomain(fourthEntity)).thenReturn(mappedDonation(fourthEntity));
+    when(entityMapper.toDomain(fifthEntity)).thenReturn(mappedDonation(fifthEntity));
+    when(cursorCodec.encode(fifthEntity.getCreatedAt(), fifthEntity.getId()))
         .thenReturn("next-cursor");
 
     Page<Donation> result = sut.find(query);
@@ -341,7 +484,7 @@ class JpaFindDonationsRepositoryTest {
   @Test
   void
       find_should_return_metadata_next_cursor_when_cursor_is_previous_cursor_and_donations_found() {
-    PaginationCriteria query = PaginationCriteria.create("previous-cursor-token", 2);
+    PaginationCriteria query = PaginationCriteria.create("previous-cursor-token", 5);
     UUID boundaryId = Id.from(DONATION_ID_3).value();
     KeysetCursor boundary = new KeysetCursor(CREATED_AT.minusSeconds(3), boundaryId);
     DonationEntity firstEntity =
@@ -366,7 +509,7 @@ class JpaFindDonationsRepositoryTest {
 
   @Test
   void find_should_return_metadata_previous_cursor_when_cursor_is_present() {
-    PaginationCriteria query = PaginationCriteria.create("cursor-token", 2);
+    PaginationCriteria query = PaginationCriteria.create("cursor-token", 5);
     UUID boundaryId = Id.from(DONATION_ID_3).value();
     KeysetCursor boundary = new KeysetCursor(CREATED_AT.minusSeconds(3), boundaryId);
     DonationEntity firstEntity =
@@ -391,7 +534,7 @@ class JpaFindDonationsRepositoryTest {
   @Test
   void
       find_should_return_metadata_previous_cursor_as_null_when_cursor_is_previous_and_no_newer_page_exists() {
-    PaginationCriteria query = PaginationCriteria.create("previous-cursor-token", 2);
+    PaginationCriteria query = PaginationCriteria.create("previous-cursor-token", 5);
     UUID boundaryId = Id.from(DONATION_ID_3).value();
     KeysetCursor boundary = new KeysetCursor(CREATED_AT.minusSeconds(3), boundaryId);
     DonationEntity firstEntity =
@@ -416,12 +559,12 @@ class JpaFindDonationsRepositoryTest {
 
   @Test
   void find_should_return_metadata_previous_cursor_as_null_when_cursor_is_not_present() {
-    PaginationCriteria query = PaginationCriteria.create(null, 2);
+    PaginationCriteria query = PaginationCriteria.create(null, 5);
     DonationEntity firstEntity =
         donationEntity(DONATION_ID_1, "Title 1", "Description 1", CREATED_AT);
     DonationEntity secondEntity =
         donationEntity(DONATION_ID_2, "Title 2", "Description 2", CREATED_AT.minusSeconds(1));
-    when(entityRepository.findByOrderByCreatedAtDescIdDesc(PageRequest.of(0, 3)))
+    when(entityRepository.findByOrderByCreatedAtDescIdDesc(PageRequest.of(0, 6)))
         .thenReturn(List.of(firstEntity, secondEntity));
     when(entityMapper.toDomain(firstEntity)).thenReturn(mappedDonation(firstEntity));
     when(entityMapper.toDomain(secondEntity)).thenReturn(mappedDonation(secondEntity));
@@ -434,7 +577,7 @@ class JpaFindDonationsRepositoryTest {
 
   @Test
   void find_should_return_metadata_previous_cursor_as_null_when_no_donations_found() {
-    PaginationCriteria query = PaginationCriteria.create("cursor-token", 2);
+    PaginationCriteria query = PaginationCriteria.create("cursor-token", 5);
     UUID boundaryId = Id.from(DONATION_ID_3).value();
     KeysetCursor boundary = new KeysetCursor(CREATED_AT.minusSeconds(3), boundaryId);
     when(cursorCodec.decode("cursor-token")).thenReturn(boundary);
@@ -450,19 +593,19 @@ class JpaFindDonationsRepositoryTest {
 
   @Test
   void find_should_return_metadata_received_page_size() {
-    PaginationCriteria query = PaginationCriteria.create(null, 2);
+    PaginationCriteria query = PaginationCriteria.create(null, 5);
     DonationEntity firstEntity =
         donationEntity(DONATION_ID_1, "Title 1", "Description 1", CREATED_AT);
     DonationEntity secondEntity =
         donationEntity(DONATION_ID_2, "Title 2", "Description 2", CREATED_AT.minusSeconds(1));
-    when(entityRepository.findByOrderByCreatedAtDescIdDesc(PageRequest.of(0, 3)))
+    when(entityRepository.findByOrderByCreatedAtDescIdDesc(PageRequest.of(0, 6)))
         .thenReturn(List.of(firstEntity, secondEntity));
     when(entityMapper.toDomain(firstEntity)).thenReturn(mappedDonation(firstEntity));
     when(entityMapper.toDomain(secondEntity)).thenReturn(mappedDonation(secondEntity));
 
     Page<Donation> result = sut.find(query);
 
-    assertEquals(2, result.metadata().size());
+    assertEquals(5, result.metadata().size());
     assertFalse(result.metadata().hasNext());
   }
 

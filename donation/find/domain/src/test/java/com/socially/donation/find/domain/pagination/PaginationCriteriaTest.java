@@ -17,16 +17,17 @@ class PaginationCriteriaTest {
   }
 
   @Test
-  void create_should_throw_exception_if_size_is_less_or_equal_to_zero() {
-    assertThrows(IllegalArgumentException.class, () -> PaginationCriteria.create(null, 0));
-    assertThrows(IllegalArgumentException.class, () -> PaginationCriteria.create(null, -1));
-  }
+  void create_should_throw_exception_if_size_is_not_allowed() {
+    IllegalArgumentException zeroSizeException =
+        assertThrows(IllegalArgumentException.class, () -> PaginationCriteria.create(null, 0));
+    IllegalArgumentException oneSizeException =
+        assertThrows(IllegalArgumentException.class, () -> PaginationCriteria.create(null, 1));
+    IllegalArgumentException twentyFiveSizeException =
+        assertThrows(IllegalArgumentException.class, () -> PaginationCriteria.create(null, 25));
 
-  @Test
-  void create_should_throw_exception_if_size_is_greater_than_max_size() {
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> PaginationCriteria.create(null, PaginationCriteria.MAX_SIZE + 1));
+    assertEquals("Size must be one of: 5, 10, 20", zeroSizeException.getMessage());
+    assertEquals("Size must be one of: 5, 10, 20", oneSizeException.getMessage());
+    assertEquals("Size must be one of: 5, 10, 20", twentyFiveSizeException.getMessage());
   }
 
   @Test
@@ -35,5 +36,12 @@ class PaginationCriteriaTest {
 
     assertNull(criteria.cursor());
     assertEquals(10, criteria.size());
+  }
+
+  @Test
+  void create_should_accept_all_allowed_sizes() {
+    assertEquals(5, PaginationCriteria.create(null, 5).size());
+    assertEquals(10, PaginationCriteria.create(null, 10).size());
+    assertEquals(20, PaginationCriteria.create(null, 20).size());
   }
 }

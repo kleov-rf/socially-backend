@@ -135,6 +135,28 @@ public class DonationStepDefinitions {
     }
   }
 
+  @And("I create {int} additional donations for pagination")
+  public void iCreateAdditionalDonationsForPagination(int donationsCount) throws Exception {
+    for (int index = 0; index < donationsCount; index++) {
+      String generatedId = UUID.randomUUID().toString();
+      String generatedTitle = "Pagination Donation " + index;
+      String generatedDescription = "Pagination description " + index;
+      String requestBody =
+          objectMapper.writeValueAsString(
+              new CreateDonationRequest(generatedId, generatedTitle, generatedDescription));
+
+      MvcResult createResult =
+          mockMvc
+              .perform(
+                  post("/api/donations")
+                      .contentType(MediaType.APPLICATION_JSON)
+                      .content(requestBody))
+              .andReturn();
+
+      assertThat(createResult.getResponse().getStatus()).isEqualTo(201);
+    }
+  }
+
   @And("the donations page should include both recorded donation ids")
   public void theDonationsPageShouldIncludeBothRecordedDonationIds() throws Exception {
     assertMvcItemsContainDonationIds(firstDonationId, secondDonationId);
