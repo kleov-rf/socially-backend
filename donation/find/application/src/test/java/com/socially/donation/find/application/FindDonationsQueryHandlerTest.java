@@ -42,7 +42,8 @@ class FindDonationsQueryHandlerTest {
     FindDonationsQuery query =
         new FindDonationsQuery(PaginationCriteria.create(null, PaginationCriteria.DEFAULT_SIZE));
     when(donationRepository.find(query.paginationCriteria()))
-        .thenReturn(Page.create(List.of(), Metadata.create(null, null, 20)));
+        .thenReturn(
+            Page.create(List.of(), Metadata.create(null, null, PaginationCriteria.DEFAULT_SIZE)));
 
     handler.execute(query);
 

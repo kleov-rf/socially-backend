@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public final class PaginationCriteria {
-  public static final int DEFAULT_SIZE = 20;
+  public static final int DEFAULT_SIZE = 5;
   public static final int MAX_SIZE = 100;
 
   private final String cursor;

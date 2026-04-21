@@ -14,7 +14,7 @@ class FindDonationsQueryMapperTest {
   void toQuery_should_use_default_size_when_size_is_null() {
     var query = mapper.toQuery(null, null);
 
-    assertEquals(20, query.paginationCriteria().size());
+    assertEquals(5, query.paginationCriteria().size());
     assertNull(query.paginationCriteria().cursor());
   }
 
