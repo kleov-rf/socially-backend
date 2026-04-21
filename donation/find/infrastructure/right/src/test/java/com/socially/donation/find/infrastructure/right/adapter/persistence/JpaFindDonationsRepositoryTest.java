@@ -321,6 +321,32 @@ class JpaFindDonationsRepositoryTest {
   }
 
   @Test
+  void
+      find_should_return_metadata_next_cursor_when_cursor_is_previous_cursor_and_donations_found() {
+    PaginationCriteria query = PaginationCriteria.create("previous-cursor-token", 2);
+    UUID boundaryId = Id.from(DONATION_ID_3).value();
+    KeysetCursor boundary = new KeysetCursor(CREATED_AT.minusSeconds(3), boundaryId);
+    DonationEntity firstEntity =
+        donationEntity(DONATION_ID_1, "Title 1", "Description 1", CREATED_AT);
+    DonationEntity secondEntity =
+        donationEntity(DONATION_ID_2, "Title 2", "Description 2", CREATED_AT.minusSeconds(1));
+    when(cursorCodec.isPreviousCursor("previous-cursor-token")).thenReturn(true);
+    when(cursorCodec.decode("previous-cursor-token")).thenReturn(boundary);
+    when(entityRepository.findPreviousPage(
+            boundary.createdAt(), boundary.id(), PageRequest.of(0, query.size() + 1)))
+        .thenReturn(List.of(firstEntity, secondEntity));
+    when(entityMapper.toDomain(firstEntity)).thenReturn(mappedDonation(firstEntity));
+    when(entityMapper.toDomain(secondEntity)).thenReturn(mappedDonation(secondEntity));
+    when(cursorCodec.encode(firstEntity.getCreatedAt(), firstEntity.getId()))
+        .thenReturn("next-cursor");
+
+    Page<Donation> result = sut.find(query);
+
+    assertEquals("next-cursor", result.metadata().nextCursor());
+    assertTrue(result.metadata().hasNext());
+  }
+
+  @Test
   void find_should_return_metadata_previous_cursor_when_cursor_is_present() {
     PaginationCriteria query = PaginationCriteria.create("cursor-token", 2);
     UUID boundaryId = Id.from(DONATION_ID_3).value();
@@ -342,6 +368,32 @@ class JpaFindDonationsRepositoryTest {
 
     assertEquals("previous-cursor", result.metadata().previousCursor());
     assertTrue(result.metadata().hasPrevious());
+  }
+
+  @Test
+  void
+      find_should_return_metadata_previous_cursor_as_null_when_cursor_is_previous_and_no_newer_page_exists() {
+    PaginationCriteria query = PaginationCriteria.create("previous-cursor-token", 2);
+    UUID boundaryId = Id.from(DONATION_ID_3).value();
+    KeysetCursor boundary = new KeysetCursor(CREATED_AT.minusSeconds(3), boundaryId);
+    DonationEntity firstEntity =
+        donationEntity(DONATION_ID_1, "Title 1", "Description 1", CREATED_AT);
+    DonationEntity secondEntity =
+        donationEntity(DONATION_ID_2, "Title 2", "Description 2", CREATED_AT.minusSeconds(1));
+    when(cursorCodec.isPreviousCursor("previous-cursor-token")).thenReturn(true);
+    when(cursorCodec.decode("previous-cursor-token")).thenReturn(boundary);
+    when(entityRepository.findPreviousPage(
+            boundary.createdAt(), boundary.id(), PageRequest.of(0, query.size() + 1)))
+        .thenReturn(List.of(firstEntity, secondEntity));
+    when(entityMapper.toDomain(firstEntity)).thenReturn(mappedDonation(firstEntity));
+    when(entityMapper.toDomain(secondEntity)).thenReturn(mappedDonation(secondEntity));
+    when(cursorCodec.encode(firstEntity.getCreatedAt(), firstEntity.getId()))
+        .thenReturn("next-cursor");
+
+    Page<Donation> result = sut.find(query);
+
+    assertNull(result.metadata().previousCursor());
+    assertFalse(result.metadata().hasPrevious());
   }
 
   @Test

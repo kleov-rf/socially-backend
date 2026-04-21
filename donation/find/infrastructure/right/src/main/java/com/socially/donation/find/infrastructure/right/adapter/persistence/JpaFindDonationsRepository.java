@@ -32,13 +32,17 @@ public class JpaFindDonationsRepository implements FindDonationsRepository {
             && cursorCodec.isPreviousCursor(paginationCriteria.cursor());
     List<DonationEntity> entities =
         fetchEntities(paginationCriteria.cursor(), pageSize + 1, previousCursorRequest);
-    boolean nextPageExists = entities.size() > pageSize;
+    boolean overflowItemsExist = entities.size() > pageSize;
 
     List<DonationEntity> pageEntities =
-        getPageDonations(nextPageExists, entities, pageSize, previousCursorRequest);
+        getPageDonations(overflowItemsExist, entities, pageSize, previousCursorRequest);
 
-    String nextCursor = getNextCursor(nextPageExists, pageEntities);
-    String previousCursor = getPreviousCursor(paginationCriteria.cursor(), pageEntities);
+    String nextCursor =
+        getNextCursor(
+            paginationCriteria.cursor(), previousCursorRequest, overflowItemsExist, pageEntities);
+    String previousCursor =
+        getPreviousCursor(
+            paginationCriteria.cursor(), previousCursorRequest, overflowItemsExist, pageEntities);
     List<Donation> donations = pageEntities.stream().map(entityMapper::toDomain).toList();
     Metadata metadata = Metadata.create(nextCursor, previousCursor, pageSize);
 
@@ -86,8 +90,20 @@ public class JpaFindDonationsRepository implements FindDonationsRepository {
     return fetchedEntities.subList(0, pageSize);
   }
 
-  private String getNextCursor(boolean nextPageExists, List<DonationEntity> donations) {
-    if (!nextPageExists) {
+  private String getNextCursor(
+      String cursor,
+      boolean previousCursorRequest,
+      boolean overflowItemsExist,
+      List<DonationEntity> donations) {
+    if (donations.isEmpty()) {
+      return null;
+    }
+
+    if (previousCursorRequest && Objects.isNull(cursor)) {
+      return null;
+    }
+
+    if (!previousCursorRequest && !overflowItemsExist) {
       return null;
     }
 
@@ -95,8 +111,16 @@ public class JpaFindDonationsRepository implements FindDonationsRepository {
     return cursorCodec.encode(lastEntity.getCreatedAt(), lastEntity.getId());
   }
 
-  private String getPreviousCursor(String cursor, List<DonationEntity> donations) {
+  private String getPreviousCursor(
+      String cursor,
+      boolean previousCursorRequest,
+      boolean overflowItemsExist,
+      List<DonationEntity> donations) {
     if (Objects.isNull(cursor) || donations.isEmpty()) {
+      return null;
+    }
+
+    if (previousCursorRequest && !overflowItemsExist) {
       return null;
     }
 
