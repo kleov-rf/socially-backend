@@ -42,6 +42,7 @@ public class DonationStepDefinitions {
   private String secondDonationId;
   private String lastCursor;
   private Integer lastPageSize;
+  private String lastOrder;
 
   @Before
   public void resetScenarioState() {
@@ -50,6 +51,7 @@ public class DonationStepDefinitions {
     secondDonationId = null;
     lastCursor = null;
     lastPageSize = null;
+    lastOrder = null;
   }
 
   @Given("I have a donation with random id, title {string} and description {string}")
@@ -103,12 +105,21 @@ public class DonationStepDefinitions {
   @When("I retrieve all donations")
   public void iRetrieveAllDonations() throws Exception {
     lastPageSize = null;
+    lastOrder = null;
     mvcResult = mockMvc.perform(get("/api/donations")).andReturn();
+  }
+
+  @When("I retrieve all donations with order {string}")
+  public void iRetrieveAllDonationsWithOrder(String order) throws Exception {
+    lastPageSize = null;
+    lastOrder = order;
+    mvcResult = mockMvc.perform(get("/api/donations").param("order", order)).andReturn();
   }
 
   @When("I retrieve donations with page size {int}")
   public void iRetrieveDonationsWithPageSize(int size) throws Exception {
     lastPageSize = size;
+    lastOrder = null;
     mvcResult =
         mockMvc.perform(get("/api/donations").param("size", String.valueOf(size))).andReturn();
   }
@@ -208,8 +219,22 @@ public class DonationStepDefinitions {
     if (lastPageSize != null) {
       request = request.param("size", String.valueOf(lastPageSize));
     }
+    if (lastOrder != null) {
+      request = request.param("order", lastOrder);
+    }
 
     mvcResult = mockMvc.perform(request).andReturn();
+  }
+
+  @And("the first donation in the current page should be donation {int}")
+  public void theFirstDonationInTheCurrentPageShouldBeDonation(int donationNumber)
+      throws Exception {
+    String responseBody = mvcResult.getResponse().getContentAsString();
+    JsonNode root = objectMapper.readTree(responseBody);
+    JsonNode items = root.path("items");
+    assertThat(items.isArray()).isTrue();
+    assertThat(items.size()).isGreaterThan(0);
+    assertThat(items.get(0).path("id").asText()).isEqualTo(expectedDonationId(donationNumber));
   }
 
   private void assertMvcItemsContainDonationIds(String... expectedIds) throws Exception {

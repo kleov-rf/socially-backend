@@ -49,6 +49,19 @@ Feature: Donation management
     And the response should include pagination metadata
     And the current page should include donation id of donation 2
 
+  Scenario: Retrieve donations with oldest first order
+    Given I have a donation with random id, title "Oldest donation" and description "Oldest order item"
+    When I create the donation
+    Then the response status should be 201
+    And I record this donation as donation 1
+    Given I have a donation with random id, title "Newest donation" and description "Newest order item"
+    When I create the donation
+    Then the response status should be 201
+    And I record this donation as donation 2
+    When I retrieve all donations with order "oldest_first"
+    Then the response status should be 200
+    And the first donation in the current page should be donation 1
+
   Scenario: Create a donation, delete it, and fail to retrieve it afterwards
     Given I have a donation with random id, title "School Supplies Fund" and description "Raising money for notebooks and backpacks"
     When I create the donation
