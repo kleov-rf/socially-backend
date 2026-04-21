@@ -153,6 +153,7 @@ public class DonationStepDefinitions {
     assertThat(page.has("hasNext")).isTrue();
     assertThat(page.has("hasPrevious")).isTrue();
     assertThat(page.has("size")).isTrue();
+    assertThat(page.has("totalCount")).isTrue();
   }
 
   @And("the pagination should indicate a next page")

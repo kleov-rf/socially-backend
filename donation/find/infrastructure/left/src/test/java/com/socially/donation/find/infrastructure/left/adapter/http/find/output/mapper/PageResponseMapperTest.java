@@ -28,6 +28,7 @@ class PageResponseMapperTest {
   private static final String NEXT_CURSOR = "next-cursor";
   private static final String PREVIOUS_CURSOR = "previous-cursor";
   private static final int PAGE_SIZE = 20;
+  private static final long TOTAL_COUNT = 123L;
 
   @Mock private FindDonationResponseMapper donationResponseMapper;
 
@@ -105,6 +106,16 @@ class PageResponseMapperTest {
     assertEquals(PAGE_SIZE, result.page().size());
   }
 
+  @Test
+  void toResponse_should_map_metadata_total_count() {
+    FindDonationDto donationDto = givenDonationDto();
+    when(donationResponseMapper.toResponse(donationDto)).thenReturn(givenDonationResponse());
+
+    var result = mapper.toResponse(givenPage(donationDto));
+
+    assertEquals(TOTAL_COUNT, result.page().totalCount());
+  }
+
   private FindDonationDto givenDonationDto() {
     return new FindDonationDto(
         Id.from(DONATION_ID),
@@ -121,6 +132,7 @@ class PageResponseMapperTest {
 
   private Page<FindDonationDto> givenPage(FindDonationDto donationDto) {
     return Page.create(
-        List.of(donationDto), Metadata.create(NEXT_CURSOR, PREVIOUS_CURSOR, PAGE_SIZE));
+        List.of(donationDto),
+        Metadata.create(NEXT_CURSOR, PREVIOUS_CURSOR, PAGE_SIZE, TOTAL_COUNT));
   }
 }

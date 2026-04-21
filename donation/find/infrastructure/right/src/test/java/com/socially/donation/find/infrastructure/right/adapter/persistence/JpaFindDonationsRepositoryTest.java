@@ -130,6 +130,24 @@ class JpaFindDonationsRepositoryTest {
   }
 
   @Test
+  void find_should_map_total_count() {
+    PaginationCriteria query = PaginationCriteria.create(null, 2);
+    DonationEntity firstEntity =
+        donationEntity(DONATION_ID_1, "Title 1", "Description 1", CREATED_AT);
+    DonationEntity secondEntity =
+        donationEntity(DONATION_ID_2, "Title 2", "Description 2", CREATED_AT.minusSeconds(1));
+    when(entityRepository.findByOrderByCreatedAtDescIdDesc(PageRequest.of(0, 3)))
+        .thenReturn(List.of(firstEntity, secondEntity));
+    when(entityMapper.toDomain(firstEntity)).thenReturn(mappedDonation(firstEntity));
+    when(entityMapper.toDomain(secondEntity)).thenReturn(mappedDonation(secondEntity));
+    when(entityRepository.count()).thenReturn(50L);
+
+    Page<Donation> result = sut.find(query);
+
+    assertEquals(50L, result.metadata().totalCount());
+  }
+
+  @Test
   void find_should_call_to_encode_last_item_if_next_page_exists() {
     PaginationCriteria query = PaginationCriteria.create(null, 2);
     DonationEntity firstEntity =

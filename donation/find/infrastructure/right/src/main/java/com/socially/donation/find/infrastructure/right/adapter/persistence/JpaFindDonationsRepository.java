@@ -27,6 +27,7 @@ public class JpaFindDonationsRepository implements FindDonationsRepository {
   @Override
   public Page<Donation> find(PaginationCriteria paginationCriteria) {
     int pageSize = paginationCriteria.size();
+    long totalCount = entityRepository.count();
     boolean previousCursorRequest =
         Objects.nonNull(paginationCriteria.cursor())
             && cursorCodec.isPreviousCursor(paginationCriteria.cursor());
@@ -44,7 +45,7 @@ public class JpaFindDonationsRepository implements FindDonationsRepository {
         getPreviousCursor(
             paginationCriteria.cursor(), previousCursorRequest, overflowItemsExist, pageEntities);
     List<Donation> donations = pageEntities.stream().map(entityMapper::toDomain).toList();
-    Metadata metadata = Metadata.create(nextCursor, previousCursor, pageSize);
+    Metadata metadata = Metadata.create(nextCursor, previousCursor, pageSize, totalCount);
 
     return Page.create(donations, metadata);
   }

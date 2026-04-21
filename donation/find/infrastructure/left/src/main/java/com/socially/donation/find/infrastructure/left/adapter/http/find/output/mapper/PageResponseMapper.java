@@ -24,7 +24,8 @@ public class PageResponseMapper {
             page.metadata().previousCursor(),
             page.metadata().hasNext(),
             page.metadata().hasPrevious(),
-            page.metadata().size());
+            page.metadata().size(),
+            page.metadata().totalCount());
 
     return new PageResponse<>(items, metadata);
   }

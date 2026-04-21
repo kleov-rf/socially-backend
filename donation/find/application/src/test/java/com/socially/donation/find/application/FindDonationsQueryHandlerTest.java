@@ -43,7 +43,8 @@ class FindDonationsQueryHandlerTest {
         new FindDonationsQuery(PaginationCriteria.create(null, PaginationCriteria.DEFAULT_SIZE));
     when(donationRepository.find(query.paginationCriteria()))
         .thenReturn(
-            Page.create(List.of(), Metadata.create(null, null, PaginationCriteria.DEFAULT_SIZE)));
+            Page.create(
+                List.of(), Metadata.create(null, null, PaginationCriteria.DEFAULT_SIZE, 0L)));
 
     handler.execute(query);
 
@@ -70,7 +71,8 @@ class FindDonationsQueryHandlerTest {
     when(donationRepository.find(query.paginationCriteria()))
         .thenReturn(
             Page.create(
-                List.of(firstDonation, secondDonation), Metadata.create("next-cursor", null, 10)));
+                List.of(firstDonation, secondDonation),
+                Metadata.create("next-cursor", null, 10, 100L)));
 
     handler.execute(query);
 
@@ -97,7 +99,8 @@ class FindDonationsQueryHandlerTest {
     FindDonationsQuery query = new FindDonationsQuery(PaginationCriteria.create(null, 10));
     when(donationRepository.find(query.paginationCriteria()))
         .thenReturn(
-            Page.create(List.of(donation), Metadata.create("next-cursor", "previous-cursor", 10)));
+            Page.create(
+                List.of(donation), Metadata.create("next-cursor", "previous-cursor", 10, 100L)));
     when(donationDtoMapper.fromDomain(donation)).thenReturn(mappedDto);
 
     Page<FindDonationDto> result = handler.execute(query);
@@ -124,7 +127,8 @@ class FindDonationsQueryHandlerTest {
     FindDonationsQuery query = new FindDonationsQuery(PaginationCriteria.create(null, 10));
     when(donationRepository.find(query.paginationCriteria()))
         .thenReturn(
-            Page.create(List.of(donation), Metadata.create("next-cursor", "previous-cursor", 10)));
+            Page.create(
+                List.of(donation), Metadata.create("next-cursor", "previous-cursor", 10, 100L)));
     when(donationDtoMapper.fromDomain(donation)).thenReturn(mappedDto);
 
     Page<FindDonationDto> result = handler.execute(query);
@@ -134,5 +138,6 @@ class FindDonationsQueryHandlerTest {
     assertTrue(result.metadata().hasNext());
     assertTrue(result.metadata().hasPrevious());
     assertEquals(10, result.metadata().size());
+    assertEquals(100L, result.metadata().totalCount());
   }
 }
