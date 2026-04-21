@@ -1,5 +1,6 @@
 package com.socially.donation.find.infrastructure.right.adapter.persistence;
 
+import com.socially.donation.find.domain.pagination.DonationsOrder;
 import com.socially.donation.find.domain.pagination.Metadata;
 import com.socially.donation.find.domain.pagination.Page;
 import com.socially.donation.find.domain.pagination.PaginationCriteria;
@@ -32,7 +33,11 @@ public class JpaFindDonationsRepository implements FindDonationsRepository {
         Objects.nonNull(paginationCriteria.cursor())
             && cursorCodec.isPreviousCursor(paginationCriteria.cursor());
     List<DonationEntity> entities =
-        fetchEntities(paginationCriteria.cursor(), pageSize + 1, previousCursorRequest);
+        fetchEntities(
+            paginationCriteria.cursor(),
+            pageSize + 1,
+            previousCursorRequest,
+            paginationCriteria.order());
     boolean overflowItemsExist = entities.size() > pageSize;
 
     List<DonationEntity> pageEntities =
@@ -51,16 +56,27 @@ public class JpaFindDonationsRepository implements FindDonationsRepository {
   }
 
   private List<DonationEntity> fetchEntities(
-      String cursor, int fetchSize, boolean previousCursorRequest) {
+      String cursor, int fetchSize, boolean previousCursorRequest, DonationsOrder order) {
     PageRequest pageRequest = PageRequest.of(0, fetchSize);
 
     if (Objects.isNull(cursor)) {
+      if (order == DonationsOrder.OLDEST_FIRST) {
+        return entityRepository.findByOrderByCreatedAtAscIdAsc(pageRequest);
+      }
       return entityRepository.findByOrderByCreatedAtDescIdDesc(pageRequest);
     }
 
     KeysetCursor boundary = cursorCodec.decode(cursor);
     if (previousCursorRequest) {
+      if (order == DonationsOrder.OLDEST_FIRST) {
+        return entityRepository.findPreviousPageForOldestFirst(
+            boundary.createdAt(), boundary.id(), pageRequest);
+      }
       return entityRepository.findPreviousPage(boundary.createdAt(), boundary.id(), pageRequest);
+    }
+    if (order == DonationsOrder.OLDEST_FIRST) {
+      return entityRepository.findNextPageForOldestFirst(
+          boundary.createdAt(), boundary.id(), pageRequest);
     }
     return entityRepository.findNextPage(boundary.createdAt(), boundary.id(), pageRequest);
   }

@@ -5,29 +5,24 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 class PaginationCriteriaTest {
 
   @Test
-  void create_should_create_criteria() {
-    PaginationCriteria criteria = PaginationCriteria.create("cursor-token", 10);
+  void create_should_default_order_to_newest_first() {
+    PaginationCriteria criteria = PaginationCriteria.create(null, 5);
 
-    assertEquals("cursor-token", criteria.cursor());
-    assertEquals(10, criteria.size());
+    assertEquals(DonationsOrder.NEWEST_FIRST, criteria.order());
   }
 
   @Test
-  void create_should_throw_exception_if_size_is_not_allowed() {
-    IllegalArgumentException zeroSizeException =
-        assertThrows(IllegalArgumentException.class, () -> PaginationCriteria.create(null, 0));
-    IllegalArgumentException oneSizeException =
-        assertThrows(IllegalArgumentException.class, () -> PaginationCriteria.create(null, 1));
-    IllegalArgumentException twentyFiveSizeException =
-        assertThrows(IllegalArgumentException.class, () -> PaginationCriteria.create(null, 25));
+  void create_should_create_criteria_with_received_cursor() {
+    PaginationCriteria criteria =
+        PaginationCriteria.create("cursor-token", 10, DonationsOrder.OLDEST_FIRST);
 
-    assertEquals("Size must be one of: 5, 10, 20", zeroSizeException.getMessage());
-    assertEquals("Size must be one of: 5, 10, 20", oneSizeException.getMessage());
-    assertEquals("Size must be one of: 5, 10, 20", twentyFiveSizeException.getMessage());
+    assertEquals("cursor-token", criteria.cursor());
   }
 
   @Test
@@ -35,13 +30,49 @@ class PaginationCriteriaTest {
     PaginationCriteria criteria = PaginationCriteria.create("   ", 10);
 
     assertNull(criteria.cursor());
+  }
+
+  @ParameterizedTest
+  @CsvSource({"5", "10", "20"})
+  void create_should_create_criteria_with_received_size(Integer size) {
+    PaginationCriteria criteria =
+        PaginationCriteria.create("cursor-token", size, DonationsOrder.OLDEST_FIRST);
+
+    assertEquals(size, criteria.size());
+  }
+
+  @Test
+  void create_should_create_criteria_with_received_order() {
+    PaginationCriteria criteria =
+        PaginationCriteria.create("cursor-token", 10, DonationsOrder.OLDEST_FIRST);
+
+    assertEquals(DonationsOrder.OLDEST_FIRST, criteria.order());
+  }
+
+  @Test
+  void create_should_throw_exception_if_size_is_not_allowed() {
+    assertThrows(IllegalArgumentException.class, () -> PaginationCriteria.create(null, 0));
+  }
+
+  @Test
+  void cursor_should_return_cursor() {
+    PaginationCriteria criteria = PaginationCriteria.create("cursor-token", 5);
+
+    assertEquals("cursor-token", criteria.cursor());
+  }
+
+  @Test
+  void size_should_return_size() {
+    PaginationCriteria criteria = PaginationCriteria.create("cursor-token", 10);
+
     assertEquals(10, criteria.size());
   }
 
   @Test
-  void create_should_accept_all_allowed_sizes() {
-    assertEquals(5, PaginationCriteria.create(null, 5).size());
-    assertEquals(10, PaginationCriteria.create(null, 10).size());
-    assertEquals(20, PaginationCriteria.create(null, 20).size());
+  void order_should_return_order() {
+    PaginationCriteria criteria =
+        PaginationCriteria.create("cursor-token", 10, DonationsOrder.OLDEST_FIRST);
+
+    assertEquals(DonationsOrder.OLDEST_FIRST, criteria.order());
   }
 }

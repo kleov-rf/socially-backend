@@ -10,6 +10,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.socially.donation.find.domain.pagination.DonationsOrder;
 import com.socially.donation.find.domain.pagination.Page;
 import com.socially.donation.find.domain.pagination.PaginationCriteria;
 import com.socially.donation.kernel.domain.entity.Donation;
@@ -159,6 +160,55 @@ class JpaFindDonationsRepositoryTest {
     sut.find(query);
 
     verify(entityRepository).findByOrderByCreatedAtDescIdDesc(PageRequest.of(0, pageSize + 1));
+  }
+
+  @Test
+  void find_should_call_oldest_first_query_when_oldest_order_is_requested() {
+    int pageSize = 5;
+    PaginationCriteria query =
+        PaginationCriteria.create(null, pageSize, DonationsOrder.OLDEST_FIRST);
+    when(entityRepository.findByOrderByCreatedAtAscIdAsc(PageRequest.of(0, pageSize + 1)))
+        .thenReturn(List.of());
+
+    sut.find(query);
+
+    verify(entityRepository).findByOrderByCreatedAtAscIdAsc(PageRequest.of(0, pageSize + 1));
+  }
+
+  @Test
+  void find_should_call_oldest_first_next_page_query_when_next_cursor_is_requested() {
+    int pageSize = 5;
+    PaginationCriteria query =
+        PaginationCriteria.create("cursor-token", pageSize, DonationsOrder.OLDEST_FIRST);
+    UUID boundaryId = Id.from(DONATION_ID_1).value();
+    KeysetCursor boundary = new KeysetCursor(CREATED_AT, boundaryId);
+    when(cursorCodec.decode("cursor-token")).thenReturn(boundary);
+    when(entityRepository.findNextPageForOldestFirst(CREATED_AT, boundaryId, PageRequest.of(0, 6)))
+        .thenReturn(List.of());
+
+    sut.find(query);
+
+    verify(entityRepository)
+        .findNextPageForOldestFirst(CREATED_AT, boundaryId, PageRequest.of(0, pageSize + 1));
+  }
+
+  @Test
+  void find_should_call_oldest_first_previous_page_query_when_previous_cursor_is_requested() {
+    int pageSize = 5;
+    PaginationCriteria query =
+        PaginationCriteria.create("previous-cursor-token", pageSize, DonationsOrder.OLDEST_FIRST);
+    UUID boundaryId = Id.from(DONATION_ID_1).value();
+    KeysetCursor boundary = new KeysetCursor(CREATED_AT, boundaryId);
+    when(cursorCodec.isPreviousCursor("previous-cursor-token")).thenReturn(true);
+    when(cursorCodec.decode("previous-cursor-token")).thenReturn(boundary);
+    when(entityRepository.findPreviousPageForOldestFirst(
+            CREATED_AT, boundaryId, PageRequest.of(0, pageSize + 1)))
+        .thenReturn(List.of());
+
+    sut.find(query);
+
+    verify(entityRepository)
+        .findPreviousPageForOldestFirst(CREATED_AT, boundaryId, PageRequest.of(0, pageSize + 1));
   }
 
   @Test

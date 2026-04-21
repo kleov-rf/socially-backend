@@ -9,17 +9,23 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public final class PaginationCriteria {
   public static final int DEFAULT_SIZE = 5;
+  public static final DonationsOrder DEFAULT_ORDER = DonationsOrder.NEWEST_FIRST;
   private static final Set<Integer> ALLOWED_SIZES = Set.of(5, 10, 20);
 
   private final String cursor;
   private final int size;
+  private final DonationsOrder order;
 
   public static PaginationCriteria create(String cursor, Integer size) {
+    return create(cursor, size, DEFAULT_ORDER);
+  }
+
+  public static PaginationCriteria create(String cursor, Integer size, DonationsOrder order) {
     validate(size);
     if (Objects.nonNull(cursor) && cursor.isBlank()) {
-      return new PaginationCriteria(null, size);
+      return new PaginationCriteria(null, size, order);
     }
-    return new PaginationCriteria(cursor, size);
+    return new PaginationCriteria(cursor, size, order);
   }
 
   private static void validate(Integer size) {
@@ -34,5 +40,9 @@ public final class PaginationCriteria {
 
   public int size() {
     return size;
+  }
+
+  public DonationsOrder order() {
+    return order;
   }
 }

@@ -13,6 +13,8 @@ public interface DonationEntityRepository extends JpaRepository<DonationEntity, 
 
   List<DonationEntity> findByOrderByCreatedAtDescIdDesc(Pageable pageable);
 
+  List<DonationEntity> findByOrderByCreatedAtAscIdAsc(Pageable pageable);
+
   @Query(
       """
       select d
@@ -33,5 +35,27 @@ public interface DonationEntityRepository extends JpaRepository<DonationEntity, 
       order by d.createdAt asc, d.id asc
       """)
   List<DonationEntity> findPreviousPage(
+      @Param("createdAt") Instant createdAt, @Param("id") UUID id, Pageable pageable);
+
+  @Query(
+      """
+      select d
+      from DonationEntity d
+      where d.createdAt > :createdAt
+         or (d.createdAt = :createdAt and d.id > :id)
+      order by d.createdAt asc, d.id asc
+      """)
+  List<DonationEntity> findNextPageForOldestFirst(
+      @Param("createdAt") Instant createdAt, @Param("id") UUID id, Pageable pageable);
+
+  @Query(
+      """
+      select d
+      from DonationEntity d
+      where d.createdAt < :createdAt
+         or (d.createdAt = :createdAt and d.id < :id)
+      order by d.createdAt desc, d.id desc
+      """)
+  List<DonationEntity> findPreviousPageForOldestFirst(
       @Param("createdAt") Instant createdAt, @Param("id") UUID id, Pageable pageable);
 }
