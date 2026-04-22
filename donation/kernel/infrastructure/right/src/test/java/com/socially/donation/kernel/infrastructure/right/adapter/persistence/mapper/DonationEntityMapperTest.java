@@ -1,6 +1,7 @@
 package com.socially.donation.kernel.infrastructure.right.adapter.persistence.mapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import com.socially.donation.kernel.domain.entity.Donation;
 import com.socially.donation.kernel.domain.valueobject.Description;
@@ -33,7 +34,7 @@ class DonationEntityMapperTest {
   private static final Instant ENTITY_CREATED_AT = Instant.parse("2025-01-01T00:00:00Z");
   private static final Instant ENTITY_LAST_UPDATED_AT = Instant.parse("2025-02-01T18:00:00Z");
   private static final DonationEntity ENTITY =
-      new DonationEntity(
+      DonationEntity.create(
           UUID.fromString(DONATION_ID),
           "Entity Title",
           "Entity Description",
@@ -73,6 +74,13 @@ class DonationEntityMapperTest {
     DonationEntity result = donationEntityMapper.toEntity(DONATION);
 
     assertEquals(LAST_UPDATED_AT, result.getLastUpdatedAt());
+  }
+
+  @Test
+  void toEntity_should_map_deleted_at_as_null() {
+    DonationEntity result = donationEntityMapper.toEntity(DONATION);
+
+    assertNull(result.getDeletedAt());
   }
 
   @Test

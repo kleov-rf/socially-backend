@@ -39,7 +39,7 @@ class JpaCreateDonationRepositoryTest {
             CREATED_AT,
             CREATED_AT);
     DonationEntity mappedEntity =
-        new DonationEntity(
+        DonationEntity.create(
             Id.from(DONATION_ID).value(), "Test Title", "Test Description", CREATED_AT, CREATED_AT);
     when(entityMapper.toEntity(donation)).thenReturn(mappedEntity);
 

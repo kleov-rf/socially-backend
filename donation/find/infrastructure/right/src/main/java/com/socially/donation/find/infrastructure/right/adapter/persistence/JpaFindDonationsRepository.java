@@ -114,10 +114,9 @@ public class JpaFindDonationsRepository implements FindDonationsRepository {
 
   private long countDonations(String searchPattern) {
     if (Objects.isNull(searchPattern)) {
-      return entityRepository.count();
+      return entityRepository.countByDeletedAtIsNull();
     }
-    return entityRepository.countByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
-        paginationSafeTerm(searchPattern), paginationSafeTerm(searchPattern));
+    return entityRepository.countBySearchPattern(searchPattern);
   }
 
   private static String toSearchPattern(String query) {
@@ -125,10 +124,6 @@ public class JpaFindDonationsRepository implements FindDonationsRepository {
       return null;
     }
     return "%" + query.toLowerCase(Locale.ROOT) + "%";
-  }
-
-  private static String paginationSafeTerm(String searchPattern) {
-    return searchPattern.substring(1, searchPattern.length() - 1);
   }
 
   private static List<DonationEntity> getPageDonations(

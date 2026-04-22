@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 public final class DonationEntityMapper {
 
   public DonationEntity toEntity(Donation donation) {
-    return new DonationEntity(
+    return DonationEntity.create(
         donation.id().value(),
         donation.title().value(),
         donation.description().value(),

@@ -39,7 +39,7 @@ class JpaUpdateDonationRepositoryTest {
             CREATED_AT,
             CREATED_AT);
     DonationEntity mappedEntity =
-        new DonationEntity(
+        DonationEntity.create(
             Id.from(DONATION_ID).value(),
             "Updated Title",
             "Updated Description",

@@ -29,4 +29,12 @@ public class DonationEntity {
 
   @Column(name = "last_updated_at", nullable = false)
   private Instant lastUpdatedAt;
+
+  @Column(name = "deleted_at")
+  private Instant deletedAt;
+
+  public static DonationEntity create(
+      UUID id, String title, String description, Instant createdAt, Instant lastUpdatedAt) {
+    return new DonationEntity(id, title, description, createdAt, lastUpdatedAt, null);
+  }
 }

@@ -271,7 +271,7 @@ class JpaFindDonationsRepositoryTest {
         .thenReturn(List.of(firstEntity, secondEntity));
     when(entityMapper.toDomain(firstEntity)).thenReturn(mappedDonation(firstEntity));
     when(entityMapper.toDomain(secondEntity)).thenReturn(mappedDonation(secondEntity));
-    when(entityRepository.count()).thenReturn(50L);
+    when(entityRepository.countByDeletedAtIsNull()).thenReturn(50L);
 
     Page<Donation> result = sut.find(query);
 
@@ -710,7 +710,7 @@ class JpaFindDonationsRepositoryTest {
 
   private static DonationEntity donationEntity(
       String id, String title, String description, Instant createdAt) {
-    return new DonationEntity(Id.from(id).value(), title, description, createdAt, createdAt);
+    return DonationEntity.create(Id.from(id).value(), title, description, createdAt, createdAt);
   }
 
   private static Donation mappedDonation(DonationEntity entity) {

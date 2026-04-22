@@ -18,6 +18,6 @@ public class JpaFindDonationByIdRepository implements FindDonationByIdRepository
 
   @Override
   public Optional<Donation> findById(Id id) {
-    return entityRepository.findById(id.value()).map(entityMapper::toDomain);
+    return entityRepository.findByIdAndDeletedAtIsNull(id.value()).map(entityMapper::toDomain);
   }
 }
