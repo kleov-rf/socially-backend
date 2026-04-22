@@ -62,6 +62,19 @@ Feature: Donation management
     Then the response status should be 200
     And the first donation in the current page should be donation 1
 
+  Scenario: Retrieve donations with query filter
+    Given I have a donation with random id, title "School notebooks" and description "Buying books"
+    When I create the donation
+    Then the response status should be 201
+    And I record this donation as donation 1
+    Given I have a donation with random id, title "Food support" and description "Community kitchen"
+    When I create the donation
+    Then the response status should be 201
+    And I record this donation as donation 2
+    When I retrieve all donations with query "note"
+    Then the response status should be 200
+    And the donations page should include only donation id of donation 1
+
   Scenario: Create a donation, delete it, and fail to retrieve it afterwards
     Given I have a donation with random id, title "School Supplies Fund" and description "Raising money for notebooks and backpacks"
     When I create the donation

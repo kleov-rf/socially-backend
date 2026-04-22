@@ -43,6 +43,7 @@ public class DonationStepDefinitions {
   private String lastCursor;
   private Integer lastPageSize;
   private String lastOrder;
+  private String lastQuery;
 
   @Before
   public void resetScenarioState() {
@@ -52,6 +53,7 @@ public class DonationStepDefinitions {
     lastCursor = null;
     lastPageSize = null;
     lastOrder = null;
+    lastQuery = null;
   }
 
   @Given("I have a donation with random id, title {string} and description {string}")
@@ -106,6 +108,7 @@ public class DonationStepDefinitions {
   public void iRetrieveAllDonations() throws Exception {
     lastPageSize = null;
     lastOrder = null;
+    lastQuery = null;
     mvcResult = mockMvc.perform(get("/api/donations")).andReturn();
   }
 
@@ -113,13 +116,23 @@ public class DonationStepDefinitions {
   public void iRetrieveAllDonationsWithOrder(String order) throws Exception {
     lastPageSize = null;
     lastOrder = order;
+    lastQuery = null;
     mvcResult = mockMvc.perform(get("/api/donations").param("order", order)).andReturn();
+  }
+
+  @When("I retrieve all donations with query {string}")
+  public void iRetrieveAllDonationsWithQuery(String query) throws Exception {
+    lastPageSize = null;
+    lastOrder = null;
+    lastQuery = query;
+    mvcResult = mockMvc.perform(get("/api/donations").param("query", query)).andReturn();
   }
 
   @When("I retrieve donations with page size {int}")
   public void iRetrieveDonationsWithPageSize(int size) throws Exception {
     lastPageSize = size;
     lastOrder = null;
+    lastQuery = null;
     mvcResult =
         mockMvc.perform(get("/api/donations").param("size", String.valueOf(size))).andReturn();
   }
@@ -222,6 +235,9 @@ public class DonationStepDefinitions {
     if (lastOrder != null) {
       request = request.param("order", lastOrder);
     }
+    if (lastQuery != null) {
+      request = request.param("query", lastQuery);
+    }
 
     mvcResult = mockMvc.perform(request).andReturn();
   }
@@ -244,6 +260,17 @@ public class DonationStepDefinitions {
     assertThat(items.isArray()).isTrue();
 
     assertThat(items.findValuesAsText("id")).contains(expectedIds);
+  }
+
+  @And("the donations page should include only donation id of donation {int}")
+  public void theDonationsPageShouldIncludeOnlyDonationIdOfDonation(int donationNumber)
+      throws Exception {
+    String responseBody = mvcResult.getResponse().getContentAsString();
+    JsonNode root = objectMapper.readTree(responseBody);
+    JsonNode items = root.path("items");
+    assertThat(items.isArray()).isTrue();
+    assertThat(items.size()).isEqualTo(1);
+    assertThat(items.findValuesAsText("id")).containsExactly(expectedDonationId(donationNumber));
   }
 
   @And("the donation should have the expected id, title {string} and description {string}")
