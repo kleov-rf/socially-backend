@@ -15,17 +15,35 @@ public final class PaginationCriteria {
   private final String cursor;
   private final int size;
   private final DonationsOrder order;
+  private final String query;
 
   public static PaginationCriteria create(String cursor, Integer size) {
-    return create(cursor, size, DEFAULT_ORDER);
+    return create(cursor, size, DEFAULT_ORDER, null);
   }
 
   public static PaginationCriteria create(String cursor, Integer size, DonationsOrder order) {
+    return create(cursor, size, order, null);
+  }
+
+  public static PaginationCriteria create(
+      String cursor, Integer size, DonationsOrder order, String query) {
     validate(size);
+    String normalizedQuery = normalizeQuery(query);
     if (Objects.nonNull(cursor) && cursor.isBlank()) {
-      return new PaginationCriteria(null, size, order);
+      return new PaginationCriteria(null, size, order, normalizedQuery);
     }
-    return new PaginationCriteria(cursor, size, order);
+    return new PaginationCriteria(cursor, size, order, normalizedQuery);
+  }
+
+  private static String normalizeQuery(String query) {
+    if (Objects.isNull(query)) {
+      return null;
+    }
+    String trimmed = query.trim();
+    if (trimmed.isBlank()) {
+      return null;
+    }
+    return trimmed;
   }
 
   private static void validate(Integer size) {
@@ -44,5 +62,9 @@ public final class PaginationCriteria {
 
   public DonationsOrder order() {
     return order;
+  }
+
+  public String query() {
+    return query;
   }
 }

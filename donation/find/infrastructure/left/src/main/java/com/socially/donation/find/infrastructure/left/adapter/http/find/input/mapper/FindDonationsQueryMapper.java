@@ -8,15 +8,15 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class FindDonationsQueryMapper {
-  public FindDonationsQuery toQuery(String cursor, Integer size, String order) {
+  public FindDonationsQuery toQuery(String cursor, Integer size, String order, String query) {
     PaginationCriteria paginationCriteria;
     DonationsOrder resolvedOrder = DonationsOrder.fromValue(order);
 
     if (Objects.nonNull(size)) {
-      paginationCriteria = PaginationCriteria.create(cursor, size, resolvedOrder);
+      paginationCriteria = PaginationCriteria.create(cursor, size, resolvedOrder, query);
     } else {
       paginationCriteria =
-          PaginationCriteria.create(cursor, PaginationCriteria.DEFAULT_SIZE, resolvedOrder);
+          PaginationCriteria.create(cursor, PaginationCriteria.DEFAULT_SIZE, resolvedOrder, query);
     }
 
     return new FindDonationsQuery(paginationCriteria);

@@ -12,6 +12,7 @@ import com.socially.donation.kernel.infrastructure.right.adapter.persistence.map
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -28,7 +29,8 @@ public class JpaFindDonationsRepository implements FindDonationsRepository {
   @Override
   public Page<Donation> find(PaginationCriteria paginationCriteria) {
     int pageSize = paginationCriteria.size();
-    long totalCount = entityRepository.count();
+    String searchPattern = toSearchPattern(paginationCriteria.query());
+    long totalCount = countDonations(searchPattern);
     boolean previousCursorRequest =
         Objects.nonNull(paginationCriteria.cursor())
             && cursorCodec.isPreviousCursor(paginationCriteria.cursor());
@@ -37,7 +39,8 @@ public class JpaFindDonationsRepository implements FindDonationsRepository {
             paginationCriteria.cursor(),
             pageSize + 1,
             previousCursorRequest,
-            paginationCriteria.order());
+            paginationCriteria.order(),
+            searchPattern);
     boolean overflowItemsExist = entities.size() > pageSize;
 
     List<DonationEntity> pageEntities =
@@ -56,10 +59,22 @@ public class JpaFindDonationsRepository implements FindDonationsRepository {
   }
 
   private List<DonationEntity> fetchEntities(
-      String cursor, int fetchSize, boolean previousCursorRequest, DonationsOrder order) {
+      String cursor,
+      int fetchSize,
+      boolean previousCursorRequest,
+      DonationsOrder order,
+      String searchPattern) {
     PageRequest pageRequest = PageRequest.of(0, fetchSize);
 
     if (Objects.isNull(cursor)) {
+      if (Objects.nonNull(searchPattern)) {
+        if (order == DonationsOrder.OLDEST_FIRST) {
+          return entityRepository.findBySearchPatternOrderByCreatedAtAscIdAsc(
+              searchPattern, pageRequest);
+        }
+        return entityRepository.findBySearchPatternOrderByCreatedAtDescIdDesc(
+            searchPattern, pageRequest);
+      }
       if (order == DonationsOrder.OLDEST_FIRST) {
         return entityRepository.findByOrderByCreatedAtAscIdAsc(pageRequest);
       }
@@ -68,17 +83,52 @@ public class JpaFindDonationsRepository implements FindDonationsRepository {
 
     KeysetCursor boundary = cursorCodec.decode(cursor);
     if (previousCursorRequest) {
+      if (Objects.nonNull(searchPattern)) {
+        if (order == DonationsOrder.OLDEST_FIRST) {
+          return entityRepository.findPreviousPageForOldestFirstBySearchPattern(
+              searchPattern, boundary.createdAt(), boundary.id(), pageRequest);
+        }
+        return entityRepository.findPreviousPageBySearchPattern(
+            searchPattern, boundary.createdAt(), boundary.id(), pageRequest);
+      }
       if (order == DonationsOrder.OLDEST_FIRST) {
         return entityRepository.findPreviousPageForOldestFirst(
             boundary.createdAt(), boundary.id(), pageRequest);
       }
       return entityRepository.findPreviousPage(boundary.createdAt(), boundary.id(), pageRequest);
     }
+    if (Objects.nonNull(searchPattern)) {
+      if (order == DonationsOrder.OLDEST_FIRST) {
+        return entityRepository.findNextPageForOldestFirstBySearchPattern(
+            searchPattern, boundary.createdAt(), boundary.id(), pageRequest);
+      }
+      return entityRepository.findNextPageBySearchPattern(
+          searchPattern, boundary.createdAt(), boundary.id(), pageRequest);
+    }
     if (order == DonationsOrder.OLDEST_FIRST) {
       return entityRepository.findNextPageForOldestFirst(
           boundary.createdAt(), boundary.id(), pageRequest);
     }
     return entityRepository.findNextPage(boundary.createdAt(), boundary.id(), pageRequest);
+  }
+
+  private long countDonations(String searchPattern) {
+    if (Objects.isNull(searchPattern)) {
+      return entityRepository.count();
+    }
+    return entityRepository.countByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
+        paginationSafeTerm(searchPattern), paginationSafeTerm(searchPattern));
+  }
+
+  private static String toSearchPattern(String query) {
+    if (Objects.isNull(query)) {
+      return null;
+    }
+    return "%" + query.toLowerCase(Locale.ROOT) + "%";
+  }
+
+  private static String paginationSafeTerm(String searchPattern) {
+    return searchPattern.substring(1, searchPattern.length() - 1);
   }
 
   private static List<DonationEntity> getPageDonations(

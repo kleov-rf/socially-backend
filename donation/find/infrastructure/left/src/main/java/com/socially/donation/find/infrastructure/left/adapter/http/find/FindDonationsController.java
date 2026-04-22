@@ -28,10 +28,11 @@ public class FindDonationsController {
   public ResponseEntity<PageResponse<FindDonationResponse>> find(
       @RequestParam(required = false) String cursor,
       @RequestParam(required = false) Integer size,
-      @RequestParam(required = false) String order) {
-    FindDonationsQuery query = queryMapper.toQuery(cursor, size, order);
+      @RequestParam(required = false) String order,
+      @RequestParam(required = false) String query) {
+    FindDonationsQuery queryModel = queryMapper.toQuery(cursor, size, order, query);
 
-    Page<FindDonationDto> page = findDonationsUseCase.execute(query);
+    Page<FindDonationDto> page = findDonationsUseCase.execute(queryModel);
 
     PageResponse<FindDonationResponse> body = pageResponseMapper.toResponse(page);
     return ResponseEntity.ok(body);

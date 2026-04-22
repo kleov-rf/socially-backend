@@ -15,6 +15,31 @@ public interface DonationEntityRepository extends JpaRepository<DonationEntity, 
 
   List<DonationEntity> findByOrderByCreatedAtAscIdAsc(Pageable pageable);
 
+  long countByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
+      String titleQuery, String descriptionQuery);
+
+  @Query(
+      """
+      select d
+      from DonationEntity d
+      where lower(d.title) like :searchPattern
+         or lower(d.description) like :searchPattern
+      order by d.createdAt desc, d.id desc
+      """)
+  List<DonationEntity> findBySearchPatternOrderByCreatedAtDescIdDesc(
+      @Param("searchPattern") String searchPattern, Pageable pageable);
+
+  @Query(
+      """
+      select d
+      from DonationEntity d
+      where lower(d.title) like :searchPattern
+         or lower(d.description) like :searchPattern
+      order by d.createdAt asc, d.id asc
+      """)
+  List<DonationEntity> findBySearchPatternOrderByCreatedAtAscIdAsc(
+      @Param("searchPattern") String searchPattern, Pageable pageable);
+
   @Query(
       """
       select d
@@ -25,6 +50,22 @@ public interface DonationEntityRepository extends JpaRepository<DonationEntity, 
       """)
   List<DonationEntity> findNextPage(
       @Param("createdAt") Instant createdAt, @Param("id") UUID id, Pageable pageable);
+
+  @Query(
+      """
+      select d
+      from DonationEntity d
+      where (lower(d.title) like :searchPattern
+         or lower(d.description) like :searchPattern)
+        and (d.createdAt < :createdAt
+         or (d.createdAt = :createdAt and d.id < :id))
+      order by d.createdAt desc, d.id desc
+      """)
+  List<DonationEntity> findNextPageBySearchPattern(
+      @Param("searchPattern") String searchPattern,
+      @Param("createdAt") Instant createdAt,
+      @Param("id") UUID id,
+      Pageable pageable);
 
   @Query(
       """
@@ -41,6 +82,22 @@ public interface DonationEntityRepository extends JpaRepository<DonationEntity, 
       """
       select d
       from DonationEntity d
+      where (lower(d.title) like :searchPattern
+         or lower(d.description) like :searchPattern)
+        and (d.createdAt > :createdAt
+         or (d.createdAt = :createdAt and d.id > :id))
+      order by d.createdAt asc, d.id asc
+      """)
+  List<DonationEntity> findPreviousPageBySearchPattern(
+      @Param("searchPattern") String searchPattern,
+      @Param("createdAt") Instant createdAt,
+      @Param("id") UUID id,
+      Pageable pageable);
+
+  @Query(
+      """
+      select d
+      from DonationEntity d
       where d.createdAt > :createdAt
          or (d.createdAt = :createdAt and d.id > :id)
       order by d.createdAt asc, d.id asc
@@ -52,10 +109,42 @@ public interface DonationEntityRepository extends JpaRepository<DonationEntity, 
       """
       select d
       from DonationEntity d
+      where (lower(d.title) like :searchPattern
+         or lower(d.description) like :searchPattern)
+        and (d.createdAt > :createdAt
+         or (d.createdAt = :createdAt and d.id > :id))
+      order by d.createdAt asc, d.id asc
+      """)
+  List<DonationEntity> findNextPageForOldestFirstBySearchPattern(
+      @Param("searchPattern") String searchPattern,
+      @Param("createdAt") Instant createdAt,
+      @Param("id") UUID id,
+      Pageable pageable);
+
+  @Query(
+      """
+      select d
+      from DonationEntity d
       where d.createdAt < :createdAt
          or (d.createdAt = :createdAt and d.id < :id)
       order by d.createdAt desc, d.id desc
       """)
   List<DonationEntity> findPreviousPageForOldestFirst(
       @Param("createdAt") Instant createdAt, @Param("id") UUID id, Pageable pageable);
+
+  @Query(
+      """
+      select d
+      from DonationEntity d
+      where (lower(d.title) like :searchPattern
+         or lower(d.description) like :searchPattern)
+        and (d.createdAt < :createdAt
+         or (d.createdAt = :createdAt and d.id < :id))
+      order by d.createdAt desc, d.id desc
+      """)
+  List<DonationEntity> findPreviousPageForOldestFirstBySearchPattern(
+      @Param("searchPattern") String searchPattern,
+      @Param("createdAt") Instant createdAt,
+      @Param("id") UUID id,
+      Pageable pageable);
 }

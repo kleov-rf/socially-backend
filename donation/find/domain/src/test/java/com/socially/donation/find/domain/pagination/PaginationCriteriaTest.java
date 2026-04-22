@@ -55,6 +55,30 @@ class PaginationCriteriaTest {
   }
 
   @Test
+  void create_should_create_criteria_with_trimmed_query() {
+    PaginationCriteria criteria =
+        PaginationCriteria.create("cursor-token", 10, DonationsOrder.OLDEST_FIRST, "   school    ");
+
+    assertEquals("school", criteria.query());
+  }
+
+  @Test
+  void create_should_create_criteria_with_null_query_if_query_is_blank() {
+    PaginationCriteria criteria =
+        PaginationCriteria.create("cursor-token", 10, DonationsOrder.OLDEST_FIRST, "      ");
+
+    assertNull(criteria.query());
+  }
+
+  @Test
+  void create_should_create_criteria_with_null_query_if_query_not_present() {
+    PaginationCriteria criteria =
+        PaginationCriteria.create("cursor-token", 10, DonationsOrder.OLDEST_FIRST, null);
+
+    assertNull(criteria.query());
+  }
+
+  @Test
   void cursor_should_return_cursor() {
     PaginationCriteria criteria = PaginationCriteria.create("cursor-token", 5);
 
@@ -74,5 +98,13 @@ class PaginationCriteriaTest {
         PaginationCriteria.create("cursor-token", 10, DonationsOrder.OLDEST_FIRST);
 
     assertEquals(DonationsOrder.OLDEST_FIRST, criteria.order());
+  }
+
+  @Test
+  void query_should_return_query() {
+    PaginationCriteria criteria =
+        PaginationCriteria.create("cursor-token", 10, DonationsOrder.OLDEST_FIRST, "school");
+
+    assertEquals("school", criteria.query());
   }
 }

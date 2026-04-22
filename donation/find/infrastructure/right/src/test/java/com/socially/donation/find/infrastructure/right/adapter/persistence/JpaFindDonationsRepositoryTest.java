@@ -212,6 +212,55 @@ class JpaFindDonationsRepositoryTest {
   }
 
   @Test
+  void find_should_call_search_query_when_query_is_present_and_order_is_newest() {
+    int pageSize = 5;
+    PaginationCriteria query =
+        PaginationCriteria.create(null, pageSize, DonationsOrder.NEWEST_FIRST, "school");
+    when(entityRepository.findBySearchPatternOrderByCreatedAtDescIdDesc(
+            "%school%", PageRequest.of(0, pageSize + 1)))
+        .thenReturn(List.of());
+
+    sut.find(query);
+
+    verify(entityRepository)
+        .findBySearchPatternOrderByCreatedAtDescIdDesc("%school%", PageRequest.of(0, pageSize + 1));
+  }
+
+  @Test
+  void find_should_call_oldest_first_search_query_when_query_is_present() {
+    int pageSize = 5;
+    PaginationCriteria query =
+        PaginationCriteria.create(null, pageSize, DonationsOrder.OLDEST_FIRST, "school");
+    when(entityRepository.findBySearchPatternOrderByCreatedAtAscIdAsc(
+            "%school%", PageRequest.of(0, pageSize + 1)))
+        .thenReturn(List.of());
+
+    sut.find(query);
+
+    verify(entityRepository)
+        .findBySearchPatternOrderByCreatedAtAscIdAsc("%school%", PageRequest.of(0, pageSize + 1));
+  }
+
+  @Test
+  void find_should_call_search_next_page_query_when_cursor_is_present() {
+    int pageSize = 5;
+    PaginationCriteria query =
+        PaginationCriteria.create("cursor-token", pageSize, DonationsOrder.NEWEST_FIRST, "school");
+    UUID boundaryId = Id.from(DONATION_ID_1).value();
+    KeysetCursor boundary = new KeysetCursor(CREATED_AT, boundaryId);
+    when(cursorCodec.decode("cursor-token")).thenReturn(boundary);
+    when(entityRepository.findNextPageBySearchPattern(
+            "%school%", CREATED_AT, boundaryId, PageRequest.of(0, pageSize + 1)))
+        .thenReturn(List.of());
+
+    sut.find(query);
+
+    verify(entityRepository)
+        .findNextPageBySearchPattern(
+            "%school%", CREATED_AT, boundaryId, PageRequest.of(0, pageSize + 1));
+  }
+
+  @Test
   void find_should_map_total_count() {
     PaginationCriteria query = PaginationCriteria.create(null, 5);
     DonationEntity firstEntity =

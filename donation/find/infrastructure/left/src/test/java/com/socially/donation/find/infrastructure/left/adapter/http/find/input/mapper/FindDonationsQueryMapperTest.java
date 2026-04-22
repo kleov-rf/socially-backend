@@ -17,7 +17,7 @@ class FindDonationsQueryMapperTest {
 
   @Test
   void toQuery_should_use_default_size_when_size_is_null() {
-    FindDonationsQuery query = mapper.toQuery(null, null, null);
+    FindDonationsQuery query = mapper.toQuery(null, null, null, null);
 
     assertEquals(PaginationCriteria.DEFAULT_SIZE, query.paginationCriteria().size());
   }
@@ -25,14 +25,14 @@ class FindDonationsQueryMapperTest {
   @Test
   void toQuery_should_map_cursor() {
     FindDonationsQuery query =
-        mapper.toQuery("next", PaginationCriteria.DEFAULT_SIZE, "oldest_first");
+        mapper.toQuery("next", PaginationCriteria.DEFAULT_SIZE, "oldest_first", "school");
 
     assertEquals("next", query.paginationCriteria().cursor());
   }
 
   @Test
   void toQuery_should_map_size() {
-    FindDonationsQuery query = mapper.toQuery("next", 10, "oldest_first");
+    FindDonationsQuery query = mapper.toQuery("next", 10, "oldest_first", "school");
 
     assertEquals(10, query.paginationCriteria().size());
   }
@@ -40,8 +40,16 @@ class FindDonationsQueryMapperTest {
   @Test
   void toQuery_should_map_order() {
     FindDonationsQuery query =
-        mapper.toQuery("next", PaginationCriteria.DEFAULT_SIZE, "oldest_first");
+        mapper.toQuery("next", PaginationCriteria.DEFAULT_SIZE, "oldest_first", "school");
 
     assertEquals(DonationsOrder.fromValue("oldest_first"), query.paginationCriteria().order());
+  }
+
+  @Test
+  void toQuery_should_map_query() {
+    FindDonationsQuery query =
+        mapper.toQuery("next", PaginationCriteria.DEFAULT_SIZE, "oldest_first", "school");
+
+    assertEquals("school", query.paginationCriteria().query());
   }
 }

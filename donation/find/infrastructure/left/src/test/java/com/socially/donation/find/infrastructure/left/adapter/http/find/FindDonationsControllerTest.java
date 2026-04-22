@@ -44,17 +44,17 @@ class FindDonationsControllerTest {
 
   @Test
   void find_should_call_query_mapper_with_received_arguments() {
-    controller.find("next-cursor", 10, "oldest_first");
+    controller.find("next-cursor", 10, "oldest_first", "school");
 
-    verify(queryMapper).toQuery("next-cursor", 10, "oldest_first");
+    verify(queryMapper).toQuery("next-cursor", 10, "oldest_first", "school");
   }
 
   @Test
   void find_should_call_use_case_with_mapped_query() {
     FindDonationsQuery query = new FindDonationsQuery(PaginationCriteria.create("next-cursor", 10));
-    when(queryMapper.toQuery("next-cursor", 10, "newest_first")).thenReturn(query);
+    when(queryMapper.toQuery("next-cursor", 10, "newest_first", "school")).thenReturn(query);
 
-    controller.find("next-cursor", 10, "newest_first");
+    controller.find("next-cursor", 10, "newest_first", "school");
 
     verify(findDonationsUseCase).execute(query);
   }
@@ -64,10 +64,10 @@ class FindDonationsControllerTest {
     FindDonationsQuery query = new FindDonationsQuery(PaginationCriteria.create("next-cursor", 10));
     Page<FindDonationDto> page =
         Page.create(List.of(), Metadata.create("next-cursor", "previous-cursor", 10, 100L));
-    when(queryMapper.toQuery("next-cursor", 10, "newest_first")).thenReturn(query);
+    when(queryMapper.toQuery("next-cursor", 10, "newest_first", "school")).thenReturn(query);
     when(findDonationsUseCase.execute(query)).thenReturn(page);
 
-    controller.find("next-cursor", 10, "newest_first");
+    controller.find("next-cursor", 10, "newest_first", "school");
 
     verify(pageResponseMapper).toResponse(page);
   }
@@ -85,7 +85,7 @@ class FindDonationsControllerTest {
     Page<FindDonationDto> page =
         Page.create(
             List.of(donationDto), Metadata.create("next-cursor", "previous-cursor", 10, 100L));
-    when(queryMapper.toQuery("next-cursor", 10, "newest_first")).thenReturn(query);
+    when(queryMapper.toQuery("next-cursor", 10, "newest_first", "school")).thenReturn(query);
     when(findDonationsUseCase.execute(query)).thenReturn(page);
 
     PageResponse<FindDonationResponse> mappedPageResponse =
@@ -97,7 +97,7 @@ class FindDonationsControllerTest {
     when(pageResponseMapper.toResponse(page)).thenReturn(mappedPageResponse);
 
     ResponseEntity<PageResponse<FindDonationResponse>> response =
-        controller.find("next-cursor", 10, "newest_first");
+        controller.find("next-cursor", 10, "newest_first", "school");
 
     assertThat(response.getBody()).isEqualTo(mappedPageResponse);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
