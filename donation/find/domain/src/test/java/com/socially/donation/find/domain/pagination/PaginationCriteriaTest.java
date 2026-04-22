@@ -12,7 +12,8 @@ class PaginationCriteriaTest {
 
   @Test
   void create_should_default_order_to_newest_first() {
-    PaginationCriteria criteria = PaginationCriteria.create(null, 5);
+    PaginationCriteria criteria =
+        PaginationCriteria.create(null, 5, PaginationCriteria.DEFAULT_ORDER, null);
 
     assertEquals(DonationsOrder.NEWEST_FIRST, criteria.order());
   }
@@ -20,14 +21,15 @@ class PaginationCriteriaTest {
   @Test
   void create_should_create_criteria_with_received_cursor() {
     PaginationCriteria criteria =
-        PaginationCriteria.create("cursor-token", 10, DonationsOrder.OLDEST_FIRST);
+        PaginationCriteria.create("cursor-token", 10, DonationsOrder.OLDEST_FIRST, null);
 
     assertEquals("cursor-token", criteria.cursor());
   }
 
   @Test
   void create_should_create_criteria_with_null_cursor_if_cursor_is_blank() {
-    PaginationCriteria criteria = PaginationCriteria.create("   ", 10);
+    PaginationCriteria criteria =
+        PaginationCriteria.create("   ", 10, PaginationCriteria.DEFAULT_ORDER, null);
 
     assertNull(criteria.cursor());
   }
@@ -36,7 +38,7 @@ class PaginationCriteriaTest {
   @CsvSource({"5", "10", "20"})
   void create_should_create_criteria_with_received_size(Integer size) {
     PaginationCriteria criteria =
-        PaginationCriteria.create("cursor-token", size, DonationsOrder.OLDEST_FIRST);
+        PaginationCriteria.create("cursor-token", size, DonationsOrder.OLDEST_FIRST, null);
 
     assertEquals(size, criteria.size());
   }
@@ -44,14 +46,16 @@ class PaginationCriteriaTest {
   @Test
   void create_should_create_criteria_with_received_order() {
     PaginationCriteria criteria =
-        PaginationCriteria.create("cursor-token", 10, DonationsOrder.OLDEST_FIRST);
+        PaginationCriteria.create("cursor-token", 10, DonationsOrder.OLDEST_FIRST, null);
 
     assertEquals(DonationsOrder.OLDEST_FIRST, criteria.order());
   }
 
   @Test
   void create_should_throw_exception_if_size_is_not_allowed() {
-    assertThrows(IllegalArgumentException.class, () -> PaginationCriteria.create(null, 0));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> PaginationCriteria.create(null, 0, PaginationCriteria.DEFAULT_ORDER, null));
   }
 
   @Test
@@ -80,14 +84,16 @@ class PaginationCriteriaTest {
 
   @Test
   void cursor_should_return_cursor() {
-    PaginationCriteria criteria = PaginationCriteria.create("cursor-token", 5);
+    PaginationCriteria criteria =
+        PaginationCriteria.create("cursor-token", 5, PaginationCriteria.DEFAULT_ORDER, null);
 
     assertEquals("cursor-token", criteria.cursor());
   }
 
   @Test
   void size_should_return_size() {
-    PaginationCriteria criteria = PaginationCriteria.create("cursor-token", 10);
+    PaginationCriteria criteria =
+        PaginationCriteria.create("cursor-token", 10, PaginationCriteria.DEFAULT_ORDER, null);
 
     assertEquals(10, criteria.size());
   }
@@ -95,7 +101,7 @@ class PaginationCriteriaTest {
   @Test
   void order_should_return_order() {
     PaginationCriteria criteria =
-        PaginationCriteria.create("cursor-token", 10, DonationsOrder.OLDEST_FIRST);
+        PaginationCriteria.create("cursor-token", 10, DonationsOrder.OLDEST_FIRST, null);
 
     assertEquals(DonationsOrder.OLDEST_FIRST, criteria.order());
   }

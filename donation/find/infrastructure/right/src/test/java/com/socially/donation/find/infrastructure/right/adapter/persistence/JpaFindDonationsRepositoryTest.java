@@ -48,7 +48,8 @@ class JpaFindDonationsRepositoryTest {
 
   @Test
   void find_should_call_to_decode_cursor() {
-    PaginationCriteria query = PaginationCriteria.create("cursor-token", 5);
+    PaginationCriteria query =
+        PaginationCriteria.create("cursor-token", 5, PaginationCriteria.DEFAULT_ORDER, null);
     UUID boundaryId = Id.from(DONATION_ID_1).value();
     KeysetCursor boundary = new KeysetCursor(CREATED_AT, boundaryId);
     when(cursorCodec.decode("cursor-token")).thenReturn(boundary);
@@ -63,7 +64,9 @@ class JpaFindDonationsRepositoryTest {
   @Test
   void find_should_call_find_previous_page_when_cursor_is_previous_cursor() {
     int pageSize = 5;
-    PaginationCriteria query = PaginationCriteria.create("previous-cursor-token", pageSize);
+    PaginationCriteria query =
+        PaginationCriteria.create(
+            "previous-cursor-token", pageSize, PaginationCriteria.DEFAULT_ORDER, null);
     UUID boundaryId = Id.from(DONATION_ID_1).value();
     KeysetCursor boundary = new KeysetCursor(CREATED_AT, boundaryId);
     when(cursorCodec.isPreviousCursor("previous-cursor-token")).thenReturn(true);
@@ -80,7 +83,9 @@ class JpaFindDonationsRepositoryTest {
   @Test
   void find_should_return_items_in_descending_creation_date_when_cursor_is_previous_cursor() {
     int pageSize = 5;
-    PaginationCriteria query = PaginationCriteria.create("previous-cursor-token", pageSize);
+    PaginationCriteria query =
+        PaginationCriteria.create(
+            "previous-cursor-token", pageSize, PaginationCriteria.DEFAULT_ORDER, null);
     UUID boundaryId = Id.from(DONATION_ID_3).value();
     KeysetCursor boundary = new KeysetCursor(CREATED_AT.minusSeconds(3), boundaryId);
     DonationEntity oldestEntity =
@@ -138,7 +143,8 @@ class JpaFindDonationsRepositoryTest {
   @Test
   void find_should_call_find_with_cursor_and_one_more_item_than_given_page_size() {
     int pageSize = 5;
-    PaginationCriteria query = PaginationCriteria.create("cursor-token", pageSize);
+    PaginationCriteria query =
+        PaginationCriteria.create("cursor-token", pageSize, PaginationCriteria.DEFAULT_ORDER, null);
     UUID boundaryId = Id.from(DONATION_ID_1).value();
     KeysetCursor boundary = new KeysetCursor(CREATED_AT, boundaryId);
     when(cursorCodec.decode("cursor-token")).thenReturn(boundary);
@@ -153,7 +159,8 @@ class JpaFindDonationsRepositoryTest {
   @Test
   void find_should_call_find_with_one_more_item_than_given_page_size_when_cursor_not_present() {
     int pageSize = 5;
-    PaginationCriteria query = PaginationCriteria.create(null, pageSize);
+    PaginationCriteria query =
+        PaginationCriteria.create(null, pageSize, PaginationCriteria.DEFAULT_ORDER, null);
     when(entityRepository.findByOrderByCreatedAtDescIdDesc(PageRequest.of(0, pageSize + 1)))
         .thenReturn(List.of());
 
@@ -166,7 +173,7 @@ class JpaFindDonationsRepositoryTest {
   void find_should_call_oldest_first_query_when_oldest_order_is_requested() {
     int pageSize = 5;
     PaginationCriteria query =
-        PaginationCriteria.create(null, pageSize, DonationsOrder.OLDEST_FIRST);
+        PaginationCriteria.create(null, pageSize, DonationsOrder.OLDEST_FIRST, null);
     when(entityRepository.findByOrderByCreatedAtAscIdAsc(PageRequest.of(0, pageSize + 1)))
         .thenReturn(List.of());
 
@@ -179,7 +186,7 @@ class JpaFindDonationsRepositoryTest {
   void find_should_call_oldest_first_next_page_query_when_next_cursor_is_requested() {
     int pageSize = 5;
     PaginationCriteria query =
-        PaginationCriteria.create("cursor-token", pageSize, DonationsOrder.OLDEST_FIRST);
+        PaginationCriteria.create("cursor-token", pageSize, DonationsOrder.OLDEST_FIRST, null);
     UUID boundaryId = Id.from(DONATION_ID_1).value();
     KeysetCursor boundary = new KeysetCursor(CREATED_AT, boundaryId);
     when(cursorCodec.decode("cursor-token")).thenReturn(boundary);
@@ -196,7 +203,8 @@ class JpaFindDonationsRepositoryTest {
   void find_should_call_oldest_first_previous_page_query_when_previous_cursor_is_requested() {
     int pageSize = 5;
     PaginationCriteria query =
-        PaginationCriteria.create("previous-cursor-token", pageSize, DonationsOrder.OLDEST_FIRST);
+        PaginationCriteria.create(
+            "previous-cursor-token", pageSize, DonationsOrder.OLDEST_FIRST, null);
     UUID boundaryId = Id.from(DONATION_ID_1).value();
     KeysetCursor boundary = new KeysetCursor(CREATED_AT, boundaryId);
     when(cursorCodec.isPreviousCursor("previous-cursor-token")).thenReturn(true);
@@ -262,7 +270,8 @@ class JpaFindDonationsRepositoryTest {
 
   @Test
   void find_should_map_total_count() {
-    PaginationCriteria query = PaginationCriteria.create(null, 5);
+    PaginationCriteria query =
+        PaginationCriteria.create(null, 5, PaginationCriteria.DEFAULT_ORDER, null);
     DonationEntity firstEntity =
         donationEntity(DONATION_ID_1, "Title 1", "Description 1", CREATED_AT);
     DonationEntity secondEntity =
@@ -280,7 +289,8 @@ class JpaFindDonationsRepositoryTest {
 
   @Test
   void find_should_call_to_encode_last_item_if_next_page_exists() {
-    PaginationCriteria query = PaginationCriteria.create(null, 5);
+    PaginationCriteria query =
+        PaginationCriteria.create(null, 5, PaginationCriteria.DEFAULT_ORDER, null);
     DonationEntity firstEntity =
         donationEntity(DONATION_ID_1, "Title 1", "Description 1", CREATED_AT);
     DonationEntity secondEntity =
@@ -328,7 +338,8 @@ class JpaFindDonationsRepositoryTest {
 
   @Test
   void find_should_not_call_to_encode_if_next_page_does_not_exist() {
-    PaginationCriteria query = PaginationCriteria.create(null, 5);
+    PaginationCriteria query =
+        PaginationCriteria.create(null, 5, PaginationCriteria.DEFAULT_ORDER, null);
     DonationEntity firstEntity =
         donationEntity(DONATION_ID_1, "Title 1", "Description 1", CREATED_AT);
     DonationEntity secondEntity =
@@ -346,7 +357,8 @@ class JpaFindDonationsRepositoryTest {
 
   @Test
   void find_should_call_to_encode_first_item_if_cursor_is_present_and_donations_found() {
-    PaginationCriteria query = PaginationCriteria.create("cursor-token", 5);
+    PaginationCriteria query =
+        PaginationCriteria.create("cursor-token", 5, PaginationCriteria.DEFAULT_ORDER, null);
     UUID boundaryId = Id.from(DONATION_ID_3).value();
     KeysetCursor boundary = new KeysetCursor(CREATED_AT.minusSeconds(3), boundaryId);
     DonationEntity firstEntity =
@@ -369,7 +381,8 @@ class JpaFindDonationsRepositoryTest {
 
   @Test
   void find_should_return_empty_list_if_no_donations_were_found() {
-    PaginationCriteria query = PaginationCriteria.create(null, 5);
+    PaginationCriteria query =
+        PaginationCriteria.create(null, 5, PaginationCriteria.DEFAULT_ORDER, null);
     when(entityRepository.findByOrderByCreatedAtDescIdDesc(PageRequest.of(0, 6)))
         .thenReturn(List.of());
 
@@ -380,7 +393,9 @@ class JpaFindDonationsRepositoryTest {
 
   @Test
   void find_should_return_null_previous_and_next_cursors_if_no_donations_were_found() {
-    PaginationCriteria query = PaginationCriteria.create("previous-cursor-token", 5);
+    PaginationCriteria query =
+        PaginationCriteria.create(
+            "previous-cursor-token", 5, PaginationCriteria.DEFAULT_ORDER, null);
     UUID boundaryId = Id.from(DONATION_ID_1).value();
     KeysetCursor boundary = new KeysetCursor(CREATED_AT, boundaryId);
     when(cursorCodec.isPreviousCursor("previous-cursor-token")).thenReturn(true);
@@ -396,7 +411,8 @@ class JpaFindDonationsRepositoryTest {
 
   @Test
   void find_should_call_entity_mapper_with_given_page_size_times_the_retrieved_items() {
-    PaginationCriteria query = PaginationCriteria.create(null, 5);
+    PaginationCriteria query =
+        PaginationCriteria.create(null, 5, PaginationCriteria.DEFAULT_ORDER, null);
     DonationEntity firstEntity =
         donationEntity(DONATION_ID_1, "Title 1", "Description 1", CREATED_AT);
     DonationEntity secondEntity =
@@ -450,7 +466,8 @@ class JpaFindDonationsRepositoryTest {
 
   @Test
   void find_should_return_mapped_donations() {
-    PaginationCriteria query = PaginationCriteria.create(null, 5);
+    PaginationCriteria query =
+        PaginationCriteria.create(null, 5, PaginationCriteria.DEFAULT_ORDER, null);
     DonationEntity firstEntity =
         donationEntity(DONATION_ID_1, "Title 1", "Description 1", CREATED_AT);
     DonationEntity secondEntity =
@@ -469,7 +486,8 @@ class JpaFindDonationsRepositoryTest {
 
   @Test
   void find_should_return_metadata_next_cursor_when_next_page_exists() {
-    PaginationCriteria query = PaginationCriteria.create(null, 5);
+    PaginationCriteria query =
+        PaginationCriteria.create(null, 5, PaginationCriteria.DEFAULT_ORDER, null);
     DonationEntity firstEntity =
         donationEntity(DONATION_ID_1, "Title 1", "Description 1", CREATED_AT);
     DonationEntity secondEntity =
@@ -517,7 +535,8 @@ class JpaFindDonationsRepositoryTest {
 
   @Test
   void find_should_return_metadata_next_cursor_as_null_when_next_page_not_exists() {
-    PaginationCriteria query = PaginationCriteria.create(null, 5);
+    PaginationCriteria query =
+        PaginationCriteria.create(null, 5, PaginationCriteria.DEFAULT_ORDER, null);
     DonationEntity firstEntity =
         donationEntity(DONATION_ID_1, "Title 1", "Description 1", CREATED_AT);
     DonationEntity secondEntity =
@@ -534,7 +553,8 @@ class JpaFindDonationsRepositoryTest {
 
   @Test
   void find_should_return_metadata_next_page_exists() {
-    PaginationCriteria query = PaginationCriteria.create(null, 5);
+    PaginationCriteria query =
+        PaginationCriteria.create(null, 5, PaginationCriteria.DEFAULT_ORDER, null);
     DonationEntity firstEntity =
         donationEntity(DONATION_ID_1, "Title 1", "Description 1", CREATED_AT);
     DonationEntity secondEntity =
@@ -583,7 +603,9 @@ class JpaFindDonationsRepositoryTest {
   @Test
   void
       find_should_return_metadata_next_cursor_when_cursor_is_previous_cursor_and_donations_found() {
-    PaginationCriteria query = PaginationCriteria.create("previous-cursor-token", 5);
+    PaginationCriteria query =
+        PaginationCriteria.create(
+            "previous-cursor-token", 5, PaginationCriteria.DEFAULT_ORDER, null);
     UUID boundaryId = Id.from(DONATION_ID_3).value();
     KeysetCursor boundary = new KeysetCursor(CREATED_AT.minusSeconds(3), boundaryId);
     DonationEntity firstEntity =
@@ -608,7 +630,8 @@ class JpaFindDonationsRepositoryTest {
 
   @Test
   void find_should_return_metadata_previous_cursor_when_cursor_is_present() {
-    PaginationCriteria query = PaginationCriteria.create("cursor-token", 5);
+    PaginationCriteria query =
+        PaginationCriteria.create("cursor-token", 5, PaginationCriteria.DEFAULT_ORDER, null);
     UUID boundaryId = Id.from(DONATION_ID_3).value();
     KeysetCursor boundary = new KeysetCursor(CREATED_AT.minusSeconds(3), boundaryId);
     DonationEntity firstEntity =
@@ -633,7 +656,9 @@ class JpaFindDonationsRepositoryTest {
   @Test
   void
       find_should_return_metadata_previous_cursor_as_null_when_cursor_is_previous_and_no_newer_page_exists() {
-    PaginationCriteria query = PaginationCriteria.create("previous-cursor-token", 5);
+    PaginationCriteria query =
+        PaginationCriteria.create(
+            "previous-cursor-token", 5, PaginationCriteria.DEFAULT_ORDER, null);
     UUID boundaryId = Id.from(DONATION_ID_3).value();
     KeysetCursor boundary = new KeysetCursor(CREATED_AT.minusSeconds(3), boundaryId);
     DonationEntity firstEntity =
@@ -658,7 +683,8 @@ class JpaFindDonationsRepositoryTest {
 
   @Test
   void find_should_return_metadata_previous_cursor_as_null_when_cursor_is_not_present() {
-    PaginationCriteria query = PaginationCriteria.create(null, 5);
+    PaginationCriteria query =
+        PaginationCriteria.create(null, 5, PaginationCriteria.DEFAULT_ORDER, null);
     DonationEntity firstEntity =
         donationEntity(DONATION_ID_1, "Title 1", "Description 1", CREATED_AT);
     DonationEntity secondEntity =
@@ -676,7 +702,8 @@ class JpaFindDonationsRepositoryTest {
 
   @Test
   void find_should_return_metadata_previous_cursor_as_null_when_no_donations_found() {
-    PaginationCriteria query = PaginationCriteria.create("cursor-token", 5);
+    PaginationCriteria query =
+        PaginationCriteria.create("cursor-token", 5, PaginationCriteria.DEFAULT_ORDER, null);
     UUID boundaryId = Id.from(DONATION_ID_3).value();
     KeysetCursor boundary = new KeysetCursor(CREATED_AT.minusSeconds(3), boundaryId);
     when(cursorCodec.decode("cursor-token")).thenReturn(boundary);
@@ -692,7 +719,8 @@ class JpaFindDonationsRepositoryTest {
 
   @Test
   void find_should_return_metadata_received_page_size() {
-    PaginationCriteria query = PaginationCriteria.create(null, 5);
+    PaginationCriteria query =
+        PaginationCriteria.create(null, 5, PaginationCriteria.DEFAULT_ORDER, null);
     DonationEntity firstEntity =
         donationEntity(DONATION_ID_1, "Title 1", "Description 1", CREATED_AT);
     DonationEntity secondEntity =

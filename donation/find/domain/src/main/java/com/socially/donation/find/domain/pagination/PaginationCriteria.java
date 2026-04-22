@@ -17,14 +17,6 @@ public final class PaginationCriteria {
   private final DonationsOrder order;
   private final String query;
 
-  public static PaginationCriteria create(String cursor, Integer size) {
-    return create(cursor, size, DEFAULT_ORDER, null);
-  }
-
-  public static PaginationCriteria create(String cursor, Integer size, DonationsOrder order) {
-    return create(cursor, size, order, null);
-  }
-
   public static PaginationCriteria create(
       String cursor, Integer size, DonationsOrder order, String query) {
     validate(size);

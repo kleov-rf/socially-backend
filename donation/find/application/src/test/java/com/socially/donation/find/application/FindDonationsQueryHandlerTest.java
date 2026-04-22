@@ -40,7 +40,9 @@ class FindDonationsQueryHandlerTest {
   @Test
   void execute_should_call_repository_with_received_query() {
     FindDonationsQuery query =
-        new FindDonationsQuery(PaginationCriteria.create(null, PaginationCriteria.DEFAULT_SIZE));
+        new FindDonationsQuery(
+            PaginationCriteria.create(
+                null, PaginationCriteria.DEFAULT_SIZE, PaginationCriteria.DEFAULT_ORDER, null));
     when(donationRepository.find(query.paginationCriteria()))
         .thenReturn(
             Page.create(
@@ -67,7 +69,9 @@ class FindDonationsQueryHandlerTest {
             Description.from("Second Test Description"),
             CREATED_AT,
             LAST_UPDATED_AT);
-    FindDonationsQuery query = new FindDonationsQuery(PaginationCriteria.create(null, 10));
+    FindDonationsQuery query =
+        new FindDonationsQuery(
+            PaginationCriteria.create(null, 10, PaginationCriteria.DEFAULT_ORDER, null));
     when(donationRepository.find(query.paginationCriteria()))
         .thenReturn(
             Page.create(
@@ -96,7 +100,9 @@ class FindDonationsQueryHandlerTest {
             donation.description(),
             donation.createdAt(),
             donation.lastUpdatedAt());
-    FindDonationsQuery query = new FindDonationsQuery(PaginationCriteria.create(null, 10));
+    FindDonationsQuery query =
+        new FindDonationsQuery(
+            PaginationCriteria.create(null, 10, PaginationCriteria.DEFAULT_ORDER, null));
     when(donationRepository.find(query.paginationCriteria()))
         .thenReturn(
             Page.create(
@@ -124,7 +130,9 @@ class FindDonationsQueryHandlerTest {
             donation.description(),
             donation.createdAt(),
             donation.lastUpdatedAt());
-    FindDonationsQuery query = new FindDonationsQuery(PaginationCriteria.create(null, 10));
+    FindDonationsQuery query =
+        new FindDonationsQuery(
+            PaginationCriteria.create(null, 10, PaginationCriteria.DEFAULT_ORDER, null));
     when(donationRepository.find(query.paginationCriteria()))
         .thenReturn(
             Page.create(

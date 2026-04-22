@@ -28,165 +28,121 @@ public class JpaFindDonationsRepository implements FindDonationsRepository {
 
   @Override
   public Page<Donation> find(PaginationCriteria paginationCriteria) {
-    int pageSize = paginationCriteria.size();
-    String searchPattern = toSearchPattern(paginationCriteria.query());
-    long totalCount = countDonations(searchPattern);
+    String searchPattern = null;
+    if (Objects.nonNull(paginationCriteria.query())) {
+      searchPattern = "%" + paginationCriteria.query().toLowerCase(Locale.ROOT) + "%";
+    }
+    long totalCount;
+    if (Objects.isNull(searchPattern)) {
+      totalCount = entityRepository.countByDeletedAtIsNull();
+    } else {
+      totalCount = entityRepository.countBySearchPattern(searchPattern);
+    }
     boolean previousCursorRequest =
         Objects.nonNull(paginationCriteria.cursor())
             && cursorCodec.isPreviousCursor(paginationCriteria.cursor());
-    List<DonationEntity> entities =
-        fetchEntities(
-            paginationCriteria.cursor(),
-            pageSize + 1,
-            previousCursorRequest,
-            paginationCriteria.order(),
-            searchPattern);
-    boolean overflowItemsExist = entities.size() > pageSize;
+    List<DonationEntity> entities;
+    PageRequest pageRequest = PageRequest.of(0, paginationCriteria.size() + 1);
 
-    List<DonationEntity> pageEntities =
-        getPageDonations(overflowItemsExist, entities, pageSize, previousCursorRequest);
-
-    String nextCursor =
-        getNextCursor(
-            paginationCriteria.cursor(), previousCursorRequest, overflowItemsExist, pageEntities);
-    String previousCursor =
-        getPreviousCursor(
-            paginationCriteria.cursor(), previousCursorRequest, overflowItemsExist, pageEntities);
-    List<Donation> donations = pageEntities.stream().map(entityMapper::toDomain).toList();
-    Metadata metadata = Metadata.create(nextCursor, previousCursor, pageSize, totalCount);
-
-    return Page.create(donations, metadata);
-  }
-
-  private List<DonationEntity> fetchEntities(
-      String cursor,
-      int fetchSize,
-      boolean previousCursorRequest,
-      DonationsOrder order,
-      String searchPattern) {
-    PageRequest pageRequest = PageRequest.of(0, fetchSize);
-
-    if (Objects.isNull(cursor)) {
+    if (Objects.isNull(paginationCriteria.cursor())) {
       if (Objects.nonNull(searchPattern)) {
-        if (order == DonationsOrder.OLDEST_FIRST) {
-          return entityRepository.findBySearchPatternOrderByCreatedAtAscIdAsc(
-              searchPattern, pageRequest);
+        if (paginationCriteria.order() == DonationsOrder.OLDEST_FIRST) {
+          entities =
+              entityRepository.findBySearchPatternOrderByCreatedAtAscIdAsc(
+                  searchPattern, pageRequest);
+        } else {
+          entities =
+              entityRepository.findBySearchPatternOrderByCreatedAtDescIdDesc(
+                  searchPattern, pageRequest);
         }
-        return entityRepository.findBySearchPatternOrderByCreatedAtDescIdDesc(
-            searchPattern, pageRequest);
+      } else if (paginationCriteria.order() == DonationsOrder.OLDEST_FIRST) {
+        entities = entityRepository.findByOrderByCreatedAtAscIdAsc(pageRequest);
+      } else {
+        entities = entityRepository.findByOrderByCreatedAtDescIdDesc(pageRequest);
       }
-      if (order == DonationsOrder.OLDEST_FIRST) {
-        return entityRepository.findByOrderByCreatedAtAscIdAsc(pageRequest);
-      }
-      return entityRepository.findByOrderByCreatedAtDescIdDesc(pageRequest);
-    }
-
-    KeysetCursor boundary = cursorCodec.decode(cursor);
-    if (previousCursorRequest) {
-      if (Objects.nonNull(searchPattern)) {
-        if (order == DonationsOrder.OLDEST_FIRST) {
-          return entityRepository.findPreviousPageForOldestFirstBySearchPattern(
-              searchPattern, boundary.createdAt(), boundary.id(), pageRequest);
+    } else {
+      KeysetCursor boundary = cursorCodec.decode(paginationCriteria.cursor());
+      if (previousCursorRequest) {
+        if (Objects.nonNull(searchPattern)) {
+          if (paginationCriteria.order() == DonationsOrder.OLDEST_FIRST) {
+            entities =
+                entityRepository.findPreviousPageForOldestFirstBySearchPattern(
+                    searchPattern, boundary.createdAt(), boundary.id(), pageRequest);
+          } else {
+            entities =
+                entityRepository.findPreviousPageBySearchPattern(
+                    searchPattern, boundary.createdAt(), boundary.id(), pageRequest);
+          }
+        } else if (paginationCriteria.order() == DonationsOrder.OLDEST_FIRST) {
+          entities =
+              entityRepository.findPreviousPageForOldestFirst(
+                  boundary.createdAt(), boundary.id(), pageRequest);
+        } else {
+          entities =
+              entityRepository.findPreviousPage(boundary.createdAt(), boundary.id(), pageRequest);
         }
-        return entityRepository.findPreviousPageBySearchPattern(
-            searchPattern, boundary.createdAt(), boundary.id(), pageRequest);
+      } else if (Objects.nonNull(searchPattern)) {
+        if (paginationCriteria.order() == DonationsOrder.OLDEST_FIRST) {
+          entities =
+              entityRepository.findNextPageForOldestFirstBySearchPattern(
+                  searchPattern, boundary.createdAt(), boundary.id(), pageRequest);
+        } else {
+          entities =
+              entityRepository.findNextPageBySearchPattern(
+                  searchPattern, boundary.createdAt(), boundary.id(), pageRequest);
+        }
+      } else if (paginationCriteria.order() == DonationsOrder.OLDEST_FIRST) {
+        entities =
+            entityRepository.findNextPageForOldestFirst(
+                boundary.createdAt(), boundary.id(), pageRequest);
+      } else {
+        entities = entityRepository.findNextPage(boundary.createdAt(), boundary.id(), pageRequest);
       }
-      if (order == DonationsOrder.OLDEST_FIRST) {
-        return entityRepository.findPreviousPageForOldestFirst(
-            boundary.createdAt(), boundary.id(), pageRequest);
-      }
-      return entityRepository.findPreviousPage(boundary.createdAt(), boundary.id(), pageRequest);
-    }
-    if (Objects.nonNull(searchPattern)) {
-      if (order == DonationsOrder.OLDEST_FIRST) {
-        return entityRepository.findNextPageForOldestFirstBySearchPattern(
-            searchPattern, boundary.createdAt(), boundary.id(), pageRequest);
-      }
-      return entityRepository.findNextPageBySearchPattern(
-          searchPattern, boundary.createdAt(), boundary.id(), pageRequest);
-    }
-    if (order == DonationsOrder.OLDEST_FIRST) {
-      return entityRepository.findNextPageForOldestFirst(
-          boundary.createdAt(), boundary.id(), pageRequest);
-    }
-    return entityRepository.findNextPage(boundary.createdAt(), boundary.id(), pageRequest);
-  }
-
-  private long countDonations(String searchPattern) {
-    if (Objects.isNull(searchPattern)) {
-      return entityRepository.countByDeletedAtIsNull();
-    }
-    return entityRepository.countBySearchPattern(searchPattern);
-  }
-
-  private static String toSearchPattern(String query) {
-    if (Objects.isNull(query)) {
-      return null;
-    }
-    return "%" + query.toLowerCase(Locale.ROOT) + "%";
-  }
-
-  private static List<DonationEntity> getPageDonations(
-      boolean nextPageExists,
-      List<DonationEntity> fetchedEntities,
-      int pageSize,
-      boolean previousCursorRequest) {
-    if (fetchedEntities.isEmpty()) {
-      return fetchedEntities;
     }
 
-    if (previousCursorRequest) {
-      List<DonationEntity> entitiesAscending = fetchedEntities;
-      if (nextPageExists) {
-        entitiesAscending = fetchedEntities.subList(0, pageSize);
+    boolean overflowItemsExist = entities.size() > paginationCriteria.size();
+
+    List<DonationEntity> pageEntities;
+    if (entities.isEmpty()) {
+      pageEntities = entities;
+    } else if (previousCursorRequest) {
+      List<DonationEntity> entitiesAscending = entities;
+      if (overflowItemsExist) {
+        entitiesAscending = entities.subList(0, paginationCriteria.size());
       }
 
       List<DonationEntity> entitiesDescending = new ArrayList<>(entitiesAscending);
       Collections.reverse(entitiesDescending);
-      return entitiesDescending;
+      pageEntities = entitiesDescending;
+    } else if (!overflowItemsExist) {
+      pageEntities = entities;
+    } else {
+      pageEntities = entities.subList(0, paginationCriteria.size());
     }
 
-    if (!nextPageExists) {
-      return fetchedEntities;
-    }
-    return fetchedEntities.subList(0, pageSize);
-  }
-
-  private String getNextCursor(
-      String cursor,
-      boolean previousCursorRequest,
-      boolean overflowItemsExist,
-      List<DonationEntity> donations) {
-    if (donations.isEmpty()) {
-      return null;
+    String nextCursor = null;
+    if (!pageEntities.isEmpty()) {
+      if (!previousCursorRequest || Objects.nonNull(paginationCriteria.cursor())) {
+        if (previousCursorRequest || overflowItemsExist) {
+          DonationEntity lastEntity = pageEntities.getLast();
+          nextCursor = cursorCodec.encode(lastEntity.getCreatedAt(), lastEntity.getId());
+        }
+      }
     }
 
-    if (previousCursorRequest && Objects.isNull(cursor)) {
-      return null;
+    String previousCursor = null;
+    if (Objects.nonNull(paginationCriteria.cursor()) && !pageEntities.isEmpty()) {
+      if (!previousCursorRequest || overflowItemsExist) {
+        DonationEntity firstEntity = pageEntities.getFirst();
+        previousCursor =
+            cursorCodec.encodePrevious(firstEntity.getCreatedAt(), firstEntity.getId());
+      }
     }
 
-    if (!previousCursorRequest && !overflowItemsExist) {
-      return null;
-    }
+    List<Donation> donations = pageEntities.stream().map(entityMapper::toDomain).toList();
+    Metadata metadata =
+        Metadata.create(nextCursor, previousCursor, paginationCriteria.size(), totalCount);
 
-    DonationEntity lastEntity = donations.getLast();
-    return cursorCodec.encode(lastEntity.getCreatedAt(), lastEntity.getId());
-  }
-
-  private String getPreviousCursor(
-      String cursor,
-      boolean previousCursorRequest,
-      boolean overflowItemsExist,
-      List<DonationEntity> donations) {
-    if (Objects.isNull(cursor) || donations.isEmpty()) {
-      return null;
-    }
-
-    if (previousCursorRequest && !overflowItemsExist) {
-      return null;
-    }
-
-    DonationEntity firstEntity = donations.getFirst();
-    return cursorCodec.encodePrevious(firstEntity.getCreatedAt(), firstEntity.getId());
+    return Page.create(donations, metadata);
   }
 }
