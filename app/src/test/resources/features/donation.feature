@@ -84,6 +84,29 @@ Feature: Donation management
     When I retrieve the donation by id
     Then the response status should be 404
 
+  Scenario: Soft-deleted donations are hidden from read and update operations
+    Given I have a donation with random id, title "Visible donation" and description "Still active"
+    When I create the donation
+    Then the response status should be 201
+    And I record this donation as donation 1
+    Given I have a donation with random id, title "Donation to deactivate" and description "Will be deleted"
+    When I create the donation
+    Then the response status should be 201
+    And I record this donation as donation 2
+    And I select donation 2 as current donation id
+    When I delete the donation by id
+    Then the response status should be 204
+    When I retrieve all donations
+    Then the response status should be 200
+    And the donations page should include only donation id of donation 1
+    And I select donation 2 as current donation id
+    When I retrieve the donation by id
+    Then the response status should be 404
+    When I partially update the donation title to "Updated after deletion"
+    Then the response status should be 404
+    When I delete the donation by id
+    Then the response status should be 204
+
   Scenario: Create a donation, patch only title, and keep description unchanged
     Given I have a donation with random id, title "Neighborhood Library" and description "Books and shelves for local students"
     When I create the donation

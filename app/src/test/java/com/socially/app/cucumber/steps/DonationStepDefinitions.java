@@ -159,6 +159,11 @@ public class DonationStepDefinitions {
     }
   }
 
+  @And("I select donation {int} as current donation id")
+  public void iSelectDonationAsCurrentDonationId(int donationNumber) {
+    id = expectedDonationId(donationNumber);
+  }
+
   @And("I create {int} additional donations for pagination")
   public void iCreateAdditionalDonationsForPagination(int donationsCount) throws Exception {
     for (int index = 0; index < donationsCount; index++) {
