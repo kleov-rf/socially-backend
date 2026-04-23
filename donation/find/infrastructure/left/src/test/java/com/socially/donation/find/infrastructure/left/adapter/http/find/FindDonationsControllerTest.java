@@ -6,8 +6,10 @@ import static org.mockito.Mockito.*;
 import com.socially.donation.find.application.input.FindDonationsQuery;
 import com.socially.donation.find.application.output.FindDonationDto;
 import com.socially.donation.find.application.port.left.FindDonationsUseCase;
+import com.socially.donation.find.domain.filter.FilterCriteria;
 import com.socially.donation.find.domain.pagination.Metadata;
 import com.socially.donation.find.domain.pagination.Page;
+import com.socially.donation.find.domain.pagination.PageSize;
 import com.socially.donation.find.domain.pagination.PaginationCriteria;
 import com.socially.donation.find.infrastructure.left.adapter.http.find.input.mapper.FindDonationsQueryMapper;
 import com.socially.donation.find.infrastructure.left.adapter.http.find.output.FindDonationResponse;
@@ -53,7 +55,9 @@ class FindDonationsControllerTest {
   void find_should_call_use_case_with_mapped_query() {
     FindDonationsQuery query =
         new FindDonationsQuery(
-            PaginationCriteria.create("next-cursor", 10, PaginationCriteria.DEFAULT_ORDER, null));
+            PaginationCriteria.create(
+                "next-cursor", PageSize.TEN_ITEMS, PaginationCriteria.DEFAULT_ORDER),
+            FilterCriteria.create("school"));
     when(queryMapper.toQuery("next-cursor", 10, "newest_first", "school")).thenReturn(query);
 
     controller.find("next-cursor", 10, "newest_first", "school");
@@ -65,7 +69,9 @@ class FindDonationsControllerTest {
   void find_should_call_response_mapper_with_use_case_output() {
     FindDonationsQuery query =
         new FindDonationsQuery(
-            PaginationCriteria.create("next-cursor", 10, PaginationCriteria.DEFAULT_ORDER, null));
+            PaginationCriteria.create(
+                "next-cursor", PageSize.TEN_ITEMS, PaginationCriteria.DEFAULT_ORDER),
+            FilterCriteria.create("school"));
     Page<FindDonationDto> page =
         Page.create(List.of(), Metadata.create("next-cursor", "previous-cursor", 10, 100L));
     when(queryMapper.toQuery("next-cursor", 10, "newest_first", "school")).thenReturn(query);
@@ -87,7 +93,9 @@ class FindDonationsControllerTest {
             LAST_UPDATED_AT);
     FindDonationsQuery query =
         new FindDonationsQuery(
-            PaginationCriteria.create("next-cursor", 10, PaginationCriteria.DEFAULT_ORDER, null));
+            PaginationCriteria.create(
+                "next-cursor", PageSize.TEN_ITEMS, PaginationCriteria.DEFAULT_ORDER),
+            FilterCriteria.create("school"));
     Page<FindDonationDto> page =
         Page.create(
             List.of(donationDto), Metadata.create("next-cursor", "previous-cursor", 10, 100L));

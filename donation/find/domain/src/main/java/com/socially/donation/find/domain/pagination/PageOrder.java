@@ -5,7 +5,7 @@ import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public enum DonationsOrder {
+public enum PageOrder {
   NEWEST_FIRST("newest_first"),
   OLDEST_FIRST("oldest_first");
 
@@ -15,7 +15,7 @@ public enum DonationsOrder {
     return value;
   }
 
-  public static DonationsOrder fromValue(String value) {
+  public static PageOrder fromValue(String value) {
     if (Objects.isNull(value)) {
       return NEWEST_FIRST;
     }

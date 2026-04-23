@@ -8,8 +8,10 @@ import static org.mockito.Mockito.when;
 import com.socially.donation.find.application.input.FindDonationsQuery;
 import com.socially.donation.find.application.output.FindDonationDto;
 import com.socially.donation.find.application.output.mapper.FindDonationDtoMapper;
+import com.socially.donation.find.domain.filter.FilterCriteria;
 import com.socially.donation.find.domain.pagination.Metadata;
 import com.socially.donation.find.domain.pagination.Page;
+import com.socially.donation.find.domain.pagination.PageSize;
 import com.socially.donation.find.domain.pagination.PaginationCriteria;
 import com.socially.donation.find.domain.port.right.FindDonationsRepository;
 import com.socially.donation.kernel.domain.entity.Donation;
@@ -42,15 +44,17 @@ class FindDonationsQueryHandlerTest {
     FindDonationsQuery query =
         new FindDonationsQuery(
             PaginationCriteria.create(
-                null, PaginationCriteria.DEFAULT_SIZE, PaginationCriteria.DEFAULT_ORDER, null));
-    when(donationRepository.find(query.paginationCriteria()))
+                null, PaginationCriteria.DEFAULT_SIZE, PaginationCriteria.DEFAULT_ORDER),
+            FilterCriteria.create(null));
+    when(donationRepository.find(query.paginationCriteria(), query.filterCriteria()))
         .thenReturn(
             Page.create(
-                List.of(), Metadata.create(null, null, PaginationCriteria.DEFAULT_SIZE, 0L)));
+                List.of(),
+                Metadata.create(null, null, PaginationCriteria.DEFAULT_SIZE.value(), 0L)));
 
     handler.execute(query);
 
-    verify(donationRepository).find(query.paginationCriteria());
+    verify(donationRepository).find(query.paginationCriteria(), query.filterCriteria());
   }
 
   @Test
@@ -71,8 +75,9 @@ class FindDonationsQueryHandlerTest {
             LAST_UPDATED_AT);
     FindDonationsQuery query =
         new FindDonationsQuery(
-            PaginationCriteria.create(null, 10, PaginationCriteria.DEFAULT_ORDER, null));
-    when(donationRepository.find(query.paginationCriteria()))
+            PaginationCriteria.create(null, PageSize.TEN_ITEMS, PaginationCriteria.DEFAULT_ORDER),
+            FilterCriteria.create("school"));
+    when(donationRepository.find(query.paginationCriteria(), query.filterCriteria()))
         .thenReturn(
             Page.create(
                 List.of(firstDonation, secondDonation),
@@ -102,8 +107,9 @@ class FindDonationsQueryHandlerTest {
             donation.lastUpdatedAt());
     FindDonationsQuery query =
         new FindDonationsQuery(
-            PaginationCriteria.create(null, 10, PaginationCriteria.DEFAULT_ORDER, null));
-    when(donationRepository.find(query.paginationCriteria()))
+            PaginationCriteria.create(null, PageSize.TEN_ITEMS, PaginationCriteria.DEFAULT_ORDER),
+            FilterCriteria.create("school"));
+    when(donationRepository.find(query.paginationCriteria(), query.filterCriteria()))
         .thenReturn(
             Page.create(
                 List.of(donation), Metadata.create("next-cursor", "previous-cursor", 10, 100L)));
@@ -132,8 +138,9 @@ class FindDonationsQueryHandlerTest {
             donation.lastUpdatedAt());
     FindDonationsQuery query =
         new FindDonationsQuery(
-            PaginationCriteria.create(null, 10, PaginationCriteria.DEFAULT_ORDER, null));
-    when(donationRepository.find(query.paginationCriteria()))
+            PaginationCriteria.create(null, PageSize.TEN_ITEMS, PaginationCriteria.DEFAULT_ORDER),
+            FilterCriteria.create("school"));
+    when(donationRepository.find(query.paginationCriteria(), query.filterCriteria()))
         .thenReturn(
             Page.create(
                 List.of(donation), Metadata.create("next-cursor", "previous-cursor", 10, 100L)));
