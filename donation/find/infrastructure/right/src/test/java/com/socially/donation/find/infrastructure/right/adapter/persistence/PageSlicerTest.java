@@ -12,37 +12,93 @@ import org.junit.jupiter.api.Test;
 
 class PageSlicerTest {
   private static final Instant CREATED_AT = Instant.parse("2024-06-01T12:00:00Z");
+
   private final PageSlicer sut = new PageSlicer();
 
   @Test
-  void slice_should_return_empty_slice_when_no_items() {
+  void slice_should_return_slice_with_received_entities_when_entities_empty() {
+    List<DonationEntity> entities = List.of();
+
+    PageSlice result = sut.slice(entities, 5, false);
+
+    assertEquals(entities, result.entities());
+  }
+
+  @Test
+  void slice_should_return_slice_with_overflow_not_exists_when_entities_empty() {
     PageSlice result = sut.slice(List.of(), 5, false);
 
-    assertEquals(List.of(), result.entities());
     assertFalse(result.overflowItemsExist());
   }
 
   @Test
-  void slice_should_trim_overflow_for_next_page() {
-    List<DonationEntity> items = List.of(entity("1"), entity("2"), entity("3"));
+  void slice_should_return_slice_with_overflow_exists_when_entities_size_greater_than_page_size() {
+    List<DonationEntity> entities = List.of(entity("1"), entity("2"), entity("3"));
 
-    PageSlice result = sut.slice(items, 2, false);
+    PageSlice result = sut.slice(entities, 2, false);
 
-    assertEquals(items.getFirst(), result.entities().getFirst());
-    assertEquals(items.get(1), result.entities().get(1));
     assertTrue(result.overflowItemsExist());
   }
 
   @Test
-  void slice_should_reverse_items_for_previous_page() {
-    List<DonationEntity> ascendingItems = List.of(entity("1"), entity("2"), entity("3"));
+  void slice_should_return_slice_with_overflow_not_exists_when_entities_size_equal_to_page_size() {
+    List<DonationEntity> entities = List.of(entity("1"), entity("2"));
 
-    PageSlice result = sut.slice(ascendingItems, 3, true);
+    PageSlice result = sut.slice(entities, 2, false);
 
-    assertEquals(ascendingItems.get(2), result.entities().getFirst());
-    assertEquals(ascendingItems.get(1), result.entities().get(1));
-    assertEquals(ascendingItems.getFirst(), result.entities().get(2));
     assertFalse(result.overflowItemsExist());
+  }
+
+  @Test
+  void
+      slice_should_return_slice_with_overflow_not_exists_when_entities_size_lesser_than_page_size() {
+    List<DonationEntity> entities = List.of(entity("1"), entity("2"));
+
+    PageSlice result = sut.slice(entities, 3, false);
+
+    assertFalse(result.overflowItemsExist());
+  }
+
+  @Test
+  void slice_should_return_slice_with_entities_of_page_size_when_overflow_exists() {
+    List<DonationEntity> entities = List.of(entity("1"), entity("2"), entity("3"));
+
+    PageSlice result = sut.slice(entities, 2, false);
+
+    assertEquals(List.of(entities.get(0), entities.get(1)), result.entities());
+  }
+
+  @Test
+  void slice_should_return_slice_with_received_entities_when_overflow_not_exists() {
+    List<DonationEntity> entities = List.of(entity("1"), entity("2"));
+
+    PageSlice result = sut.slice(entities, 2, false);
+
+    assertEquals(entities, result.entities());
+  }
+
+  @Test
+  void slice_should_return_slice_with_reversed_entities_when_is_previous_cursor_request() {
+    List<DonationEntity> entitiesAscending = List.of(entity("1"), entity("2"), entity("3"));
+
+    PageSlice result = sut.slice(entitiesAscending, 3, true);
+
+    assertEquals(
+        List.of(entitiesAscending.get(2), entitiesAscending.get(1), entitiesAscending.get(0)),
+        result.entities());
+  }
+
+  @Test
+  void
+      slice_should_return_slice_with_entities_of_page_size_when_overflow_exists_for_previous_cursor_request() {
+    List<DonationEntity> entitiesAscending =
+        List.of(entity("1"), entity("2"), entity("3"), entity("4"));
+
+    PageSlice result = sut.slice(entitiesAscending, 3, true);
+
+    assertEquals(
+        List.of(entitiesAscending.get(2), entitiesAscending.get(1), entitiesAscending.get(0)),
+        result.entities());
   }
 
   private static DonationEntity entity(String sequence) {

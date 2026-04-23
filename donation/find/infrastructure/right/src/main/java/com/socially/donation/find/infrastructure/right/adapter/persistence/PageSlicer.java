@@ -9,13 +9,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class PageSlicer {
   public PageSlice slice(
-      List<DonationEntity> entities, int pageSize, boolean previousCursorRequest) {
-    boolean overflowItemsExist = entities.size() > pageSize;
+      List<DonationEntity> entities, int pageSize, boolean isPreviousCursorRequest) {
     if (entities.isEmpty()) {
-      return new PageSlice(entities, overflowItemsExist);
+      return new PageSlice(entities, false);
     }
 
-    if (previousCursorRequest) {
+    boolean overflowItemsExist = entities.size() > pageSize;
+
+    if (isPreviousCursorRequest) {
       return processPreviousCursorRequest(entities, pageSize, overflowItemsExist);
     }
 
