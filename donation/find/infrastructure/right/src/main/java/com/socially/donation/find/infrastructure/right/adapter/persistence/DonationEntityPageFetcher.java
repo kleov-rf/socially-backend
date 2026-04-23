@@ -1,6 +1,5 @@
 package com.socially.donation.find.infrastructure.right.adapter.persistence;
 
-import com.socially.donation.find.domain.pagination.PageOrder;
 import com.socially.donation.kernel.infrastructure.right.adapter.persistence.DonationEntityRepository;
 import com.socially.donation.kernel.infrastructure.right.adapter.persistence.entity.DonationEntity;
 import java.util.List;
@@ -25,63 +24,76 @@ public class DonationEntityPageFetcher implements PageFetcher {
   }
 
   private List<DonationEntity> fetchInitialPage(FetchCriteria criteria) {
-    if (Objects.nonNull(criteria.searchPattern())) {
-      if (criteria.paginationCriteria().order() == PageOrder.OLDEST_FIRST) {
-        return entityRepository.findBySearchPatternOrderByCreatedAtAscIdAsc(
-            criteria.searchPattern(), criteria.pageRequest());
-      }
-      return entityRepository.findBySearchPatternOrderByCreatedAtDescIdDesc(
-          criteria.searchPattern(), criteria.pageRequest());
+    if (Objects.isNull(criteria.searchPattern())) {
+      return switch (criteria.paginationCriteria().order()) {
+        case OLDEST_FIRST ->
+            entityRepository.findByOrderByCreatedAtAscIdAsc(criteria.pageRequest());
+        case NEWEST_FIRST ->
+            entityRepository.findByOrderByCreatedAtDescIdDesc(criteria.pageRequest());
+      };
     }
-    if (criteria.paginationCriteria().order() == PageOrder.OLDEST_FIRST) {
-      return entityRepository.findByOrderByCreatedAtAscIdAsc(criteria.pageRequest());
-    }
-    return entityRepository.findByOrderByCreatedAtDescIdDesc(criteria.pageRequest());
+
+    return switch (criteria.paginationCriteria().order()) {
+      case OLDEST_FIRST ->
+          entityRepository.findBySearchPatternOrderByCreatedAtAscIdAsc(
+              criteria.searchPattern(), criteria.pageRequest());
+      case NEWEST_FIRST ->
+          entityRepository.findBySearchPatternOrderByCreatedAtDescIdDesc(
+              criteria.searchPattern(), criteria.pageRequest());
+    };
   }
 
   private List<DonationEntity> fetchPreviousPage(FetchCriteria criteria) {
-    if (Objects.nonNull(criteria.searchPattern())) {
-      if (criteria.paginationCriteria().order() == PageOrder.OLDEST_FIRST) {
-        return entityRepository.findPreviousPageForOldestFirstBySearchPattern(
-            criteria.searchPattern(),
-            criteria.boundary().createdAt(),
-            criteria.boundary().id(),
-            criteria.pageRequest());
-      }
-      return entityRepository.findPreviousPageBySearchPattern(
-          criteria.searchPattern(),
-          criteria.boundary().createdAt(),
-          criteria.boundary().id(),
-          criteria.pageRequest());
+    if (Objects.isNull(criteria.searchPattern())) {
+      return switch (criteria.paginationCriteria().order()) {
+        case OLDEST_FIRST ->
+            entityRepository.findPreviousPageForOldestFirst(
+                criteria.boundary().createdAt(), criteria.boundary().id(), criteria.pageRequest());
+        case NEWEST_FIRST ->
+            entityRepository.findPreviousPage(
+                criteria.boundary().createdAt(), criteria.boundary().id(), criteria.pageRequest());
+      };
     }
-    if (criteria.paginationCriteria().order() == PageOrder.OLDEST_FIRST) {
-      return entityRepository.findPreviousPageForOldestFirst(
-          criteria.boundary().createdAt(), criteria.boundary().id(), criteria.pageRequest());
-    }
-    return entityRepository.findPreviousPage(
-        criteria.boundary().createdAt(), criteria.boundary().id(), criteria.pageRequest());
+    return switch (criteria.paginationCriteria().order()) {
+      case OLDEST_FIRST ->
+          entityRepository.findPreviousPageForOldestFirstBySearchPattern(
+              criteria.searchPattern(),
+              criteria.boundary().createdAt(),
+              criteria.boundary().id(),
+              criteria.pageRequest());
+      case NEWEST_FIRST ->
+          entityRepository.findPreviousPageBySearchPattern(
+              criteria.searchPattern(),
+              criteria.boundary().createdAt(),
+              criteria.boundary().id(),
+              criteria.pageRequest());
+    };
   }
 
   private List<DonationEntity> fetchNextPage(FetchCriteria criteria) {
-    if (Objects.nonNull(criteria.searchPattern())) {
-      if (criteria.paginationCriteria().order() == PageOrder.OLDEST_FIRST) {
-        return entityRepository.findNextPageForOldestFirstBySearchPattern(
-            criteria.searchPattern(),
-            criteria.boundary().createdAt(),
-            criteria.boundary().id(),
-            criteria.pageRequest());
-      }
-      return entityRepository.findNextPageBySearchPattern(
-          criteria.searchPattern(),
-          criteria.boundary().createdAt(),
-          criteria.boundary().id(),
-          criteria.pageRequest());
+    if (Objects.isNull(criteria.searchPattern())) {
+      return switch (criteria.paginationCriteria().order()) {
+        case OLDEST_FIRST ->
+            entityRepository.findNextPageForOldestFirst(
+                criteria.boundary().createdAt(), criteria.boundary().id(), criteria.pageRequest());
+        case NEWEST_FIRST ->
+            entityRepository.findNextPage(
+                criteria.boundary().createdAt(), criteria.boundary().id(), criteria.pageRequest());
+      };
     }
-    if (criteria.paginationCriteria().order() == PageOrder.OLDEST_FIRST) {
-      return entityRepository.findNextPageForOldestFirst(
-          criteria.boundary().createdAt(), criteria.boundary().id(), criteria.pageRequest());
-    }
-    return entityRepository.findNextPage(
-        criteria.boundary().createdAt(), criteria.boundary().id(), criteria.pageRequest());
+    return switch (criteria.paginationCriteria().order()) {
+      case OLDEST_FIRST ->
+          entityRepository.findNextPageForOldestFirstBySearchPattern(
+              criteria.searchPattern(),
+              criteria.boundary().createdAt(),
+              criteria.boundary().id(),
+              criteria.pageRequest());
+      case NEWEST_FIRST ->
+          entityRepository.findNextPageBySearchPattern(
+              criteria.searchPattern(),
+              criteria.boundary().createdAt(),
+              criteria.boundary().id(),
+              criteria.pageRequest());
+    };
   }
 }
