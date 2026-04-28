@@ -39,7 +39,7 @@ jobs:
 
   push:
     name: Image
-    needs: [ sonar-scan, build ]
+    needs: [ snyk-scan, sonar-scan, build ]
     uses: ./.github/workflows/_push-image.yaml
     with:
       environment: ${{ (github.event_name == 'workflow_dispatch' && inputs.environment) || 'dev' }}
