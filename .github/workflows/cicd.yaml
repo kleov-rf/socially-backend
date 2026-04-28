@@ -21,6 +21,11 @@ permissions:
   contents: read
 
 jobs:
+  snyk-scan:
+    name: Pre-checks
+    uses: ./.github/workflows/_snyk-scan.yaml
+    secrets: inherit
+
   sonar-scan:
     name: Pre-checks
     uses: ./.github/workflows/_sonar-scan.yaml
