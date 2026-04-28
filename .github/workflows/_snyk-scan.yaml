@@ -22,12 +22,12 @@ jobs:
       - name: Set up Snyk CLI
         uses: snyk/actions/setup@master
 
-      - name: Send snapshot to Snyk UI
-        run: snyk monitor --all-projects --fail-on=upgradable --severity-threshold=high
+      - name: Run Snyk test
+        run: snyk test --all-projects --fail-on=upgradable --severity-threshold=high
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
-      - name: Run Snyk test
-        run: snyk test --all-projects --fail-on=upgradable --severity-threshold=high
+      - name: Send snapshot to Snyk UI
+        run: snyk monitor --all-projects --fail-on=upgradable --severity-threshold=high
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
