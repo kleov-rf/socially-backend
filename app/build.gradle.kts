@@ -1,7 +1,7 @@
 plugins {
     java
-    id("org.springframework.boot") version "4.0.0-RC2"
-    id("io.spring.dependency-management") version "1.1.7"
+    alias(libs.plugins.spring.boot)
+    alias(libs.plugins.spring.dependency.management)
 }
 
 group = "com.socially"
@@ -24,29 +24,25 @@ dependencies {
     implementation(project(":donation:get-by-id:infrastructure:left"))
     implementation(project(":donation:update:infrastructure:left"))
     implementation(project(":donation:find:infrastructure:left"))
-    implementation("org.springframework.boot:spring-boot-starter-webmvc")
-    implementation("org.springframework.boot:spring-boot-starter-actuator")
-    implementation("org.springframework.boot:spring-boot-starter-validation")
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("org.postgresql:postgresql")
-    implementation("org.springframework.boot:spring-boot-starter-flyway")
-    implementation("org.flywaydb:flyway-database-postgresql")
+    implementation(libs.spring.boot.starter.webmvc)
+    implementation(libs.spring.boot.starter.actuator)
+    implementation(libs.spring.boot.starter.validation)
+    implementation(libs.spring.boot.starter.data.jpa)
+    implementation(libs.postgresql)
+    implementation(libs.spring.boot.starter.flyway)
+    implementation(libs.flyway.database.postgresql)
 
-    compileOnly("org.projectlombok:lombok")
-    annotationProcessor("org.projectlombok:lombok")
+    compileOnly(libs.lombok)
+    annotationProcessor(libs.lombok)
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("com.fasterxml.jackson.core:jackson-databind")
-    testRuntimeOnly("com.h2database:h2")
+    testImplementation(libs.spring.boot.starter.test)
+    testImplementation(libs.jackson.databind)
+    testRuntimeOnly(libs.h2)
 
-    testImplementation("io.cucumber:cucumber-java:7.22.0")
-    testImplementation("io.cucumber:cucumber-spring:7.22.0")
-    testImplementation("io.cucumber:cucumber-junit-platform-engine:7.22.0")
-    testImplementation("org.junit.platform:junit-platform-suite:1.11.4")
+    testImplementation(libs.bundles.cucumber)
+    testImplementation(libs.junit.platform.suite)
 
-    testImplementation("org.testcontainers:testcontainers:2.0.3")
-    testImplementation("org.testcontainers:testcontainers-postgresql:2.0.3")
-    testImplementation("org.testcontainers:testcontainers-junit-jupiter:2.0.3")
+    testImplementation(libs.bundles.testcontainers)
 }
 
 tasks.named<Test>("test") {

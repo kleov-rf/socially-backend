@@ -1,9 +1,9 @@
 plugins {
     java
-    id("org.springframework.boot") version "4.0.0-RC2" apply false
-    id("io.spring.dependency-management") version "1.1.7" apply false
-    id("com.diffplug.spotless") version "8.0.0"
-    id("org.sonarqube") version "7.2.3.7755"
+    alias(libs.plugins.spring.boot) apply false
+    alias(libs.plugins.spring.dependency.management) apply false
+    alias(libs.plugins.spotless)
+    alias(libs.plugins.sonarqube)
 }
 
 group = "com.socially"

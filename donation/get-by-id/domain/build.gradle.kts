@@ -1,6 +1,6 @@
 plugins {
     `java-library`
-    id("io.spring.dependency-management") version "1.1.7"
+    alias(libs.plugins.spring.dependency.management)
 }
 
 group = "com.socially.donation.getbyid.domain"
@@ -18,18 +18,18 @@ repositories {
 
 dependencyManagement {
     imports {
-        mavenBom("org.springframework.boot:spring-boot-dependencies:4.0.0-RC2")
+        mavenBom("${libs.spring.boot.dependencies.bom.get().module}:${libs.versions.spring.boot.get()}")
     }
 }
 
 dependencies {
     api(project(":donation:kernel:domain"))
 
-    compileOnly("org.projectlombok:lombok")
-    annotationProcessor("org.projectlombok:lombok")
+    compileOnly(libs.lombok)
+    annotationProcessor(libs.lombok)
 
-    testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platform.launcher)
 }
 
 tasks.withType<Test> {
