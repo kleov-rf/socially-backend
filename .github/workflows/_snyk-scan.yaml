@@ -19,10 +19,10 @@ jobs:
           distribution: temurin
           cache: gradle
 
-      - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/gradle@master
+      - name: Set up Snyk CLI
+        uses: snyk/actions/setup@master
+
+      - name: Snyk monitor
+        run: snyk test --all-projects --fail-on=upgradable --severity-threshold=high
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          command: test
-          args: --all-projects --severity-threshold=high
