@@ -9,6 +9,7 @@ junit-platform-suite = "1.11.4"
 mockito = "5.15.2"
 cucumber = "7.22.0"
 testcontainers = "2.0.3"
+logstash-logback-encoder = "8.1"
 
 [libraries]
 spring-boot-dependencies-bom = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "spring-boot" }
@@ -28,6 +29,7 @@ lombok = { module = "org.projectlombok:lombok" }
 jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind" }
 h2 = { module = "com.h2database:h2" }
 jakarta-validation-api = { module = "jakarta.validation:jakarta.validation-api", version.ref = "jakarta-validation" }
+logstash-logback-encoder = { module = "net.logstash.logback:logstash-logback-encoder", version.ref = "logstash-logback-encoder" }
 
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit-jupiter" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
