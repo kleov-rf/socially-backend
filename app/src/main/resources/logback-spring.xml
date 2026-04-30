@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+      <providers>
+        <timestamp>
+          <fieldName>timestamp</fieldName>
+        </timestamp>
+        <logLevel>
+          <fieldName>level</fieldName>
+        </logLevel>
+        <threadName>
+          <fieldName>thread</fieldName>
+        </threadName>
+        <loggerName>
+          <fieldName>logger</fieldName>
+        </loggerName>
+        <message>
+          <fieldName>message</fieldName>
+        </message>
+        <mdc />
+        <arguments />
+        <pattern>
+          <pattern>
+            {
+              "trace_id":"%X{dd.trace_id:-}",
+              "span_id":"%X{dd.span_id:-}",
+              "service":"${DD_SERVICE:-${spring.application.name:-socially-backend}}",
+              "env":"${DD_ENV:-}",
+              "version":"${DD_VERSION:-}",
+              "exception.class":"%replace(%ex{0}){'\\:.*',''}"
+            }
+          </pattern>
+        </pattern>
+        <stackTrace>
+          <fieldName>exception.stacktrace</fieldName>
+        </stackTrace>
+      </providers>
+    </encoder>
+  </appender>
+
+  <root level="INFO">
+    <appender-ref ref="JSON_CONSOLE" />
+  </root>
+</configuration>
