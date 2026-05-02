@@ -10,6 +10,7 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,6 +19,7 @@ import org.slf4j.MDC;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
@@ -105,6 +107,50 @@ class RequestResponseLoggingInterceptorTest {
     assertNull(appender.list.get(0).getMDCPropertyMap().get("operation"));
     assertNull(appender.list.get(1).getMDCPropertyMap().get("operation"));
     assertNull(MDC.get("operation"));
+  }
+
+  @Test
+  void logsEntityIdInMdcWhenPathVariableIdIsPresent() throws Exception {
+    MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/donations/123");
+    request.setContent("request-payload".getBytes(StandardCharsets.UTF_8));
+    request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, Map.of("id", "123"));
+    ContentCachingRequestWrapper cachedRequest = new ContentCachingRequestWrapper(request, 1024);
+    cachedRequest.getInputStream().readAllBytes();
+    ContentCachingResponseWrapper cachedResponse =
+        new ContentCachingResponseWrapper(new MockHttpServletResponse());
+    cachedResponse.getWriter().write("response-payload");
+    cachedResponse.setStatus(200);
+    HandlerMethod handlerMethod = new HandlerMethod(new AnnotatedController(), "endpoint");
+
+    interceptor.preHandle(cachedRequest, cachedResponse, handlerMethod);
+    interceptor.afterCompletion(cachedRequest, cachedResponse, handlerMethod, null);
+
+    assertEquals(2, appender.list.size());
+    assertEquals("123", appender.list.get(0).getMDCPropertyMap().get("entity_id"));
+    assertEquals("123", appender.list.get(1).getMDCPropertyMap().get("entity_id"));
+    assertNull(MDC.get("entity_id"));
+  }
+
+  @Test
+  void doesNotSetEntityIdMdcWhenPathVariableIdIsMissing() throws Exception {
+    MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/donations");
+    request.setContent("request-payload".getBytes(StandardCharsets.UTF_8));
+    request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, Map.of());
+    ContentCachingRequestWrapper cachedRequest = new ContentCachingRequestWrapper(request, 1024);
+    cachedRequest.getInputStream().readAllBytes();
+    ContentCachingResponseWrapper cachedResponse =
+        new ContentCachingResponseWrapper(new MockHttpServletResponse());
+    cachedResponse.getWriter().write("response-payload");
+    cachedResponse.setStatus(200);
+    HandlerMethod handlerMethod = new HandlerMethod(new AnnotatedController(), "endpoint");
+
+    interceptor.preHandle(cachedRequest, cachedResponse, handlerMethod);
+    interceptor.afterCompletion(cachedRequest, cachedResponse, handlerMethod, null);
+
+    assertEquals(2, appender.list.size());
+    assertNull(appender.list.get(0).getMDCPropertyMap().get("entity_id"));
+    assertNull(appender.list.get(1).getMDCPropertyMap().get("entity_id"));
+    assertNull(MDC.get("entity_id"));
   }
 
   @Test
