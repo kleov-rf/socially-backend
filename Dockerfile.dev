@@ -8,9 +8,10 @@ WORKDIR /app
 COPY gradle gradle
 COPY gradlew build.gradle.kts settings.gradle.kts ./
 
-# Copy all subprojects (app + donation modules)
+# Copy all subprojects (app + donation + commons modules)
 COPY app app
 COPY donation donation
+COPY commons commons
 
 # Build the application (no daemon, produce boot JAR from app module)
 RUN ./gradlew :app:bootJar --no-daemon -x test
