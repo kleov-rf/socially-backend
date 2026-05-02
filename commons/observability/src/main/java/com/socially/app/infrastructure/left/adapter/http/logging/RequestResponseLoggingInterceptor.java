@@ -29,6 +29,7 @@ public class RequestResponseLoggingInterceptor implements HandlerInterceptor {
     log.info(
         REQUEST_RECEIVED_MESSAGE,
         StructuredArguments.keyValue("uri", request.getRequestURI()),
+        StructuredArguments.keyValue("method", request.getMethod()),
         StructuredArguments.keyValue("body", extractRequestBody(request)));
     return true;
   }
@@ -40,6 +41,7 @@ public class RequestResponseLoggingInterceptor implements HandlerInterceptor {
       log.info(
           RESPONSE_SENT_MESSAGE,
           StructuredArguments.keyValue("uri", request.getRequestURI()),
+          StructuredArguments.keyValue("method", request.getMethod()),
           StructuredArguments.keyValue("status", response.getStatus()),
           StructuredArguments.keyValue("body", extractResponseBody(response)));
     } finally {
