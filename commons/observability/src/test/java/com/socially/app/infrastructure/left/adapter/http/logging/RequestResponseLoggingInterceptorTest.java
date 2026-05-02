@@ -110,6 +110,28 @@ class RequestResponseLoggingInterceptorTest {
   }
 
   @Test
+  void keepsEntityIdInMdcForBodyBasedFlowWhenPrepopulatedByFilter() throws Exception {
+    MockHttpServletRequest request = new MockHttpServletRequest("POST", "/api/donations");
+    request.setContent("request-payload".getBytes(StandardCharsets.UTF_8));
+    ContentCachingRequestWrapper cachedRequest = new ContentCachingRequestWrapper(request, 1024);
+    cachedRequest.getInputStream().readAllBytes();
+    ContentCachingResponseWrapper cachedResponse =
+        new ContentCachingResponseWrapper(new MockHttpServletResponse());
+    cachedResponse.getWriter().write("response-payload");
+    cachedResponse.setStatus(201);
+    HandlerMethod handlerMethod = new HandlerMethod(new AnnotatedController(), "endpoint");
+    MDC.put("entity_id", "from-body-123");
+
+    interceptor.preHandle(cachedRequest, cachedResponse, handlerMethod);
+    interceptor.afterCompletion(cachedRequest, cachedResponse, handlerMethod, null);
+
+    assertEquals(2, appender.list.size());
+    assertEquals("from-body-123", appender.list.get(0).getMDCPropertyMap().get("entity_id"));
+    assertEquals("from-body-123", appender.list.get(1).getMDCPropertyMap().get("entity_id"));
+    assertNull(MDC.get("entity_id"));
+  }
+
+  @Test
   void logsEntityIdInMdcWhenPathVariableIdIsPresent() throws Exception {
     MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/donations/123");
     request.setContent("request-payload".getBytes(StandardCharsets.UTF_8));

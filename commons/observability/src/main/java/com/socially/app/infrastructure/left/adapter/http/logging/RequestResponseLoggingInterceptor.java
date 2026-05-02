@@ -81,6 +81,10 @@ public class RequestResponseLoggingInterceptor implements HandlerInterceptor {
   }
 
   private String extractRequestBody(HttpServletRequest request) {
+    if (request instanceof CachedBodyHttpServletRequest wrapper) {
+      return wrapper.getCachedBodyAsString();
+    }
+
     if (request instanceof ContentCachingRequestWrapper wrapper) {
       return new String(wrapper.getContentAsByteArray(), StandardCharsets.UTF_8);
     }
