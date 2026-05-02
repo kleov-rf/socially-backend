@@ -22,7 +22,7 @@ public class RequestResponseLoggingInterceptor implements HandlerInterceptor {
       HttpServletRequest request, HttpServletResponse response, Object handler) {
     log.info(
         REQUEST_RECEIVED_MESSAGE,
-        StructuredArguments.keyValue("requestUri", request.getRequestURI()),
+        StructuredArguments.keyValue("uri", request.getRequestURI()),
         StructuredArguments.keyValue("body", extractRequestBody(request)));
     return true;
   }
@@ -32,7 +32,8 @@ public class RequestResponseLoggingInterceptor implements HandlerInterceptor {
       HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
     log.info(
         RESPONSE_SENT_MESSAGE,
-        StructuredArguments.keyValue("requestUri", request.getRequestURI()),
+        StructuredArguments.keyValue("uri", request.getRequestURI()),
+        StructuredArguments.keyValue("status", response.getStatus()),
         StructuredArguments.keyValue("body", extractResponseBody(response)));
   }
 

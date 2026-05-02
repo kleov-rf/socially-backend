@@ -55,7 +55,7 @@ class RequestResponseLoggingInterceptorTest {
     assertEquals(Level.INFO, event.getLevel());
     assertEquals("Request received", event.getFormattedMessage());
     assertEquals(2, event.getArgumentArray().length);
-    assertEquals("requestUri=/api/donations", event.getArgumentArray()[0].toString());
+    assertEquals("uri=/api/donations", event.getArgumentArray()[0].toString());
     assertEquals("body=request-payload", event.getArgumentArray()[1].toString());
     assertFalse(event.hasCallerData());
   }
@@ -75,8 +75,9 @@ class RequestResponseLoggingInterceptorTest {
     ILoggingEvent event = appender.list.getFirst();
     assertEquals(Level.INFO, event.getLevel());
     assertEquals("Response sent", event.getFormattedMessage());
-    assertEquals(2, event.getArgumentArray().length);
-    assertEquals("requestUri=/api/donations", event.getArgumentArray()[0].toString());
-    assertEquals("body=response-payload", event.getArgumentArray()[1].toString());
+    assertEquals(3, event.getArgumentArray().length);
+    assertEquals("uri=/api/donations", event.getArgumentArray()[0].toString());
+    assertEquals("status=201", event.getArgumentArray()[1].toString());
+    assertEquals("body=response-payload", event.getArgumentArray()[2].toString());
   }
 }
