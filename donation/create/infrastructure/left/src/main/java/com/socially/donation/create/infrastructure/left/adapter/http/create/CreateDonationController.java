@@ -1,5 +1,6 @@
 package com.socially.donation.create.infrastructure.left.adapter.http.create;
 
+import com.socially.app.infrastructure.left.adapter.http.logging.LogOperation;
 import com.socially.donation.create.application.input.CreateDonationCommand;
 import com.socially.donation.create.application.port.left.CreateDonationUseCase;
 import com.socially.donation.create.infrastructure.left.adapter.http.create.input.CreateDonationRequest;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@LogOperation("CREATE_DONATION")
 @RequestMapping("/api/donations")
 @RequiredArgsConstructor
 public class CreateDonationController {

@@ -2,6 +2,7 @@ package com.socially.app.infrastructure.left.adapter.http.logging;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ch.qos.logback.classic.Level;
@@ -13,8 +14,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
@@ -37,6 +40,7 @@ class RequestResponseLoggingInterceptorTest {
   void tearDown() {
     logger.detachAppender(appender);
     appender.stop();
+    MDC.clear();
   }
 
   @Test
@@ -61,6 +65,48 @@ class RequestResponseLoggingInterceptorTest {
   }
 
   @Test
+  void logsOperationInMdcForAnnotatedControllerHandler() throws Exception {
+    MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/donations");
+    request.setContent("request-payload".getBytes(StandardCharsets.UTF_8));
+    ContentCachingRequestWrapper cachedRequest = new ContentCachingRequestWrapper(request, 1024);
+    cachedRequest.getInputStream().readAllBytes();
+    ContentCachingResponseWrapper cachedResponse =
+        new ContentCachingResponseWrapper(new MockHttpServletResponse());
+    cachedResponse.getWriter().write("response-payload");
+    cachedResponse.setStatus(200);
+    HandlerMethod handlerMethod = new HandlerMethod(new AnnotatedController(), "endpoint");
+
+    interceptor.preHandle(cachedRequest, cachedResponse, handlerMethod);
+    interceptor.afterCompletion(cachedRequest, cachedResponse, handlerMethod, null);
+
+    assertEquals(2, appender.list.size());
+    assertEquals("CREATE_DONATION", appender.list.get(0).getMDCPropertyMap().get("operation"));
+    assertEquals("CREATE_DONATION", appender.list.get(1).getMDCPropertyMap().get("operation"));
+    assertNull(MDC.get("operation"));
+  }
+
+  @Test
+  void doesNotSetOperationMdcWhenAnnotationIsMissing() throws Exception {
+    MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/donations");
+    request.setContent("request-payload".getBytes(StandardCharsets.UTF_8));
+    ContentCachingRequestWrapper cachedRequest = new ContentCachingRequestWrapper(request, 1024);
+    cachedRequest.getInputStream().readAllBytes();
+    ContentCachingResponseWrapper cachedResponse =
+        new ContentCachingResponseWrapper(new MockHttpServletResponse());
+    cachedResponse.getWriter().write("response-payload");
+    cachedResponse.setStatus(200);
+    HandlerMethod handlerMethod = new HandlerMethod(new UnannotatedController(), "endpoint");
+
+    interceptor.preHandle(cachedRequest, cachedResponse, handlerMethod);
+    interceptor.afterCompletion(cachedRequest, cachedResponse, handlerMethod, null);
+
+    assertEquals(2, appender.list.size());
+    assertNull(appender.list.get(0).getMDCPropertyMap().get("operation"));
+    assertNull(appender.list.get(1).getMDCPropertyMap().get("operation"));
+    assertNull(MDC.get("operation"));
+  }
+
+  @Test
   void afterCompletion_logsResponseSentWithStructuredResponseBody() throws Exception {
     MockHttpServletRequest request = new MockHttpServletRequest("POST", "/api/donations");
     ContentCachingRequestWrapper cachedRequest = new ContentCachingRequestWrapper(request, 1024);
@@ -79,5 +125,14 @@ class RequestResponseLoggingInterceptorTest {
     assertEquals("uri=/api/donations", event.getArgumentArray()[0].toString());
     assertEquals("status=201", event.getArgumentArray()[1].toString());
     assertEquals("body=response-payload", event.getArgumentArray()[2].toString());
+  }
+
+  @LogOperation("CREATE_DONATION")
+  private static class AnnotatedController {
+    public void endpoint() {}
+  }
+
+  private static class UnannotatedController {
+    public void endpoint() {}
   }
 }

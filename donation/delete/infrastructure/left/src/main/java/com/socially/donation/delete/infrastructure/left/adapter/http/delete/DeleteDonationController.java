@@ -1,5 +1,6 @@
 package com.socially.donation.delete.infrastructure.left.adapter.http.delete;
 
+import com.socially.app.infrastructure.left.adapter.http.logging.LogOperation;
 import com.socially.donation.delete.application.input.DeleteDonationCommand;
 import com.socially.donation.delete.application.port.left.DeleteDonationUseCase;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@LogOperation("DELETE_DONATION")
 @RequestMapping("/api/donations")
 @RequiredArgsConstructor
 public class DeleteDonationController {

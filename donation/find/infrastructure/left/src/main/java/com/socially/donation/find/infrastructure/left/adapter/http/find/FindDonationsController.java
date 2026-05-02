@@ -1,5 +1,6 @@
 package com.socially.donation.find.infrastructure.left.adapter.http.find;
 
+import com.socially.app.infrastructure.left.adapter.http.logging.LogOperation;
 import com.socially.donation.find.application.input.FindDonationsQuery;
 import com.socially.donation.find.application.output.FindDonationDto;
 import com.socially.donation.find.application.port.left.FindDonationsUseCase;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@LogOperation("FIND_DONATIONS")
 @RequestMapping("/api/donations")
 @RequiredArgsConstructor
 public class FindDonationsController {

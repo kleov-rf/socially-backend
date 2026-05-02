@@ -1,5 +1,6 @@
 package com.socially.donation.getbyid.infrastructure.left.adapter.http.get;
 
+import com.socially.app.infrastructure.left.adapter.http.logging.LogOperation;
 import com.socially.donation.getbyid.application.input.FindDonationByIdQuery;
 import com.socially.donation.getbyid.application.port.left.FindDonationByIdUseCase;
 import com.socially.donation.getbyid.infrastructure.left.adapter.http.get.output.DonationResponseDto;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@LogOperation("GET_DONATION_BY_ID")
 @RequestMapping("/api/donations")
 @RequiredArgsConstructor
 public class GetDonationController {

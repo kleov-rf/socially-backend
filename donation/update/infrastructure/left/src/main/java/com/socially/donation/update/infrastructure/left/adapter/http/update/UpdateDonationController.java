@@ -1,5 +1,6 @@
 package com.socially.donation.update.infrastructure.left.adapter.http.update;
 
+import com.socially.app.infrastructure.left.adapter.http.logging.LogOperation;
 import com.socially.donation.update.application.DonationNotFoundException;
 import com.socially.donation.update.application.port.left.UpdateDonationUseCase;
 import com.socially.donation.update.infrastructure.left.adapter.http.update.input.UpdateDonationRequest;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@LogOperation("UPDATE_DONATION")
 @RequestMapping("/api/donations")
 @RequiredArgsConstructor
 public class UpdateDonationController {

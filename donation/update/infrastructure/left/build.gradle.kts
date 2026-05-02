@@ -20,6 +20,7 @@ repositories {
 }
 
 dependencies {
+    implementation(project(":commons:observability"))
     implementation(project(":donation:update:domain"))
     implementation(project(":donation:update:application"))
     implementation(project(":donation:update:infrastructure:right"))
