@@ -1,395 +1,175 @@
 # Socially Backend
 
-[![Java](https://img.shields.io/badge/Java-25-orange.svg)](https://openjdk.org/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0.0-green.svg)](https://spring.io/projects/spring-boot)
-[![Gradle](https://img.shields.io/badge/Gradle-Kotlin%20DSL-blue.svg)](https://gradle.org/)
-[![License](https://img.shields.io/badge/License-See%20LICENSE-lightgrey.svg)](LICENSE)
+Spring Boot backend for Socially. The currently implemented bounded context is donation management, exposed through `/api/donations` with create, list, get-by-id, partial update, and delete operations.
 
-Backend service for the Socially platform — a charitable donation management system.
+## Current Scope
 
-## Table of Contents
+Implemented in this repository today:
 
-- [Architecture](#architecture)
-- [Project Structure](#project-structure)
-- [Technology Stack](#technology-stack)
-- [Getting Started](#getting-started)
-- [Running the Application](#running-the-application)
-- [Testing](#testing)
-- [API Reference](#api-reference)
-- [Docker](#docker)
-- [Contributing](#contributing)
+- Donation write flows: create, partial update, delete.
+- Donation read flows: get by id and list.
+- Cursor pagination, configurable page size, sort order, and text query filtering on list endpoint.
+- Soft delete behavior (`deleted_at`) enforced across read and update operations.
+- Flyway-managed PostgreSQL schema evolution.
+- CI pipeline for security scan, code quality scan, image build, ECR push, and ECS deploy.
+
+Not implemented in this repository today:
+
+- Additional business domains beyond donations.
+- Background jobs/message consumers/schedulers.
+- Public OpenAPI/Swagger contract generation.
 
 ## Architecture
 
-This project follows **Hexagonal Architecture** (also known as Ports and Adapters), combined with **Domain-Driven Design (DDD)** principles and a **CQRS-lite** pattern for separating read and write operations.
+The codebase is a modular monolith using hexagonal layering:
 
-### Architectural Diagram
+- `domain` modules: entities, value objects, core rules.
+- `application` modules: use cases and orchestration.
+- `infrastructure:left` modules: HTTP adapters/controllers.
+- `infrastructure:right` modules: persistence adapters.
+- `app` module: Spring Boot runtime assembly.
 
-```
-┌──────────────────────────────────────────────────────────────────────┐
-│                              APP MODULE                               │
-│                      (Spring Boot Application)                        │
-│                                                                       │
-│  ┌───────────────────── DONATION MODULE ─────────────────────────┐   │
-│  │                                                                │   │
-│  │  ┌──────────────────────────────────────────────────────────┐ │   │
-│  │  │                INFRASTRUCTURE:LEFT                        │ │   │
-│  │  │         (Primary/Driving Adapters - HTTP API)             │ │   │
-│  │  │                                                           │ │   │
-│  │  │   • CreateDonationController    POST /api/donations       │ │   │
-│  │  │   • GetDonationController       GET  /api/donations/{id}  │ │   │
-│  │  └─────────────────────────┬────────────────────────────────┘ │   │
-│  │                            │                                   │   │
-│  │                            ▼ depends on                        │   │
-│  │  ┌──────────────────────────────────────────────────────────┐ │   │
-│  │  │                    APPLICATION                            │ │   │
-│  │  │               (Use Cases / Business Logic)                │ │   │
-│  │  │                                                           │ │   │
-│  │  │   Inbound Ports:                                          │ │   │
-│  │  │   • CreateDonationUseCase                                 │ │   │
-│  │  │   • FindDonationByIdUseCase                               │ │   │
-│  │  │                                                           │ │   │
-│  │  │   Handlers (Implementations):                             │ │   │
-│  │  │   • CreateDonationCommandHandler                          │ │   │
-│  │  │   • FindDonationByIdQueryHandler                          │ │   │
-│  │  └─────────────────────────┬────────────────────────────────┘ │   │
-│  │                            │                                   │   │
-│  │                            ▼ depends on                        │   │
-│  │  ┌──────────────────────────────────────────────────────────┐ │   │
-│  │  │                      DOMAIN                               │ │   │
-│  │  │          (Core Business Rules - Framework Free)           │ │   │
-│  │  │                                                           │ │   │
-│  │  │   Entities:      Donation                                 │ │   │
-│  │  │   Value Objects: Id, Title, Description                   │ │   │
-│  │  │   Outbound Ports: DonationRepository                      │ │   │
-│  │  └─────────────────────────▲────────────────────────────────┘ │   │
-│  │                            │                                   │   │
-│  │                            │ implements                        │   │
-│  │  ┌─────────────────────────┴────────────────────────────────┐ │   │
-│  │  │                INFRASTRUCTURE:RIGHT                       │ │   │
-│  │  │        (Secondary/Driven Adapters - Persistence)          │ │   │
-│  │  │                                                           │ │   │
-│  │  │   • JpaDonationRepository (PostgreSQL)                  │ │   │
-│  │  └──────────────────────────────────────────────────────────┘ │   │
-│  │                                                                │   │
-│  └────────────────────────────────────────────────────────────────┘   │
-│                                                                       │
-└───────────────────────────────────────────────────────────────────────┘
-```
+Main module graph:
 
-### Key Architectural Principles
-
-| Principle | Description |
-|-----------|-------------|
-| **Dependency Rule** | Dependencies always point inward. Domain has no external dependencies. |
-| **Port/Adapter Pattern** | Ports define contracts; adapters implement them for specific technologies. |
-| **Domain Isolation** | Business logic is isolated from frameworks, making it testable and portable. |
-| **CQRS-Lite** | Separate command (write) and query (read) handlers for clarity. |
-
-## Project Structure
-
-```
-socially-backend/
-├── app/                                    # Spring Boot application module
-│   └── src/
-│       ├── main/java/.../app/
-│       │   └── SociallyBackendApplication.java
-│       └── test/
-│           ├── java/.../cucumber/          # Cucumber BDD tests
-│           └── resources/features/         # Gherkin feature files
-│
-├── donation/                               # Donation bounded context
-│   ├── domain/                             # Core domain layer
-│   │   └── src/main/java/.../domain/
-│   │       ├── entity/                     # Domain entities
-│   │       │   └── Donation.java
-│   │       ├── valueobject/                # Value objects
-│   │       │   ├── Id.java
-│   │       │   ├── Title.java
-│   │       │   └── Description.java
-│   │       └── port/right/                 # Outbound ports (driven)
-│   │           └── DonationRepository.java
-│   │
-│   ├── application/                        # Application layer (use cases)
-│   │   └── src/main/java/.../application/
-│   │       ├── port/left/                  # Inbound ports (driving)
-│   │       │   ├── CreateDonationUseCase.java
-│   │       │   └── FindDonationByIdUseCase.java
-│   │       ├── create/                     # Create donation use case
-│   │       │   ├── CreateDonationCommandHandler.java
-│   │       │   ├── input/
-│   │       │   └── mapper/
-│   │       └── get/                        # Get donation use case
-│   │           ├── FindDonationByIdQueryHandler.java
-│   │           ├── input/
-│   │           ├── output/
-│   │           └── mapper/
-│   │
-│   └── infrastructure/
-│       ├── left/                           # Primary adapters (driving)
-│       │   └── src/main/java/.../left/adapter/http/
-│       │       ├── create/
-│       │       │   └── CreateDonationController.java
-│       │       └── get/
-│       │           └── GetDonationController.java
-│       │
-│       └── right/                          # Secondary adapters (driven)
-│           └── src/main/java/.../right/adapter/persistence/
-│               └── JpaDonationRepository.java
-│
-├── gradle/                                 # Gradle wrapper
-├── build.gradle.kts                        # Root build configuration
-├── settings.gradle.kts                     # Module definitions
-├── Dockerfile                              # Production container
-└── Dockerfile.dev                          # Development container
-```
-
-### Module Dependencies
-
-```
+```text
 app
- └── donation:infrastructure:left
-      ├── donation:application
-      │    └── donation:domain
-      └── donation:infrastructure:right
-           └── donation:domain
+├── commons:observability
+├── donation:create:infrastructure:left
+├── donation:delete:infrastructure:left
+├── donation:get-by-id:infrastructure:left
+├── donation:update:infrastructure:left
+└── donation:find:infrastructure:left
 ```
 
-## Technology Stack
+All declared Gradle modules are listed in `settings.gradle.kts`.
 
-| Category | Technology | Version |
-|----------|------------|---------|
-| **Language** | Java | 25 |
-| **Framework** | Spring Boot | 4.0.0-RC2 |
-| **Build Tool** | Gradle (Kotlin DSL) | 8.x |
-| **Code Quality** | Spotless (Google Java Format) | 8.0.0 |
-| **Testing** | JUnit 5, Mockito, Cucumber | Latest |
-| **Utilities** | Lombok | Latest |
-| **Container** | Docker (Eclipse Temurin) | JRE 25 Alpine |
+## API Surface
 
-## Getting Started
+Base URL: `http://localhost:8080/api`
+
+### Endpoints
+
+- `POST /donations` -> creates a donation (`201`).
+- `GET /donations` -> lists donations (`200`) with optional query params:
+  - `cursor`
+  - `size` (`5`, `10`, `20`)
+  - `order` (`newest_first`, `oldest_first`)
+  - `query` (text filter)
+- `GET /donations/{id}` -> returns donation or `404`.
+- `PATCH /donations/{id}` -> partial update (title and/or description), returns `204` or `404`.
+- `DELETE /donations/{id}` -> delete operation, returns `204`.
+
+### Request/response notes
+
+- Create request requires `id`, `title`, and `description`.
+- List response includes `items` plus `page` metadata:
+  - `nextCursor`, `previousCursor`, `hasNext`, `hasPrevious`, `size`, `totalCount`.
+- Delete is implemented as soft delete (`deleted_at`), validated by BDD scenarios.
+
+## Data and Runtime
+
+- Runtime framework: Spring Boot WebMVC + Validation + Actuator + Spring Data JPA.
+- Database: PostgreSQL (configured via `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD`).
+- Migrations: Flyway SQL scripts under `app/src/main/resources/db/migration`.
+- Health endpoint: `/actuator/health` (exposed through management config).
+- Production container includes Datadog Java agent (`dd-java-agent.jar`).
+
+## Local Development
 
 ### Prerequisites
 
-- **Java 25** or higher
-- **Gradle 8.x** (or use the included Gradle wrapper)
-- **Docker** (optional, for containerized deployment)
+- Java 25
+- Docker (required for local compose and integration tests)
 
-### Clone the Repository
+### Option 1: Run with Docker Compose
 
-```bash
-git clone https://github.com/your-org/socially-backend.git
-cd socially-backend
-```
-
-### Build the Project
-
-```bash
-# Using Gradle wrapper (recommended)
-./gradlew build
-
-# On Windows
-gradlew.bat build
-```
-
-### Code Formatting
-
-The project uses [Spotless](https://github.com/diffplug/spotless) with Google Java Format:
-
-```bash
-# Check formatting
-./gradlew spotlessCheck
-
-# Apply formatting
-./gradlew spotlessApply
-```
-
-## Running the Application
-
-### Option 1: Docker Compose (recommended for local full-stack)
-
-Starts PostgreSQL + backend; frontend can be added when running from `socially-frontend`:
+From this repository:
 
 ```bash
 docker compose up --build
 ```
 
-- **Backend:** http://localhost:8080
-- **Postgres:** localhost:5432 (user: `postgres`, pass: `postgres`, db: `socially`)
+Services started:
 
-### Option 2: From IDE / Gradle
+- Backend: `http://localhost:8080`
+- Postgres: `localhost:5432` (`postgres` / `postgres`, db `socially`)
 
-Requires PostgreSQL running (e.g. `docker compose up postgres -d`):
+### Option 2: Run from Gradle/IDE
+
+Start Postgres separately (for example from compose), then:
 
 ```bash
 ./gradlew :app:bootRun
 ```
 
-The application will start on `http://localhost:8080`.
-
-### Health Check
+### Build and format
 
 ```bash
-curl http://localhost:8080/actuator/health
+./gradlew build
+./gradlew spotlessCheck
+./gradlew spotlessApply
 ```
 
 ## Testing
 
-### Unit Tests (fast, H2 in-memory)
+### Unit and module tests
 
 ```bash
 ./gradlew test
 ```
 
-Excludes Cucumber; uses H2 for fast feedback.
+Notes:
 
-### Integration Tests (Cucumber + real PostgreSQL via Testcontainers)
+- Uses JUnit Platform.
+- Excludes Cucumber runner from the default `test` task.
+- Generates JaCoCo XML/HTML reports for modules with tests.
+
+### Integration/BDD tests
 
 ```bash
 ./gradlew testIntegration
 ```
 
-Runs Cucumber BDD tests against a real PostgreSQL container. Requires Docker.
+Notes:
 
-### Run Specific Module Tests
+- Runs Cucumber scenarios against PostgreSQL via Testcontainers.
+- Requires Docker available on the host.
 
-```bash
-# Domain tests only
-./gradlew :donation:domain:test
+## CI/CD
 
-# Application layer tests
-./gradlew :donation:application:test
+Main workflow: `.github/workflows/cicd.yaml`
+
+On push to `main` (or manual dispatch for `dev`) the pipeline runs:
+
+1. Snyk scan (`_snyk-scan.yaml`)
+2. Sonar scan (`_sonar-scan.yaml`)
+3. Build JAR artifact (`_build-image.yaml`)
+4. Build/push Docker image to ECR (`_push-image.yaml`)
+5. Deploy new task definition to ECS and write deployed image tag to SSM (`_deploy-image.yaml`)
+
+Key deployment contracts:
+
+- AWS region: `eu-south-2`
+- ECS cluster/service naming: `socially-<env>-cluster`, `socially-<env>-service`
+- SSM parameter updated on deploy: `/config/socially/backend/container/image-version`
+
+## Repository Layout
+
+```text
+.
+├── app/
+├── commons/
+├── donation/
+│   ├── kernel/
+│   ├── create/
+│   ├── delete/
+│   ├── get-by-id/
+│   ├── update/
+│   └── find/
+├── .github/workflows/
+├── Dockerfile
+├── Dockerfile.dev
+├── docker-compose.yml
+├── build.gradle.kts
+└── settings.gradle.kts
 ```
-
-### Test Reports
-
-After running tests, reports are available at:
-- **Unit Tests:** `app/build/reports/tests/test/index.html`
-- **Integration Tests:** `app/build/reports/tests/testIntegration/index.html`
-- **Cucumber Reports:** `app/target/cucumber-reports/cucumber.html`
-
-### Testing Strategy
-
-| Layer | Test Type | Tools |
-|-------|-----------|-------|
-| Domain | Unit Tests | JUnit 5 |
-| Application | Unit Tests | JUnit 5, Mockito |
-| Infrastructure | Integration Tests | Spring Boot Test |
-| End-to-End | BDD/Acceptance | Cucumber + Testcontainers (PostgreSQL) |
-
-## API Reference
-
-### Base URL
-
-```
-http://localhost:8080/api
-```
-
-### Endpoints
-
-#### Create Donation
-
-```http
-POST /api/donations
-Content-Type: application/json
-
-{
-  "id": "550e8400-e29b-41d4-a716-446655440000",
-  "title": "Winter Clothes Drive",
-  "description": "Collecting warm clothes for homeless shelters"
-}
-```
-
-**Response:** `201 Created`
-
-#### Get Donation by ID
-
-```http
-GET /api/donations/{id}
-```
-
-**Response:** `200 OK`
-```json
-{
-  "id": "550e8400-e29b-41d4-a716-446655440000",
-  "title": "Winter Clothes Drive",
-  "description": "Collecting warm clothes for homeless shelters"
-}
-```
-
-**Response:** `404 Not Found` (if donation doesn't exist)
-
-## Docker
-
-### Local Development Stack (Postgres + Backend)
-
-```bash
-docker compose up --build
-```
-
-Starts PostgreSQL and the backend. For frontend + backend + postgres, run `docker compose up` from the `socially-frontend` directory (with backend as a sibling).
-
-### Production Image
-
-```bash
-# First, build the JAR
-./gradlew :app:bootJar
-
-# Build Docker image
-docker build -t socially-backend:latest .
-```
-
-### Run the Container
-
-Production runs require external PostgreSQL (or managed DB); configure via `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD`:
-
-```bash
-docker run -p 8080:8080 \
-  -e DB_HOST=your-db-host \
-  -e DB_PORT=5432 \
-  -e DB_NAME=socially \
-  -e DB_USERNAME=postgres \
-  -e DB_PASSWORD=postgres \
-  socially-backend:latest
-```
-
-### Container Features
-
-- **Non-root user:** Runs as `spring` user for security
-- **Health checks:** Built-in container health monitoring
-- **JVM optimization:** Container-aware memory settings (`-XX:+UseContainerSupport`)
-
-## Contributing
-
-### Code Style
-
-- Follow [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html)
-- Run `./gradlew spotlessApply` before committing
-- Write meaningful commit messages
-
-### Pull Request Guidelines
-
-1. Create a feature branch from `main`
-2. Ensure all tests pass (`./gradlew test`)
-3. Ensure code is formatted (`./gradlew spotlessCheck`)
-4. Update documentation if needed
-5. Submit PR with clear description
-
-### Architecture Guidelines
-
-When adding new features:
-
-1. **Start with the Domain** — Define entities, value objects, and ports
-2. **Implement Use Cases** — Create command/query handlers in the application layer
-3. **Add Adapters** — Implement HTTP controllers (left) and persistence (right)
-4. **Write Tests** — Unit tests for domain/application, integration tests for infrastructure
-
-## License
-
-See the [LICENSE](LICENSE) file for details.
-
----
-
-<p align="center">
-  <sub>Built with ❤️ using Hexagonal Architecture</sub>
-</p>
