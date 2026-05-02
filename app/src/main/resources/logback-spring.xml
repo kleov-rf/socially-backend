@@ -23,12 +23,7 @@
         <pattern>
           <pattern>
             {
-              "trace_id":"%X{dd.trace_id:-}",
-              "span_id":"%X{dd.span_id:-}",
-              "service":"${DD_SERVICE:-${spring.application.name:-socially-backend}}",
-              "env":"${DD_ENV:-}",
-              "version":"${DD_VERSION:-}",
-              "exception.class":"%replace(%ex{0}){'\\:.*',''}"
+              "service":"${DD_SERVICE:-${spring.application.name:-socially-backend}}"
             }
           </pattern>
         </pattern>

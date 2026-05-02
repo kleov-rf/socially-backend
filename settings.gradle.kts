@@ -14,6 +14,7 @@ dependencyResolutionManagement {
 rootProject.name = "socially-backend"
 
 include("app")
+include("commons:observability")
 include("donation:kernel:domain")
 include("donation:kernel:infrastructure:right")
 include("donation:create:domain")

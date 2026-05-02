@@ -19,6 +19,7 @@ repositories {
 }
 
 dependencies {
+    implementation(project(":commons:observability"))
     implementation(project(":donation:create:infrastructure:left"))
     implementation(project(":donation:delete:infrastructure:left"))
     implementation(project(":donation:get-by-id:infrastructure:left"))
