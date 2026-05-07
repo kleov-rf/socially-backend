@@ -27,6 +27,10 @@ subprojects {
     apply(plugin = "java")
     apply(plugin = "jacoco")
 
+    dependencyLocking {
+        lockAllConfigurations()
+    }
+
     sonar {
         properties {
             property("sonar.sources", "src/main")
