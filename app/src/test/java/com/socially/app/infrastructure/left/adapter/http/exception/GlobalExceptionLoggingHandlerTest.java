@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 class GlobalExceptionLoggingHandlerTest {
 
@@ -56,5 +57,15 @@ class GlobalExceptionLoggingHandlerTest {
     assertEquals(1, appender.list.size());
     assertEquals(Level.ERROR, appender.list.getFirst().getLevel());
     assertNotNull(appender.list.getFirst().getThrowableProxy());
+  }
+
+  @Test
+  void handleResponseStatusException_returnsOriginalStatusAndReason() {
+    var response =
+        handler.handleResponseStatusException(
+            new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthenticated request"));
+
+    assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+    assertEquals("Unauthenticated request", response.getBody().message());
   }
 }

@@ -53,6 +53,19 @@ dependencies {
     testImplementation(libs.junit.platform.suite)
 
     testImplementation(libs.bundles.testcontainers)
+
+    testImplementation(project(":auth:callback:application"))
+    testImplementation(project(":auth:callback:domain"))
+    testImplementation(project(":auth:refresh:domain"))
+    testImplementation(project(":auth:logout:domain"))
+    testImplementation(project(":auth:callback:infrastructure:right"))
+    testImplementation(project(":auth:refresh:infrastructure:right"))
+    testImplementation(project(":auth:logout:infrastructure:right"))
+    testImplementation(project(":auth:login:application"))
+    testImplementation(project(":auth:me:application"))
+    testImplementation(project(":auth:refresh:application"))
+    testImplementation(project(":auth:logout:application"))
+    testImplementation(project(":auth:kernel:domain"))
 }
 
 tasks.named<org.springframework.boot.gradle.tasks.run.BootRun>("bootRun") {
