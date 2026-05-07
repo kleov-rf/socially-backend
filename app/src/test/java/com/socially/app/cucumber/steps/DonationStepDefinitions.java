@@ -45,7 +45,7 @@ public class DonationStepDefinitions {
   private String lastOrder;
   private String lastQuery;
 
-  @Before
+  @Before("@donation")
   public void resetScenarioState() {
     jdbcTemplate.execute("DELETE FROM donations");
     firstDonationId = null;

@@ -1,6 +1,5 @@
 package com.socially.app.cucumber;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.spring.CucumberContextConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -31,6 +30,7 @@ public class CucumberSpringConfiguration {
 
   @DynamicPropertySource
   static void configureDatasource(DynamicPropertyRegistry registry) {
+    registry.add("spring.security.oauth2.resourceserver.jwt.issuer-uri", () -> "");
     registry.add("spring.datasource.url", postgres::getJdbcUrl);
     registry.add("spring.datasource.username", postgres::getUsername);
     registry.add("spring.datasource.password", postgres::getPassword);
@@ -42,11 +42,6 @@ public class CucumberSpringConfiguration {
     @Bean
     public MockMvc mockMvc(WebApplicationContext webApplicationContext) {
       return MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-    }
-
-    @Bean
-    public ObjectMapper objectMapper() {
-      return new ObjectMapper();
     }
   }
 }

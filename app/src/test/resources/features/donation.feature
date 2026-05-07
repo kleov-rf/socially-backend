@@ -1,3 +1,4 @@
+@donation
 Feature: Donation management
   As a user of the Socially platform
   I want to create and retrieve donations

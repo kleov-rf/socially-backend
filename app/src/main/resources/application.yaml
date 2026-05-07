@@ -2,9 +2,6 @@ spring:
   application:
     name: socially-backend
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:socially}
-    username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:postgres}
     hikari:
       maximum-pool-size: 10
       connection-timeout: 20000
@@ -20,3 +17,10 @@ management:
   endpoint:
     health:
       show-details: when-authorized
+
+auth:
+  cookies:
+    names:
+      refresh: socially_refresh_token
+      state: socially_oauth_state
+      pkce: socially_oauth_pkce

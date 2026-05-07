@@ -1,0 +1,33 @@
+# Test classpath overlay: merged on top of src/main/resources when running tests (not packaged in the app JAR).
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:socially-test;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
+    username: sa
+    password: ""
+  flyway:
+    enabled: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ""
+
+auth:
+  redirect-uri: http://localhost:5173/auth/callback/google
+  cookies:
+    secure: false
+    names:
+      refresh: socially_refresh_token
+      state: socially_oauth_state
+      pkce: socially_oauth_pkce
+  oauth:
+    hosted-domain: https://cognito-local.invalid
+    base-url: ""
+    identity-provider: ""
+    credentials:
+      spa:
+        client-id: test-spa-client
+      backend:
+        client-id: test-backend-client
+        client-secret-json: '{"client_secret":"test-backend-secret"}'

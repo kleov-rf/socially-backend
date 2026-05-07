@@ -20,6 +20,12 @@ repositories {
 
 dependencies {
     implementation(project(":commons:observability"))
+    implementation(project(":auth:login:infrastructure:left"))
+    implementation(project(":auth:callback:infrastructure:left"))
+    implementation(project(":auth:me:infrastructure:left"))
+    implementation(project(":auth:logout:infrastructure:left"))
+    implementation(project(":auth:refresh:infrastructure:left"))
+    implementation(project(":auth:kernel:infrastructure:left"))
     implementation(project(":donation:create:infrastructure:left"))
     implementation(project(":donation:delete:infrastructure:left"))
     implementation(project(":donation:get-by-id:infrastructure:left"))
@@ -38,6 +44,8 @@ dependencies {
     annotationProcessor(libs.lombok)
 
     testImplementation(libs.spring.boot.starter.test)
+    testImplementation(libs.spring.security.test)
+    testImplementation(libs.spring.boot.starter.oauth2.resource.server)
     testImplementation(libs.jackson.databind)
     testRuntimeOnly(libs.h2)
 
@@ -45,6 +53,50 @@ dependencies {
     testImplementation(libs.junit.platform.suite)
 
     testImplementation(libs.bundles.testcontainers)
+}
+
+tasks.named<org.springframework.boot.gradle.tasks.run.BootRun>("bootRun") {
+    val activeProfile =
+        System.getenv("SPRING_PROFILES_ACTIVE")
+            ?: System.getProperty("spring.profiles.active")
+            ?: "local"
+    systemProperty("spring.profiles.active", activeProfile)
+
+    if (System.getenv("DB_HOST") == null) {
+        environment("DB_HOST", "localhost")
+    }
+    if (System.getenv("DB_PORT") == null) {
+        environment("DB_PORT", "5432")
+    }
+    if (System.getenv("DB_NAME") == null) {
+        environment("DB_NAME", "socially")
+    }
+    if (System.getenv("DB_USERNAME") == null) {
+        environment("DB_USERNAME", "postgres")
+    }
+    if (System.getenv("DB_PASSWORD") == null) {
+        environment("DB_PASSWORD", "postgres")
+    }
+    if (System.getenv("LOCAL_DB_HOST") == null) {
+        environment("LOCAL_DB_HOST", "localhost")
+    }
+    if (System.getenv("LOCAL_DB_PORT") == null) {
+        environment("LOCAL_DB_PORT", "5432")
+    }
+    if (System.getenv("LOCAL_DB_NAME") == null) {
+        environment("LOCAL_DB_NAME", "socially")
+    }
+    if (System.getenv("LOCAL_DB_USERNAME") == null) {
+        environment("LOCAL_DB_USERNAME", "postgres")
+    }
+    if (System.getenv("LOCAL_DB_PASSWORD") == null) {
+        environment("LOCAL_DB_PASSWORD", "postgres")
+    }
+    if (System.getenv("LOCAL_COGNITO_USE_MINISTACK") == null &&
+        "true".equals(System.getenv("COGNITO_USE_MINISTACK"), ignoreCase = true)
+    ) {
+        environment("LOCAL_COGNITO_USE_MINISTACK", "true")
+    }
 }
 
 tasks.named<Test>("test") {
@@ -73,9 +125,35 @@ tasks.register<Test>("testIntegration") {
 
     useJUnitPlatform()
 
+    systemProperty("spring.profiles.active", System.getProperty("spring.profiles.active", "test"))
+
     filter {
-        includeTestsMatching("*CucumberTestRunner*")
+        includeTestsMatching("com.socially.app.cucumber.CucumberTestRunner")
     }
 
     dependsOn("testClasses")
+}
+
+tasks.register<Test>("testIntegrationAuth") {
+    group = "verification"
+    description = "Run auth Cucumber integration tests without Testcontainers dependencies."
+
+    testClassesDirs = sourceSets.test.get().output.classesDirs
+    classpath = sourceSets.test.get().runtimeClasspath
+
+    useJUnitPlatform()
+
+    systemProperty("spring.profiles.active", System.getProperty("spring.profiles.active", "test"))
+
+    filter {
+        includeTestsMatching("*AuthCucumberTestRunner*")
+        excludeTestsMatching("com.socially.app.cucumber.CucumberTestRunner")
+        isFailOnNoMatchingTests = false
+    }
+
+    dependsOn("testClasses")
+}
+
+tasks.named<Jar>("jar") {
+    enabled = false
 }

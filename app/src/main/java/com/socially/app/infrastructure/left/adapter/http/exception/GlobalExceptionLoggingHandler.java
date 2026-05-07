@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 @Slf4j
 @RestControllerAdvice
@@ -18,6 +19,15 @@ public class GlobalExceptionLoggingHandler {
     log.warn("Handled client error: {}", exception.getMessage());
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
         .body(new GlobalErrorResponse(exception.getMessage()));
+  }
+
+  @ExceptionHandler(ResponseStatusException.class)
+  public ResponseEntity<GlobalErrorResponse> handleResponseStatusException(
+      ResponseStatusException exception) {
+    HttpStatus status = HttpStatus.valueOf(exception.getStatusCode().value());
+    String message = exception.getReason() != null ? exception.getReason() : "Request failed";
+    log.warn("Handled status exception {}: {}", status.value(), message);
+    return ResponseEntity.status(status).body(new GlobalErrorResponse(message));
   }
 
   @ExceptionHandler(Exception.class)
