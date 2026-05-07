@@ -34,9 +34,9 @@ class BuildOAuthLoginUrlCommandHandlerTest {
         .thenReturn("code-verifier");
     when(oAuthPkceService.generateCodeChallenge("code-verifier")).thenReturn("code-challenge");
     when(authCookieFactory.oauthTransientCookie("socially_oauth_state", "state-nonce"))
-        .thenReturn(new CookieInstruction("socially_oauth_state", "state-nonce", 300));
+        .thenReturn(new CookieInstruction("socially_oauth_state", "state-nonce", 300L));
     when(authCookieFactory.oauthTransientCookie("socially_oauth_pkce", "code-verifier"))
-        .thenReturn(new CookieInstruction("socially_oauth_pkce", "code-verifier", 300));
+        .thenReturn(new CookieInstruction("socially_oauth_pkce", "code-verifier", 300L));
     when(authProperties.stateCookieName()).thenReturn("socially_oauth_state");
     when(authProperties.pkceCookieName()).thenReturn("socially_oauth_pkce");
     when(loginAuthorizeUrlMapper.toAuthorizeUrl("state-nonce", "code-challenge"))

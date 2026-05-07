@@ -52,8 +52,8 @@ class LoginGoogleControllerTest {
   void loginWithGoogle_should_return_response_with_retrieved_headers() {
     var instructions =
         List.of(
-            new CookieInstruction("socially_oauth_state", "state-1", 300),
-            new CookieInstruction("socially_oauth_pkce", "pkce-1", 300));
+            new CookieInstruction("socially_oauth_state", "state-1", 300L),
+            new CookieInstruction("socially_oauth_pkce", "pkce-1", 300L));
     when(useCase.execute())
         .thenReturn(new BuildOAuthLoginResult("https://auth.example.com", instructions));
     when(authSetCookieHeaderMapper.toSetCookieHeader(instructions.get(0)))
@@ -84,8 +84,8 @@ class LoginGoogleControllerTest {
   void loginWithGoogle_should_map_cookie_instructions_to_headers() {
     var instructions =
         List.of(
-            new CookieInstruction("socially_oauth_state", "state-1", 300),
-            new CookieInstruction("socially_oauth_pkce", "pkce-1", 300));
+            new CookieInstruction("socially_oauth_state", "state-1", 300L),
+            new CookieInstruction("socially_oauth_pkce", "pkce-1", 300L));
     when(useCase.execute())
         .thenReturn(new BuildOAuthLoginResult("https://auth.example.com", instructions));
     when(authSetCookieHeaderMapper.toSetCookieHeader(instructions.get(0)))

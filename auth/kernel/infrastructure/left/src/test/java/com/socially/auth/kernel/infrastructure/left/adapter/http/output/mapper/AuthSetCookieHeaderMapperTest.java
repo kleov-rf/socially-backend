@@ -29,7 +29,7 @@ class AuthSetCookieHeaderMapperTest {
 
   @Test
   void toSetCookieHeader_should_return_cookie_with_received_name() {
-    CookieInstruction instruction = new CookieInstruction("my_cookie", "v", 60);
+    CookieInstruction instruction = new CookieInstruction("my_cookie", "v", 60L);
 
     String header = sut.toSetCookieHeader(instruction);
 
@@ -38,7 +38,7 @@ class AuthSetCookieHeaderMapperTest {
 
   @Test
   void toSetCookieHeader_should_return_cookie_with_received_value() {
-    CookieInstruction instruction = new CookieInstruction("n", "secret-value", 60);
+    CookieInstruction instruction = new CookieInstruction("n", "secret-value", 60L);
 
     String header = sut.toSetCookieHeader(instruction);
 
@@ -47,7 +47,7 @@ class AuthSetCookieHeaderMapperTest {
 
   @Test
   void toSetCookieHeader_should_return_cookie_with_http_only() {
-    CookieInstruction instruction = new CookieInstruction("n", "v", 60);
+    CookieInstruction instruction = new CookieInstruction("n", "v", 60L);
 
     String header = sut.toSetCookieHeader(instruction);
 
@@ -58,7 +58,7 @@ class AuthSetCookieHeaderMapperTest {
   @ValueSource(booleans = {true, false})
   void toSetCookieHeader_should_return_cookie_with_cookies_secure(boolean secure) {
     when(authProperties.cookiesSecure()).thenReturn(secure);
-    CookieInstruction instruction = new CookieInstruction("n", "v", 60);
+    CookieInstruction instruction = new CookieInstruction("n", "v", 60L);
 
     String header = sut.toSetCookieHeader(instruction);
 
@@ -67,7 +67,7 @@ class AuthSetCookieHeaderMapperTest {
 
   @Test
   void toSetCookieHeader_should_return_cookie_with_same_site() {
-    CookieInstruction instruction = new CookieInstruction("n", "v", 60);
+    CookieInstruction instruction = new CookieInstruction("n", "v", 60L);
 
     String header = sut.toSetCookieHeader(instruction);
 
@@ -76,7 +76,7 @@ class AuthSetCookieHeaderMapperTest {
 
   @Test
   void toSetCookieHeader_should_return_cookie_with_path() {
-    CookieInstruction instruction = new CookieInstruction("n", "v", 60);
+    CookieInstruction instruction = new CookieInstruction("n", "v", 60L);
 
     String header = sut.toSetCookieHeader(instruction);
 
@@ -85,7 +85,7 @@ class AuthSetCookieHeaderMapperTest {
 
   @Test
   void toSetCookieHeader_should_return_cookie_with_received_max_age() {
-    CookieInstruction instruction = new CookieInstruction("n", "v", 7200);
+    CookieInstruction instruction = new CookieInstruction("n", "v", 7200L);
 
     String header = sut.toSetCookieHeader(instruction);
 
