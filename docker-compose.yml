@@ -20,6 +20,25 @@ services:
       timeout: 5s
       retries: 5
 
+  ministack:
+    image: ministackorg/ministack:latest
+    container_name: socially-ministack
+    ports:
+      - "4566:4566"
+    environment:
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+    healthcheck:
+      test: ["CMD", "busybox", "wget", "-q", "-O-", "http://127.0.0.1:4566/_ministack/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    volumes:
+      - ministack-data:/tmp/ministack
+      - ./scripts/ministack-init.sh:/docker-entrypoint-initaws.d/init.sh:ro
+
   backend:
     build:
       context: .
@@ -28,12 +47,27 @@ services:
     ports:
       - "8080:8080"
     environment:
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: socially
-      DB_USERNAME: postgres
-      DB_PASSWORD: postgres
+      SPRING_PROFILES_ACTIVE: local
+      LOCAL_DB_HOST: postgres
+      LOCAL_DB_PORT: "5432"
+      LOCAL_DB_NAME: socially
+      LOCAL_DB_USERNAME: postgres
+      LOCAL_DB_PASSWORD: postgres
+      LOCAL_COGNITO_HOSTED_DOMAIN: http://localhost:4566
+      LOCAL_COGNITO_OAUTH_BASE_URL: http://ministack:4566
+      LOCAL_COGNITO_REGION: us-east-1
+      LOCAL_AUTH_REDIRECT_URI: http://localhost:5173/auth/callback/google
+      LOCAL_COGNITO_USE_MINISTACK: "true"
+      LOCAL_AUTH_COOKIES_SECURE: "false"
+      LOCAL_COGNITO_IDENTITY_PROVIDER: ""
+      LOCAL_COGNITO_USER_POOL_ID: ${LOCAL_COGNITO_USER_POOL_ID:-}
+      LOCAL_COGNITO_ISSUER_URL: ${LOCAL_COGNITO_ISSUER_URL:-}
+      LOCAL_COGNITO_SPA_CLIENT_ID: ${LOCAL_COGNITO_SPA_CLIENT_ID:-}
+      LOCAL_COGNITO_BACKEND_CLIENT_ID: ${LOCAL_COGNITO_BACKEND_CLIENT_ID:-}
+      LOCAL_COGNITO_BACKEND_CLIENT_SECRET_JSON: ${LOCAL_COGNITO_BACKEND_CLIENT_SECRET_JSON:-}
     depends_on:
+      ministack:
+        condition: service_healthy
       postgres:
         condition: service_healthy
     healthcheck:
@@ -42,3 +76,6 @@ services:
       timeout: 3s
       retries: 3
       start_period: 60s
+
+volumes:
+  ministack-data:

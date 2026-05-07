@@ -1,0 +1,28 @@
+spring:
+  datasource:
+    url: "jdbc:postgresql://${LOCAL_DB_HOST:localhost}:${LOCAL_DB_PORT:5432}/${LOCAL_DB_NAME:socially}"
+    username: "${LOCAL_DB_USERNAME:postgres}"
+    password: "${LOCAL_DB_PASSWORD:postgres}"
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: "${LOCAL_COGNITO_ISSUER_URL:}"
+
+auth:
+  redirect-uri: "${LOCAL_AUTH_REDIRECT_URI:http://localhost:5173/auth/callback/google}"
+  cookies:
+    secure: "${LOCAL_AUTH_COOKIES_SECURE:false}"
+  oauth:
+    use-ministack: "${LOCAL_COGNITO_USE_MINISTACK:true}"
+    region: "${LOCAL_COGNITO_REGION:us-east-1}"
+    user-pool-id: "${LOCAL_COGNITO_USER_POOL_ID:}"
+    hosted-domain: "${LOCAL_COGNITO_HOSTED_DOMAIN:http://localhost:4566}"
+    base-url: "${LOCAL_COGNITO_OAUTH_BASE_URL:http://ministack:4566}"
+    identity-provider: "${LOCAL_COGNITO_IDENTITY_PROVIDER:}"
+    credentials:
+      spa:
+        client-id: "${LOCAL_COGNITO_SPA_CLIENT_ID:}"
+      backend:
+        client-id: "${LOCAL_COGNITO_BACKEND_CLIENT_ID:}"
+        client-secret-json: "${LOCAL_COGNITO_BACKEND_CLIENT_SECRET_JSON:}"

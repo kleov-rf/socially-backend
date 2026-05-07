@@ -94,6 +94,42 @@ Services started:
 - Backend: `http://localhost:8080`
 - Postgres: `localhost:5432` (`postgres` / `postgres`, db `socially`)
 
+### Local Cognito (MiniStack)
+
+This repository includes a local Cognito bootstrap using MiniStack (`ministackorg/ministack`) so backend auth can start with production-like Cognito environment variables, without real AWS credentials.
+
+Run:
+
+```bash
+./scripts/start-local.sh
+```
+
+What this does:
+
+- starts MiniStack (`http://localhost:4566`)
+- runs `scripts/ministack-init.sh` inside MiniStack to create/reuse:
+  - Cognito user pool `socially-local`
+  - SPA app client
+  - backend app client (with secret)
+  - Secrets Manager entry `socially/cognito/backend-client-secret` (JSON with `client_id` and `client_secret`, aligned with AWS)
+  - writes **`LOCAL_COGNITO_*`** variables to `/tmp/ministack/cognito-outputs.env` for the **`local`** Spring profile (recreate the ministack container if you still have an older `COGNITO_*` version of that file)
+- exports those vars plus derived URLs and starts `postgres` + `backend`
+
+MiniStack does not register hosted-UI identity providers named `Google` or `COGNITO`. The **`local`** profile uses **`LOCAL_COGNITO_IDENTITY_PROVIDER`** (default empty) so authorize URLs omit `identity_provider`. For real Cognito, `application-dev.yaml` uses `Google`. Override with **`LOCAL_COGNITO_IDENTITY_PROVIDER`** if needed. Recreate the backend container after changing env.
+
+JWTs from MiniStack use an AWS-style `iss` claim while JWKS is loaded via `http://ministack:4566/...`. The emulator `JwtDecoder` is registered when **`auth.oauth.use-ministack=true`**, driven by **`LOCAL_COGNITO_USE_MINISTACK`** (defaults true in `application-local.yaml`). **`bootRun`** sets **`LOCAL_COGNITO_USE_MINISTACK=true`** when **`COGNITO_USE_MINISTACK=true`** is exported.
+
+The Cognito token endpoint exposed via MiniStack accepts `grant_type=refresh_token` with the SPA app client id (no secret), matching AWS semantics and backing `POST /auth/refresh` for reloading the SPA with an existing httpOnly refresh cookie.
+
+**Hosted UI username/password:** `dev@socially.local` / `SociallyDev1!` (created by `scripts/ministack-init.sh`). Override via ministack env `LOCAL_DEV_COGNITO_USERNAME` / `LOCAL_DEV_COGNITO_PASSWORD`. If your MiniStack volume predates that logic, run `docker compose up -d --force-recreate ministack`, wait for Cognito init, then `./scripts/start-local.sh` again.
+
+Quick checks:
+
+```bash
+curl -f http://localhost:8080/actuator/health
+docker compose exec -T backend sh -lc 'wget -qO- "$LOCAL_COGNITO_ISSUER_URL/.well-known/jwks.json" | head -c 200'
+```
+
 ### Option 2: Run from Gradle/IDE
 
 Start Postgres separately (for example from compose), then:
@@ -101,6 +137,18 @@ Start Postgres separately (for example from compose), then:
 ```bash
 ./gradlew :app:bootRun
 ```
+
+The `bootRun` task defaults `spring.profiles.active` to **`local`**, seeds **`LOCAL_DB_*`** for host Postgres (and **`DB_*`** for profile **`dev`**), and can mirror **`LOCAL_COGNITO_USE_MINISTACK`** from **`COGNITO_USE_MINISTACK`**. For MiniStack, export the same **`COGNITO_*`** variables as Compose (pool, issuer, clients). To match **AWS ECS** (real Cognito), use the deployment profile (`dev`, `stg`, or `prd`) with the task’s environment — not the `local` machine profile:
+
+```bash
+SPRING_PROFILES_ACTIVE=dev ./gradlew :app:bootRun
+```
+
+Use this only when your shell provides the same Cognito-related variables as the target ECS task. For everyday workstation + MiniStack, keep **`local`** and run **`./scripts/start-local.sh`** (or export the same **`LOCAL_COGNITO_*`** variables **`start-local`** sets before `bootRun`).
+
+In an IDE, set **VM options** `-Dspring.profiles.active=local` or the environment variable **`SPRING_PROFILES_ACTIVE=local`** on your run configuration when developing on your machine.
+
+`application.yaml` does not default a profile. **AWS:** Terraform sets `SPRING_PROFILES_ACTIVE` on ECS to `dev`, `stg`, or `prd`. **Machine:** use `local` (e.g. `docker-compose.yml` now sets `SPRING_PROFILES_ACTIVE: local`).
 
 ### Build and format
 
@@ -133,6 +181,7 @@ Notes:
 Notes:
 
 - Runs Cucumber scenarios against PostgreSQL via Testcontainers.
+- Uses the **`test`** Spring profile by default; test-only config overlays from `app/src/test/resources/application.yaml`, not `local`.
 - Requires Docker available on the host.
 
 ## CI/CD
@@ -152,6 +201,9 @@ Key deployment contracts:
 - AWS region: `eu-south-2`
 - ECS cluster/service naming: `socially-<env>-cluster`, `socially-<env>-service`
 - SSM parameter updated on deploy: `/config/socially/backend/container/image-version`
+- **Cognito backend client:** the task sets `COGNITO_BACKEND_CLIENT_ID` from Terraform and injects **`COGNITO_BACKEND_CLIENT_SECRET_JSON`** (JSON credentials) from Secrets Manager.
+- **OAuth redirect:** when CloudFront is enabled, Terraform passes **`AUTH_REDIRECT_URI`** (same URL as the Cognito SPA callback) so the `dev` profile matches Hosted UI.
+- **Cognito Hosted UI:** **`COGNITO_HOSTED_DOMAIN`** is set to the Cognito auth domain base URL (`https://<prefix>.auth.<region>.amazoncognito.com`), bound as **`auth.oauth.hosted-domain`** in shared `application.yaml`.
 
 ## Repository Layout
 
