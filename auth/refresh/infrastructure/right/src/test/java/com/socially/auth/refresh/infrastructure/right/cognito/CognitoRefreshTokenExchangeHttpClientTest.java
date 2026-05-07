@@ -170,7 +170,7 @@ class CognitoRefreshTokenExchangeHttpClientTest {
   }
 
   @Test
-  void exchangeRefreshToken_should_throw_bad_gateway_exception_when_request_fails() {
+  void exchangeRefreshToken_should_throw_exception_when_request_fails() {
     lenient().when(authProperties.oauthHostedDomain()).thenReturn("https://hosted.example");
     when(formMapper.toForm("refresh-1")).thenReturn(minimalForm());
 
