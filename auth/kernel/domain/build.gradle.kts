@@ -31,6 +31,8 @@ dependencies {
     annotationProcessor(libs.lombok)
 
     testImplementation(libs.junit.jupiter)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.junit.jupiter)
     testRuntimeOnly(libs.junit.platform.launcher)
 }
 
