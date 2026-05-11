@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 @LogOperation("AUTH_REFRESH_SESSION")
 public class RefreshSessionController {
   private final RefreshSessionUseCase useCase;

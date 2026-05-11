@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 @LogOperation("AUTH_LOGIN_GOOGLE")
 public class LoginGoogleController {
   private final BuildOAuthLoginUrlUseCase useCase;

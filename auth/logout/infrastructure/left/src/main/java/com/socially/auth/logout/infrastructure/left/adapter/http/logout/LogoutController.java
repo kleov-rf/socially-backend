@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 @LogOperation("AUTH_LOGOUT")
 public class LogoutController {
   private final LogoutUseCase useCase;

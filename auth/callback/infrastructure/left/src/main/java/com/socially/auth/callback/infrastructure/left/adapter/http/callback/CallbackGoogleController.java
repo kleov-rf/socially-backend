@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 @LogOperation("AUTH_CALLBACK_GOOGLE")
 public class CallbackGoogleController {
   private final CompleteOAuthCallbackUseCase useCase;

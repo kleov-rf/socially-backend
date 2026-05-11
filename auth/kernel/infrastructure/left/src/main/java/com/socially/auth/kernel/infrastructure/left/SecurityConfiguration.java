@@ -25,11 +25,12 @@ public class SecurityConfiguration {
     http.authorizeHttpRequests(
         authorize ->
             authorize
-                .requestMatchers("/actuator/health", "/auth/login/google", "/auth/callback/google")
+                .requestMatchers(
+                    "/actuator/health", "/api/auth/login/google", "/api/auth/callback/google")
                 .permitAll()
-                .requestMatchers(HttpMethod.POST, "/auth/refresh")
+                .requestMatchers(HttpMethod.POST, "/api/auth/refresh")
                 .permitAll()
-                .requestMatchers("/auth/me", "/auth/logout")
+                .requestMatchers("/api/auth/me", "/api/auth/logout")
                 .authenticated()
                 .anyRequest()
                 .permitAll());

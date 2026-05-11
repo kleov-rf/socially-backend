@@ -40,7 +40,7 @@ public class AuthStepDefinitions {
 
   @Given("I initialize Google login")
   public void iInitializeGoogleLogin() throws Exception {
-    mvcResult = mockMvc.perform(get("/auth/login/google")).andReturn();
+    mvcResult = mockMvc.perform(get("/api/auth/login/google")).andReturn();
 
     String responseBody = mvcResult.getResponse().getContentAsString();
     JsonNode root = objectMapper.readTree(responseBody);
@@ -65,7 +65,7 @@ public class AuthStepDefinitions {
     mvcResult =
         mockMvc
             .perform(
-                get("/auth/callback/google")
+                get("/api/auth/callback/google")
                     .param("code", code)
                     .param("state", state)
                     .cookie(cookieArray))
