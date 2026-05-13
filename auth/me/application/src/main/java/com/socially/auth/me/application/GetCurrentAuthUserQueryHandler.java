@@ -25,14 +25,17 @@ public class GetCurrentAuthUserQueryHandler implements GetCurrentAuthUserUseCase
   @Override
   public User execute(Principal principal) {
     if (principal instanceof JwtAuthenticationToken jwtAuthenticationToken) {
-      AuthUser authUser = userFromJwt(jwtAuthenticationToken.getToken());
-      var createUserCommand = authUserToCreateUserCommandMapper.toCommand(authUser);
-      createUserUseCase.execute(createUserCommand);
-      return findUserByEmailUseCase
-          .execute(new FindUserByEmailQuery(createUserCommand.email()))
-          .orElseThrow(UserNotFoundAfterCreateException::new);
+      return getOrCreateUser(userFromJwt(jwtAuthenticationToken.getToken()));
     }
     throw new UnauthenticatedRequestException();
+  }
+
+  private User getOrCreateUser(AuthUser authUser) {
+    var createUserCommand = authUserToCreateUserCommandMapper.toCommand(authUser);
+    createUserUseCase.execute(createUserCommand);
+    return findUserByEmailUseCase
+        .execute(new FindUserByEmailQuery(createUserCommand.email()))
+        .orElseThrow(UserNotFoundAfterCreateException::new);
   }
 
   private AuthUser userFromJwt(Jwt jwt) {
