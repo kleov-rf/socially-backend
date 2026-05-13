@@ -13,6 +13,7 @@ COPY app app
 COPY donation donation
 COPY auth auth
 COPY user user
+COPY donor donor
 COPY commons commons
 
 # Build the application (no daemon, produce boot JAR from app module)
