@@ -2,6 +2,7 @@ package com.socially.app.cucumber.steps;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -23,6 +24,7 @@ import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 public class DonationStepDefinitions {
@@ -48,6 +50,8 @@ public class DonationStepDefinitions {
   @Before("@donation")
   public void resetScenarioState() {
     jdbcTemplate.execute("DELETE FROM donations");
+    jdbcTemplate.execute("DELETE FROM donors");
+    jdbcTemplate.execute("DELETE FROM users");
     firstDonationId = null;
     secondDonationId = null;
     lastCursor = null;
@@ -65,6 +69,21 @@ public class DonationStepDefinitions {
 
   @When("I create the donation")
   public void iCreateTheDonation() throws Exception {
+    String requestBody =
+        objectMapper.writeValueAsString(new CreateDonationRequest(id, title, description));
+
+    mvcResult =
+        mockMvc
+            .perform(
+                post("/api/donations")
+                    .with(cucumberDonorJwt())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(requestBody))
+            .andReturn();
+  }
+
+  @When("I create the donation without authentication")
+  public void iCreateTheDonationWithoutAuthentication() throws Exception {
     String requestBody =
         objectMapper.writeValueAsString(new CreateDonationRequest(id, title, description));
 
@@ -178,6 +197,7 @@ public class DonationStepDefinitions {
           mockMvc
               .perform(
                   post("/api/donations")
+                      .with(cucumberDonorJwt())
                       .contentType(MediaType.APPLICATION_JSON)
                       .content(requestBody))
               .andReturn();
@@ -306,5 +326,16 @@ public class DonationStepDefinitions {
     Instant lastUpdatedAt = Instant.parse(jsonNode.get("lastUpdatedAt").asText());
 
     assertThat(lastUpdatedAt).isAfter(createdAt);
+  }
+
+  private static RequestPostProcessor cucumberDonorJwt() {
+    return jwt()
+        .jwt(
+            builder ->
+                builder
+                    .subject("cucumber-donor-sub")
+                    .claim("email", "donor@example.com")
+                    .claim("given_name", "Donor")
+                    .claim("family_name", "User"));
   }
 }

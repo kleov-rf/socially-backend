@@ -4,6 +4,11 @@ Feature: Donation management
   I want to create and retrieve donations
   So that I can manage charitable contributions
 
+  Scenario: Creating a donation without authentication is rejected
+    Given I have a donation with random id, title "No Auth" and description "Should not be created"
+    When I create the donation without authentication
+    Then the response status should be 403
+
   Scenario: Create a donation and retrieve it by ID
     Given I have a donation with random id, title "Winter Clothes Drive" and description "Collecting warm clothes for homeless shelters"
     When I create the donation

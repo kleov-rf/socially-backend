@@ -1,5 +1,7 @@
 package com.socially.app.cucumber;
 
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import io.cucumber.spring.CucumberContextConfiguration;
@@ -118,7 +120,9 @@ public class CucumberSpringConfiguration {
 
     @Bean
     public MockMvc mockMvc(WebApplicationContext webApplicationContext) {
-      return MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+      return MockMvcBuilders.webAppContextSetup(webApplicationContext)
+          .apply(springSecurity())
+          .build();
     }
   }
 }
