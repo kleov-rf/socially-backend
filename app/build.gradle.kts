@@ -32,6 +32,7 @@ dependencies {
     implementation(project(":donation:update:infrastructure:left"))
     implementation(project(":donation:find:infrastructure:left"))
     implementation(project(":user:create:infrastructure:right"))
+    implementation(project(":user:find-by-email:infrastructure:right"))
     implementation(libs.spring.boot.starter.webmvc)
     implementation(libs.spring.boot.starter.actuator)
     implementation(libs.spring.boot.starter.validation)
