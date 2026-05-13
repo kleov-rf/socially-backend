@@ -33,12 +33,7 @@ jobs:
           cache: gradle
 
       - name: Run Gradle tests
-        if: ${{ inputs.gradle_task != ':app:testIntegration' }}
-        run: ./gradlew --no-daemon ${{ inputs.gradle_task }}
-
-      - name: Run Gradle integration tests (verbose logs)
-        if: ${{ inputs.gradle_task == ':app:testIntegration' }}
-        run: ./gradlew --no-daemon --console=plain --info ${{ inputs.gradle_task }}
+        run: ./gradlew --no-daemon --info ${{ inputs.gradle_task }}
 
       - name: Upload JaCoCo XML artifact
         if: ${{ inputs.upload_jacoco }}
