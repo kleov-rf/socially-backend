@@ -11,8 +11,11 @@ import com.socially.auth.refresh.application.exception.MissingRefreshSessionExce
 import com.socially.auth.refresh.application.mapper.RefreshCookieInstructionsMapper;
 import com.socially.auth.refresh.application.output.RefreshSessionCommandResult;
 import com.socially.auth.refresh.application.port.left.RefreshSessionUseCase;
+import com.socially.auth.kernel.domain.exception.UserNotFoundAfterCreateException;
 import com.socially.auth.refresh.domain.port.right.RefreshTokenExchangeOAuthClient;
 import com.socially.user.create.application.port.left.CreateUserUseCase;
+import com.socially.user.findbyemail.application.input.FindUserByEmailQuery;
+import com.socially.user.findbyemail.application.port.left.FindUserByEmailUseCase;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,6 +30,7 @@ public class RefreshSessionCommandHandler implements RefreshSessionUseCase {
   private final AuthResultMapper authResultMapper;
   private final AuthUserToCreateUserCommandMapper authUserToCreateUserCommandMapper;
   private final CreateUserUseCase createUserUseCase;
+  private final FindUserByEmailUseCase findUserByEmailUseCase;
 
   @Override
   public RefreshSessionCommandResult execute(Map<String, String> requestCookies) {
@@ -41,8 +45,12 @@ public class RefreshSessionCommandHandler implements RefreshSessionUseCase {
     CookieInstruction cookieInstruction =
         refreshCookieInstructionsMapper.toCookieInstruction(tokenResponse);
     var authResult = decodeAuthResult(tokenResponse);
+    var createUserCommand = authUserToCreateUserCommandMapper.toCommand(authResult.user());
+    createUserUseCase.execute(createUserCommand);
     var user =
-        createUserUseCase.execute(authUserToCreateUserCommandMapper.toCommand(authResult.user()));
+        findUserByEmailUseCase
+            .execute(new FindUserByEmailQuery(createUserCommand.email()))
+            .orElseThrow(UserNotFoundAfterCreateException::new);
     return new RefreshSessionCommandResult(authResult, user, cookieInstruction);
   }
 

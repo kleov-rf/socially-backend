@@ -3,7 +3,7 @@ plugins {
     alias(libs.plugins.spring.dependency.management)
 }
 
-group = "com.socially.auth.callback.application"
+group = "com.socially.user.findbyemail.application"
 version = "0.0.1-SNAPSHOT"
 
 java {
@@ -23,12 +23,7 @@ dependencyManagement {
 }
 
 dependencies {
-    implementation(project(":auth:kernel:domain"))
-    implementation(project(":auth:kernel:infrastructure:right"))
-    implementation(project(":auth:callback:domain"))
-    implementation(project(":user:create:application"))
-    implementation(project(":user:find-by-email:application"))
-    implementation(project(":user:kernel:domain"))
+    implementation(project(":user:find-by-email:domain"))
 
     implementation(libs.spring.context)
 

@@ -4,7 +4,10 @@ import com.socially.auth.kernel.domain.AuthUser;
 import com.socially.auth.kernel.infrastructure.right.adapter.user.mapper.AuthUserToCreateUserCommandMapper;
 import com.socially.auth.me.application.exception.UnauthenticatedRequestException;
 import com.socially.auth.me.application.port.left.GetCurrentAuthUserUseCase;
+import com.socially.auth.kernel.domain.exception.UserNotFoundAfterCreateException;
 import com.socially.user.create.application.port.left.CreateUserUseCase;
+import com.socially.user.findbyemail.application.input.FindUserByEmailQuery;
+import com.socially.user.findbyemail.application.port.left.FindUserByEmailUseCase;
 import com.socially.user.kernel.domain.entity.User;
 import java.security.Principal;
 import lombok.RequiredArgsConstructor;
@@ -17,12 +20,17 @@ import org.springframework.stereotype.Service;
 public class GetCurrentAuthUserQueryHandler implements GetCurrentAuthUserUseCase {
   private final AuthUserToCreateUserCommandMapper authUserToCreateUserCommandMapper;
   private final CreateUserUseCase createUserUseCase;
+  private final FindUserByEmailUseCase findUserByEmailUseCase;
 
   @Override
   public User execute(Principal principal) {
     if (principal instanceof JwtAuthenticationToken jwtAuthenticationToken) {
       AuthUser authUser = userFromJwt(jwtAuthenticationToken.getToken());
-      return createUserUseCase.execute(authUserToCreateUserCommandMapper.toCommand(authUser));
+      var createUserCommand = authUserToCreateUserCommandMapper.toCommand(authUser);
+      createUserUseCase.execute(createUserCommand);
+      return findUserByEmailUseCase
+          .execute(new FindUserByEmailQuery(createUserCommand.email()))
+          .orElseThrow(UserNotFoundAfterCreateException::new);
     }
     throw new UnauthenticatedRequestException();
   }

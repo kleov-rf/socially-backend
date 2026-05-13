@@ -7,16 +7,20 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.socially.auth.kernel.domain.AuthUser;
+import com.socially.auth.kernel.domain.exception.UserNotFoundAfterCreateException;
 import com.socially.auth.kernel.infrastructure.right.adapter.user.mapper.AuthUserToCreateUserCommandMapper;
 import com.socially.auth.me.application.exception.UnauthenticatedRequestException;
 import com.socially.user.create.application.input.CreateUserCommand;
 import com.socially.user.create.application.port.left.CreateUserUseCase;
+import com.socially.user.findbyemail.application.input.FindUserByEmailQuery;
+import com.socially.user.findbyemail.application.port.left.FindUserByEmailUseCase;
 import com.socially.user.kernel.domain.entity.User;
 import com.socially.user.kernel.domain.valueobject.Email;
 import com.socially.user.kernel.domain.valueobject.Id;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -36,13 +40,14 @@ class GetCurrentAuthUserQueryHandlerTest {
 
   @Mock private AuthUserToCreateUserCommandMapper authUserToCreateUserCommandMapper;
   @Mock private CreateUserUseCase createUserUseCase;
+  @Mock private FindUserByEmailUseCase findUserByEmailUseCase;
 
   @InjectMocks private GetCurrentAuthUserQueryHandler handler;
 
   @Test
   void should_call_command_mapper_with_correct_auth_user() {
     Jwt jwt = jwtWithClaims(baseClaims("sub-99", "id-test@example.com"));
-    User createdUser =
+    User foundUser =
         User.create(
             Id.from("550e8400-e29b-41d4-a716-446655440000"),
             Email.from("id-test@example.com"),
@@ -52,7 +57,8 @@ class GetCurrentAuthUserQueryHandlerTest {
     when(authUserToCreateUserCommandMapper.toCommand(
             new AuthUser("sub-99", "id-test@example.com", "Jane", "Doe")))
         .thenReturn(CREATE_USER_COMMAND);
-    when(createUserUseCase.execute(CREATE_USER_COMMAND)).thenReturn(createdUser);
+    when(findUserByEmailUseCase.execute(new FindUserByEmailQuery(CREATE_USER_COMMAND.email())))
+        .thenReturn(Optional.of(foundUser));
 
     handler.execute(new JwtAuthenticationToken(jwt));
 
@@ -69,7 +75,7 @@ class GetCurrentAuthUserQueryHandlerTest {
   @Test
   void should_call_create_use_case_with_mapped_command() {
     Jwt jwt = jwtWithClaims(baseClaims("sub-99", "id-test@example.com"));
-    User createdUser =
+    User foundUser =
         User.create(
             Id.from("550e8400-e29b-41d4-a716-446655440000"),
             Email.from("id-test@example.com"),
@@ -79,7 +85,8 @@ class GetCurrentAuthUserQueryHandlerTest {
     when(authUserToCreateUserCommandMapper.toCommand(
             new AuthUser("sub-99", "id-test@example.com", "Jane", "Doe")))
         .thenReturn(CREATE_USER_COMMAND);
-    when(createUserUseCase.execute(CREATE_USER_COMMAND)).thenReturn(createdUser);
+    when(findUserByEmailUseCase.execute(new FindUserByEmailQuery(CREATE_USER_COMMAND.email())))
+        .thenReturn(Optional.of(foundUser));
 
     handler.execute(new JwtAuthenticationToken(jwt));
 
@@ -87,9 +94,9 @@ class GetCurrentAuthUserQueryHandlerTest {
   }
 
   @Test
-  void should_return_result_from_create_use_case() {
+  void should_call_find_by_email_use_case_with_mapped_email() {
     Jwt jwt = jwtWithClaims(baseClaims("sub-99", "id-test@example.com"));
-    User createdUser =
+    User foundUser =
         User.create(
             Id.from("550e8400-e29b-41d4-a716-446655440000"),
             Email.from("id-test@example.com"),
@@ -99,11 +106,50 @@ class GetCurrentAuthUserQueryHandlerTest {
     when(authUserToCreateUserCommandMapper.toCommand(
             new AuthUser("sub-99", "id-test@example.com", "Jane", "Doe")))
         .thenReturn(CREATE_USER_COMMAND);
-    when(createUserUseCase.execute(CREATE_USER_COMMAND)).thenReturn(createdUser);
+    when(findUserByEmailUseCase.execute(new FindUserByEmailQuery(CREATE_USER_COMMAND.email())))
+        .thenReturn(Optional.of(foundUser));
+
+    handler.execute(new JwtAuthenticationToken(jwt));
+
+    verify(findUserByEmailUseCase).execute(new FindUserByEmailQuery(CREATE_USER_COMMAND.email()));
+  }
+
+  @Test
+  void should_return_result_from_find_by_email_use_case() {
+    Jwt jwt = jwtWithClaims(baseClaims("sub-99", "id-test@example.com"));
+    User foundUser =
+        User.create(
+            Id.from("550e8400-e29b-41d4-a716-446655440000"),
+            Email.from("id-test@example.com"),
+            "Jane",
+            "Doe",
+            CREATED_AT);
+    when(authUserToCreateUserCommandMapper.toCommand(
+            new AuthUser("sub-99", "id-test@example.com", "Jane", "Doe")))
+        .thenReturn(CREATE_USER_COMMAND);
+    when(findUserByEmailUseCase.execute(new FindUserByEmailQuery(CREATE_USER_COMMAND.email())))
+        .thenReturn(Optional.of(foundUser));
 
     User result = handler.execute(new JwtAuthenticationToken(jwt));
 
-    assertEquals(createdUser, result);
+    assertEquals(foundUser, result);
+  }
+
+  @Test
+  void should_throw_exception_when_user_not_found_after_create() {
+    Jwt jwt = jwtWithClaims(baseClaims("sub-99", "id-test@example.com"));
+    when(authUserToCreateUserCommandMapper.toCommand(
+            new AuthUser("sub-99", "id-test@example.com", "Jane", "Doe")))
+        .thenReturn(CREATE_USER_COMMAND);
+    when(findUserByEmailUseCase.execute(new FindUserByEmailQuery(CREATE_USER_COMMAND.email())))
+        .thenReturn(Optional.empty());
+
+    UserNotFoundAfterCreateException exception =
+        assertThrows(
+            UserNotFoundAfterCreateException.class,
+            () -> handler.execute(new JwtAuthenticationToken(jwt)));
+
+    assertEquals("User not found after create", exception.getMessage());
   }
 
   @Test

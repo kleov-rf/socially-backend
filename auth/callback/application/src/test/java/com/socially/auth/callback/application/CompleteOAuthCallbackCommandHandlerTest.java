@@ -14,16 +14,20 @@ import com.socially.auth.kernel.domain.AuthUser;
 import com.socially.auth.kernel.domain.CookieInstruction;
 import com.socially.auth.kernel.domain.OAuthTokenResponse;
 import com.socially.auth.kernel.domain.properties.AuthProperties;
+import com.socially.auth.kernel.domain.exception.UserNotFoundAfterCreateException;
 import com.socially.auth.kernel.infrastructure.right.adapter.oauth.mapper.AuthResultMapper;
 import com.socially.auth.kernel.infrastructure.right.adapter.user.mapper.AuthUserToCreateUserCommandMapper;
 import com.socially.user.create.application.input.CreateUserCommand;
 import com.socially.user.create.application.port.left.CreateUserUseCase;
+import com.socially.user.findbyemail.application.input.FindUserByEmailQuery;
+import com.socially.user.findbyemail.application.port.left.FindUserByEmailUseCase;
 import com.socially.user.kernel.domain.entity.User;
 import com.socially.user.kernel.domain.valueobject.Email;
 import com.socially.user.kernel.domain.valueobject.Id;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -39,6 +43,7 @@ class CompleteOAuthCallbackCommandHandlerTest {
   @Mock private AuthResultMapper authResultMapper;
   @Mock private AuthUserToCreateUserCommandMapper authUserToCreateUserCommandMapper;
   @Mock private CreateUserUseCase createUserUseCase;
+  @Mock private FindUserByEmailUseCase findUserByEmailUseCase;
 
   @InjectMocks private CompleteOAuthCallbackCommandHandler sut;
 
@@ -147,6 +152,45 @@ class CompleteOAuthCallbackCommandHandlerTest {
   }
 
   @Test
+  void execute_should_call_create_use_case_with_mapped_command() {
+    stubSuccessfulExecution();
+
+    sut.execute(CODE, STATE, validRequestCookies());
+
+    verify(createUserUseCase).execute(CREATE_USER_COMMAND);
+  }
+
+  @Test
+  void execute_should_call_find_by_email_use_case_with_command_email() {
+    stubSuccessfulExecution();
+
+    sut.execute(CODE, STATE, validRequestCookies());
+
+    verify(findUserByEmailUseCase).execute(new FindUserByEmailQuery(CREATE_USER_COMMAND.email()));
+  }
+
+  @Test
+  void execute_should_throw_exception_when_created_user_cannot_be_found() {
+    when(authProperties.stateCookieName()).thenReturn(STATE_COOKIE_NAME);
+    when(authProperties.pkceCookieName()).thenReturn(PKCE_COOKIE_NAME);
+    when(authorizationCodeExchangeOAuthClient.exchangeAuthorizationCode(CODE, CODE_VERIFIER))
+        .thenReturn(TOKEN_RESPONSE);
+    when(callbackCookieInstructionsMapper.toCookieInstructions(TOKEN_RESPONSE))
+        .thenReturn(COOKIE_INSTRUCTIONS);
+    when(authResultMapper.toAuthResult(TOKEN_RESPONSE)).thenReturn(AUTH_RESULT);
+    when(authUserToCreateUserCommandMapper.toCommand(USER)).thenReturn(CREATE_USER_COMMAND);
+    when(findUserByEmailUseCase.execute(new FindUserByEmailQuery(CREATE_USER_COMMAND.email())))
+        .thenReturn(Optional.empty());
+
+    UserNotFoundAfterCreateException exception =
+        assertThrows(
+            UserNotFoundAfterCreateException.class,
+            () -> sut.execute(CODE, STATE, validRequestCookies()));
+
+    assertEquals("User not found after create", exception.getMessage());
+  }
+
+  @Test
   void execute_should_propagate_exception_when_auth_result_mapper_throws() {
     when(authProperties.stateCookieName()).thenReturn(STATE_COOKIE_NAME);
     when(authProperties.pkceCookieName()).thenReturn(PKCE_COOKIE_NAME);
@@ -173,7 +217,8 @@ class CompleteOAuthCallbackCommandHandlerTest {
         .thenReturn(COOKIE_INSTRUCTIONS);
     when(authResultMapper.toAuthResult(TOKEN_RESPONSE)).thenReturn(AUTH_RESULT);
     when(authUserToCreateUserCommandMapper.toCommand(USER)).thenReturn(CREATE_USER_COMMAND);
-    when(createUserUseCase.execute(CREATE_USER_COMMAND)).thenReturn(CREATED_USER);
+    when(findUserByEmailUseCase.execute(new FindUserByEmailQuery(CREATE_USER_COMMAND.email())))
+        .thenReturn(Optional.of(CREATED_USER));
   }
 
   private Map<String, String> validRequestCookies() {
