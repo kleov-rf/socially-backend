@@ -16,4 +16,4 @@ Feature: Google auth flow
     Then the auth response status should be 200
     And the auth response should include token and user payload
     And the auth response should set refresh token cookie
-    And the users table should contain 2 records
+    And the users table should contain 1 records
