@@ -48,7 +48,7 @@ jobs:
 
   build:
     name: Image
-    needs: [ unit-tests, integration-tests, snyk-scan ]
+    needs: [ unit-tests, integration-tests, snyk-scan, sonar-scan ]
     uses: ./.github/workflows/_build-image.yaml
     with:
       environment: ${{ (github.event_name == 'workflow_dispatch' && inputs.environment) || 'dev' }}
