@@ -34,6 +34,6 @@ public class RefreshSessionController {
           authSetCookieHeaderMapper.toSetCookieHeader(commandResult.cookieInstruction()));
     }
     return responseBuilder.body(
-        refreshSessionResponseMapper.toResponse(commandResult.authResult()));
+        refreshSessionResponseMapper.toResponse(commandResult.authResult(), commandResult.user()));
   }
 }

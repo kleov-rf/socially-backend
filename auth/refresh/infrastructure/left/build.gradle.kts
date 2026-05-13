@@ -25,6 +25,7 @@ dependencies {
     implementation(project(":auth:kernel:infrastructure:left"))
     implementation(project(":auth:refresh:application"))
     implementation(project(":auth:refresh:infrastructure:right"))
+    implementation(project(":user:kernel:domain"))
 
     implementation(libs.spring.boot.starter.webmvc)
 

@@ -25,6 +25,7 @@ dependencyManagement {
 dependencies {
     implementation(project(":auth:kernel:domain"))
     implementation(project(":auth:refresh:domain"))
+    implementation(project(":user:kernel:domain"))
 
     implementation(libs.spring.context)
 
