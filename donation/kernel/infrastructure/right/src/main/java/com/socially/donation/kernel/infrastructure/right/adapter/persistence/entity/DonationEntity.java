@@ -18,6 +18,9 @@ import lombok.NoArgsConstructor;
 public class DonationEntity {
   @Id private UUID id;
 
+  @Column(name = "donor_id", nullable = false)
+  private UUID donorId;
+
   @Column(name = "title")
   private String title;
 
@@ -34,7 +37,12 @@ public class DonationEntity {
   private Instant deletedAt;
 
   public static DonationEntity create(
-      UUID id, String title, String description, Instant createdAt, Instant lastUpdatedAt) {
-    return new DonationEntity(id, title, description, createdAt, lastUpdatedAt, null);
+      UUID id,
+      UUID donorId,
+      String title,
+      String description,
+      Instant createdAt,
+      Instant lastUpdatedAt) {
+    return new DonationEntity(id, donorId, title, description, createdAt, lastUpdatedAt, null);
   }
 }

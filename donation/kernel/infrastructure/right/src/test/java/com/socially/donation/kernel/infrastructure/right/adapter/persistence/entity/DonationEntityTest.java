@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class DonationEntityTest {
 
   private static final UUID ID = UUID.fromString("550e8400-e29b-41d4-a716-446655440000");
+  private static final UUID DONOR_ID = UUID.fromString("550e8400-e29b-41d4-a716-446655440001");
   private static final String TITLE = "Test Title";
   private static final String DESCRIPTION = "Test Description";
   private static final Instant CREATED_AT = Instant.parse("2024-06-01T12:00:00Z");
@@ -21,7 +22,7 @@ class DonationEntityTest {
   @Test
   void create_should_set_id() {
     DonationEntity result =
-        DonationEntity.create(ID, TITLE, DESCRIPTION, CREATED_AT, LAST_UPDATED_AT);
+        DonationEntity.create(ID, DONOR_ID, TITLE, DESCRIPTION, CREATED_AT, LAST_UPDATED_AT);
 
     assertEquals(ID, result.getId());
   }
@@ -29,7 +30,7 @@ class DonationEntityTest {
   @Test
   void create_should_set_title() {
     DonationEntity result =
-        DonationEntity.create(ID, TITLE, DESCRIPTION, CREATED_AT, LAST_UPDATED_AT);
+        DonationEntity.create(ID, DONOR_ID, TITLE, DESCRIPTION, CREATED_AT, LAST_UPDATED_AT);
 
     assertEquals(TITLE, result.getTitle());
   }
@@ -37,7 +38,7 @@ class DonationEntityTest {
   @Test
   void create_should_set_description() {
     DonationEntity result =
-        DonationEntity.create(ID, TITLE, DESCRIPTION, CREATED_AT, LAST_UPDATED_AT);
+        DonationEntity.create(ID, DONOR_ID, TITLE, DESCRIPTION, CREATED_AT, LAST_UPDATED_AT);
 
     assertEquals(DESCRIPTION, result.getDescription());
   }
@@ -45,7 +46,7 @@ class DonationEntityTest {
   @Test
   void create_should_set_created_at() {
     DonationEntity result =
-        DonationEntity.create(ID, TITLE, DESCRIPTION, CREATED_AT, LAST_UPDATED_AT);
+        DonationEntity.create(ID, DONOR_ID, TITLE, DESCRIPTION, CREATED_AT, LAST_UPDATED_AT);
 
     assertEquals(CREATED_AT, result.getCreatedAt());
   }
@@ -53,7 +54,7 @@ class DonationEntityTest {
   @Test
   void create_should_set_last_updated_at() {
     DonationEntity result =
-        DonationEntity.create(ID, TITLE, DESCRIPTION, CREATED_AT, LAST_UPDATED_AT);
+        DonationEntity.create(ID, DONOR_ID, TITLE, DESCRIPTION, CREATED_AT, LAST_UPDATED_AT);
 
     assertEquals(LAST_UPDATED_AT, result.getLastUpdatedAt());
   }
@@ -61,8 +62,16 @@ class DonationEntityTest {
   @Test
   void create_should_set_deleted_at_as_null() {
     DonationEntity result =
-        DonationEntity.create(ID, TITLE, DESCRIPTION, CREATED_AT, LAST_UPDATED_AT);
+        DonationEntity.create(ID, DONOR_ID, TITLE, DESCRIPTION, CREATED_AT, LAST_UPDATED_AT);
 
     assertNull(result.getDeletedAt());
+  }
+
+  @Test
+  void create_should_set_donor_id() {
+    DonationEntity result =
+        DonationEntity.create(ID, DONOR_ID, TITLE, DESCRIPTION, CREATED_AT, LAST_UPDATED_AT);
+
+    assertEquals(DONOR_ID, result.getDonorId());
   }
 }

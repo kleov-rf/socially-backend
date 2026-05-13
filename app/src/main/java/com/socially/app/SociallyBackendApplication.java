@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
     scanBasePackages = {
       "com.socially.app",
       "com.socially.auth",
+      "com.socially.donor",
       "com.socially.donation",
       "com.socially.donation.kernel.infrastructure.right",
       "com.socially.user"
@@ -17,11 +18,13 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @ConfigurationPropertiesScan(basePackages = "com.socially.auth")
 @EntityScan(
     basePackages = {
+      "com.socially.donor.kernel.infrastructure.right",
       "com.socially.donation.kernel.infrastructure.right",
       "com.socially.user.kernel.infrastructure.right"
     })
 @EnableJpaRepositories(
     basePackages = {
+      "com.socially.donor.kernel.infrastructure.right",
       "com.socially.donation.kernel.infrastructure.right",
       "com.socially.user.kernel.infrastructure.right"
     })
