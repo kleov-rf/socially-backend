@@ -6,7 +6,7 @@ import com.socially.donation.getbyid.application.output.mapper.DonationDtoMapper
 import com.socially.donation.getbyid.application.port.left.FindDonationByIdUseCase;
 import com.socially.donation.getbyid.domain.port.right.FindDonationByIdRepository;
 import com.socially.donation.kernel.domain.entity.Donation;
-import com.socially.donation.kernel.domain.valueobject.Id;
+import com.socially.commons.kernel.domain.valueobject.Id;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

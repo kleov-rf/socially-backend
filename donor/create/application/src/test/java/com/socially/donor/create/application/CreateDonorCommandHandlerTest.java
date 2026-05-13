@@ -7,10 +7,9 @@ import com.socially.donor.create.application.input.CreateDonorCommand;
 import com.socially.donor.create.application.input.mapper.CreateDonorCommandMapper;
 import com.socially.donor.create.domain.port.right.CreateDonorRepository;
 import com.socially.donor.kernel.domain.entity.Donor;
-import com.socially.donor.kernel.domain.valueobject.Id;
+import com.socially.commons.kernel.domain.valueobject.Id;
 import java.time.Clock;
 import java.time.Instant;
-import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -36,7 +35,7 @@ class CreateDonorCommandHandlerTest {
     Donor mappedDonor =
         Donor.create(
             Id.from(DONOR_ID),
-            UUID.fromString(USER_ID),
+            Id.from(USER_ID),
             "donor@example.com",
             "Jane",
             "Doe",
@@ -55,7 +54,7 @@ class CreateDonorCommandHandlerTest {
     Donor mappedDonor =
         Donor.create(
             Id.from(DONOR_ID),
-            UUID.fromString(USER_ID),
+            Id.from(USER_ID),
             "donor@example.com",
             "Jane",
             "Doe",
@@ -74,7 +73,7 @@ class CreateDonorCommandHandlerTest {
     Donor mappedDonor =
         Donor.create(
             Id.from(DONOR_ID),
-            UUID.fromString(USER_ID),
+            Id.from(USER_ID),
             "donor@example.com",
             "Jane",
             "Doe",

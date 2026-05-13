@@ -3,7 +3,7 @@ package com.socially.donation.delete.infrastructure.right.adapter.persistence;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.socially.donation.kernel.domain.valueobject.Id;
+import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donation.kernel.infrastructure.right.adapter.persistence.DonationEntityRepository;
 import java.time.Clock;
 import java.time.Instant;

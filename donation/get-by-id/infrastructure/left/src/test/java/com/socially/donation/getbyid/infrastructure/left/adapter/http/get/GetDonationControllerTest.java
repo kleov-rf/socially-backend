@@ -10,7 +10,7 @@ import com.socially.donation.getbyid.application.port.left.FindDonationByIdUseCa
 import com.socially.donation.getbyid.infrastructure.left.adapter.http.get.output.DonationResponseDto;
 import com.socially.donation.getbyid.infrastructure.left.adapter.http.get.output.mapper.DonationResponseMapper;
 import com.socially.donation.kernel.domain.valueobject.Description;
-import com.socially.donation.kernel.domain.valueobject.Id;
+import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donation.kernel.domain.valueobject.Title;
 import java.time.Instant;
 import java.util.Optional;

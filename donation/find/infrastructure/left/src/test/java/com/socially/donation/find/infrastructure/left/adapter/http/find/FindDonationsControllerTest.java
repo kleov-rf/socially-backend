@@ -17,7 +17,7 @@ import com.socially.donation.find.infrastructure.left.adapter.http.find.output.M
 import com.socially.donation.find.infrastructure.left.adapter.http.find.output.PageResponse;
 import com.socially.donation.find.infrastructure.left.adapter.http.find.output.mapper.PageResponseMapper;
 import com.socially.donation.kernel.domain.valueobject.Description;
-import com.socially.donation.kernel.domain.valueobject.Id;
+import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donation.kernel.domain.valueobject.Title;
 import java.time.Instant;
 import java.util.List;

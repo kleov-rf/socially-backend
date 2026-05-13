@@ -10,7 +10,7 @@ import com.socially.auth.kernel.infrastructure.left.adapter.http.output.mapper.U
 import com.socially.auth.me.application.port.left.GetCurrentAuthUserUseCase;
 import com.socially.user.kernel.domain.entity.User;
 import com.socially.user.kernel.domain.valueobject.Email;
-import com.socially.user.kernel.domain.valueobject.Id;
+import com.socially.commons.kernel.domain.valueobject.Id;
 import java.security.Principal;
 import java.time.Instant;
 import org.junit.jupiter.api.Test;

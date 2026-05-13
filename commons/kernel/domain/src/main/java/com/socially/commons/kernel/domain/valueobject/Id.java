@@ -1,4 +1,4 @@
-package com.socially.donor.kernel.domain.valueobject;
+package com.socially.commons.kernel.domain.valueobject;
 
 import java.util.UUID;
 import lombok.EqualsAndHashCode;

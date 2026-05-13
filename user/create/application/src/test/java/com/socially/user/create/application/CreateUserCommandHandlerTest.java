@@ -9,7 +9,7 @@ import com.socially.user.create.application.input.mapper.CreateUserCommandMapper
 import com.socially.user.create.domain.port.right.CreateUserRepository;
 import com.socially.user.kernel.domain.entity.User;
 import com.socially.user.kernel.domain.valueobject.Email;
-import com.socially.user.kernel.domain.valueobject.Id;
+import com.socially.commons.kernel.domain.valueobject.Id;
 import java.time.Clock;
 import java.time.Instant;
 import org.junit.jupiter.api.Test;

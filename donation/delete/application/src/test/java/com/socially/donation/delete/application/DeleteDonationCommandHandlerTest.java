@@ -5,7 +5,7 @@ import static org.mockito.Mockito.verify;
 
 import com.socially.donation.delete.application.input.DeleteDonationCommand;
 import com.socially.donation.delete.domain.port.right.DeleteDonationRepository;
-import com.socially.donation.kernel.domain.valueobject.Id;
+import com.socially.commons.kernel.domain.valueobject.Id;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

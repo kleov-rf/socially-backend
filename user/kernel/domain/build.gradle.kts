@@ -1,5 +1,5 @@
 plugins {
-    java
+    `java-library`
     alias(libs.plugins.spring.dependency.management)
 }
 
@@ -23,6 +23,8 @@ dependencyManagement {
 }
 
 dependencies {
+    api(project(":commons:kernel:domain"))
+
     compileOnly(libs.lombok)
     annotationProcessor(libs.lombok)
 

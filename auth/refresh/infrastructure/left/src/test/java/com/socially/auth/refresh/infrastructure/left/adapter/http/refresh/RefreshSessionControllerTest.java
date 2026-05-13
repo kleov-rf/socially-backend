@@ -16,7 +16,7 @@ import com.socially.auth.refresh.infrastructure.left.adapter.http.refresh.output
 import com.socially.auth.refresh.infrastructure.left.adapter.http.refresh.output.mapper.RefreshSessionResponseMapper;
 import com.socially.user.kernel.domain.entity.User;
 import com.socially.user.kernel.domain.valueobject.Email;
-import com.socially.user.kernel.domain.valueobject.Id;
+import com.socially.commons.kernel.domain.valueobject.Id;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Instant;
 import java.util.Map;

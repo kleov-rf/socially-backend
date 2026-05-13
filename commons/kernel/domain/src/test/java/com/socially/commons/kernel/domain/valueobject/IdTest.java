@@ -1,4 +1,4 @@
-package com.socially.user.kernel.domain.valueobject;
+package com.socially.commons.kernel.domain.valueobject;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;

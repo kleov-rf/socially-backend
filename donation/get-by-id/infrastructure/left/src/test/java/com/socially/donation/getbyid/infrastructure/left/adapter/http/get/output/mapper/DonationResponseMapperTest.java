@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.socially.donation.getbyid.application.output.DonationDto;
 import com.socially.donation.getbyid.infrastructure.left.adapter.http.get.output.DonationResponseDto;
 import com.socially.donation.kernel.domain.valueobject.Description;
-import com.socially.donation.kernel.domain.valueobject.Id;
+import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donation.kernel.domain.valueobject.Title;
 import java.time.Instant;
 import org.junit.jupiter.api.Test;

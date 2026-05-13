@@ -3,7 +3,7 @@ package com.socially.user.create.application.input.mapper;
 import com.socially.user.create.application.input.CreateUserCommand;
 import com.socially.user.kernel.domain.entity.User;
 import com.socially.user.kernel.domain.valueobject.Email;
-import com.socially.user.kernel.domain.valueobject.Id;
+import com.socially.commons.kernel.domain.valueobject.Id;
 import java.time.Instant;
 import org.springframework.stereotype.Component;
 

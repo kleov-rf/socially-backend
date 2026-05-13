@@ -7,7 +7,7 @@ import static org.mockito.Mockito.when;
 import com.socially.donation.find.domain.pagination.PageOrder;
 import com.socially.donation.find.domain.pagination.PageSize;
 import com.socially.donation.find.domain.pagination.PaginationCriteria;
-import com.socially.donation.kernel.domain.valueobject.Id;
+import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donation.kernel.infrastructure.right.adapter.persistence.DonationEntityRepository;
 import com.socially.donation.kernel.infrastructure.right.adapter.persistence.entity.DonationEntity;
 import java.time.Instant;
@@ -22,6 +22,7 @@ import org.springframework.data.domain.PageRequest;
 @ExtendWith(MockitoExtension.class)
 class DonationEntityPageFetcherTest {
   private static final String SEARCH_PATTERN = "%school%";
+  private static final String DONOR_ID = "550e8400-e29b-41d4-a716-446655449999";
   private static final PageRequest PAGE_REQUEST = PageRequest.of(0, 6);
   public static final KeysetCursor BOUNDARY =
       new KeysetCursor(
@@ -31,12 +32,14 @@ class DonationEntityPageFetcherTest {
       List.of(
           DonationEntity.create(
               Id.from("550e8400-e29b-41d4-a716-446655440000").value(),
+              Id.from(DONOR_ID).value(),
               "Donation Title",
               "Donation Description",
               Instant.parse("2024-06-01T12:00:00Z"),
               Instant.parse("2024-06-01T12:00:00Z")),
           DonationEntity.create(
               Id.from("550e8400-e29b-41d4-a716-446655440001").value(),
+              Id.from(DONOR_ID).value(),
               "Another Donation Title",
               "Another Donation Description",
               Instant.parse("2024-06-02T12:00:00Z"),

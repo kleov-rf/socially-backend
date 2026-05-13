@@ -16,7 +16,7 @@ import com.socially.donation.create.domain.port.right.CreateDonationRepository;
 import com.socially.donation.kernel.domain.entity.Donation;
 import com.socially.donation.kernel.domain.valueobject.Description;
 import com.socially.donation.kernel.domain.valueobject.DonorId;
-import com.socially.donation.kernel.domain.valueobject.Id;
+import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donation.kernel.domain.valueobject.Title;
 import com.socially.donor.create.application.input.CreateDonorCommand;
 import com.socially.donor.create.application.port.left.CreateDonorUseCase;
@@ -58,7 +58,7 @@ class CreateDonationCommandHandlerTest {
     command = new CreateDonationCommand(DONATION_ID, "Test Title", "Test Description", PRINCIPAL);
     user =
         User.create(
-            com.socially.user.kernel.domain.valueobject.Id.from(USER_ID),
+            Id.from(USER_ID),
             Email.from("user@example.com"),
             "Jane",
             "Doe",

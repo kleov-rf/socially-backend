@@ -22,7 +22,7 @@ import com.socially.user.findbyemail.application.input.FindUserByEmailQuery;
 import com.socially.user.findbyemail.application.port.left.FindUserByEmailUseCase;
 import com.socially.user.kernel.domain.entity.User;
 import com.socially.user.kernel.domain.valueobject.Email;
-import com.socially.user.kernel.domain.valueobject.Id;
+import com.socially.commons.kernel.domain.valueobject.Id;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
