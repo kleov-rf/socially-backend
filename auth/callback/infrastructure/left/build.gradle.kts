@@ -25,6 +25,7 @@ dependencies {
     implementation(project(":auth:kernel:infrastructure:left"))
     implementation(project(":auth:callback:application"))
     implementation(project(":auth:callback:infrastructure:right"))
+    implementation(project(":user:kernel:domain"))
 
     implementation(libs.spring.boot.starter.webmvc)
     implementation(libs.spring.boot.starter.validation)

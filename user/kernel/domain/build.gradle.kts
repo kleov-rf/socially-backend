@@ -3,7 +3,7 @@ plugins {
     alias(libs.plugins.spring.dependency.management)
 }
 
-group = "com.socially.auth.callback.application"
+group = "com.socially.user.kernel.domain"
 version = "0.0.1-SNAPSHOT"
 
 java {
@@ -23,18 +23,10 @@ dependencyManagement {
 }
 
 dependencies {
-    implementation(project(":auth:kernel:domain"))
-    implementation(project(":auth:callback:domain"))
-    implementation(project(":user:kernel:domain"))
-
-    implementation(libs.spring.context)
-
     compileOnly(libs.lombok)
     annotationProcessor(libs.lombok)
 
     testImplementation(libs.junit.jupiter)
-    testImplementation(libs.mockito.core)
-    testImplementation(libs.mockito.junit.jupiter)
     testRuntimeOnly(libs.junit.platform.launcher)
 }
 

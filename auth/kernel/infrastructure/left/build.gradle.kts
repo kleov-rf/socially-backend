@@ -21,6 +21,7 @@ repositories {
 
 dependencies {
     implementation(project(":auth:kernel:domain"))
+    implementation(project(":user:kernel:domain"))
 
     implementation(libs.spring.boot.starter.webmvc)
     implementation(libs.spring.boot.starter.security)
