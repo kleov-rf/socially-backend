@@ -15,6 +15,13 @@ import com.socially.auth.kernel.domain.AuthUser;
 import com.socially.auth.kernel.domain.CookieInstruction;
 import com.socially.auth.kernel.domain.OAuthTokenResponse;
 import com.socially.auth.kernel.domain.properties.AuthProperties;
+import com.socially.auth.kernel.infrastructure.right.adapter.user.mapper.AuthUserToCreateUserCommandMapper;
+import com.socially.user.create.application.input.CreateUserCommand;
+import com.socially.user.create.application.port.left.CreateUserUseCase;
+import com.socially.user.kernel.domain.entity.User;
+import com.socially.user.kernel.domain.valueobject.Email;
+import com.socially.user.kernel.domain.valueobject.Id;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -30,6 +37,8 @@ class CompleteOAuthCallbackCommandHandlerTest {
   @Mock private AuthProperties authProperties;
   @Mock private CallbackCookieInstructionsMapper callbackCookieInstructionsMapper;
   @Mock private AuthResultMapper authResultMapper;
+  @Mock private AuthUserToCreateUserCommandMapper authUserToCreateUserCommandMapper;
+  @Mock private CreateUserUseCase createUserUseCase;
 
   @InjectMocks private CompleteOAuthCallbackCommandHandler sut;
 
@@ -40,6 +49,15 @@ class CompleteOAuthCallbackCommandHandlerTest {
   private static final String STATE_COOKIE_NAME = "socially_oauth_state";
   private static final String PKCE_COOKIE_NAME = "socially_oauth_pkce";
   private static final AuthUser USER = new AuthUser("user-id-1", "user@example.com", "John Doe");
+  private static final CreateUserCommand CREATE_USER_COMMAND =
+      new CreateUserCommand("user@example.com", "John", "Doe");
+  private static final User CREATED_USER =
+      User.create(
+          Id.from("550e8400-e29b-41d4-a716-446655440000"),
+          Email.from("user@example.com"),
+          "John",
+          "Doe",
+          Instant.parse("2024-06-01T12:00:00Z"));
   private static final OAuthTokenResponse TOKEN_RESPONSE =
       new OAuthTokenResponse("access-token-1", ID_TOKEN, "refresh-1", "Bearer", 3600L);
   private static final AuthResult AUTH_RESULT =
@@ -124,6 +142,7 @@ class CompleteOAuthCallbackCommandHandlerTest {
     var outcome = sut.execute(CODE, STATE, validRequestCookies());
 
     assertEquals(AUTH_RESULT, outcome.authResult());
+    assertEquals(CREATED_USER, outcome.user());
     assertEquals(COOKIE_INSTRUCTIONS, outcome.cookieInstructions());
   }
 
@@ -153,6 +172,8 @@ class CompleteOAuthCallbackCommandHandlerTest {
     when(callbackCookieInstructionsMapper.toCookieInstructions(TOKEN_RESPONSE))
         .thenReturn(COOKIE_INSTRUCTIONS);
     when(authResultMapper.toAuthResult(TOKEN_RESPONSE)).thenReturn(AUTH_RESULT);
+    when(authUserToCreateUserCommandMapper.toCommand(USER)).thenReturn(CREATE_USER_COMMAND);
+    when(createUserUseCase.execute(CREATE_USER_COMMAND)).thenReturn(CREATED_USER);
   }
 
   private Map<String, String> validRequestCookies() {

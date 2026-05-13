@@ -9,6 +9,8 @@ import com.socially.auth.callback.domain.port.right.AuthorizationCodeExchangeOAu
 import com.socially.auth.kernel.domain.AuthResultMapper;
 import com.socially.auth.kernel.domain.OAuthTokenResponse;
 import com.socially.auth.kernel.domain.properties.AuthProperties;
+import com.socially.auth.kernel.infrastructure.right.adapter.user.mapper.AuthUserToCreateUserCommandMapper;
+import com.socially.user.create.application.port.left.CreateUserUseCase;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,8 @@ public class CompleteOAuthCallbackCommandHandler implements CompleteOAuthCallbac
   private final AuthorizationCodeExchangeOAuthClient authorizationCodeExchangeOAuthClient;
   private final CallbackCookieInstructionsMapper callbackCookieInstructionsMapper;
   private final AuthResultMapper authResultMapper;
+  private final AuthUserToCreateUserCommandMapper authUserToCreateUserCommandMapper;
+  private final CreateUserUseCase createUserUseCase;
 
   @Override
   public CompleteOAuthCallbackOutcome execute(
@@ -40,6 +44,8 @@ public class CompleteOAuthCallbackCommandHandler implements CompleteOAuthCallbac
 
     var cookieInstructions = callbackCookieInstructionsMapper.toCookieInstructions(tokenResponse);
     var authResult = authResultMapper.toAuthResult(tokenResponse);
-    return new CompleteOAuthCallbackOutcome(authResult, cookieInstructions);
+    var user =
+        createUserUseCase.execute(authUserToCreateUserCommandMapper.toCommand(authResult.user()));
+    return new CompleteOAuthCallbackOutcome(authResult, user, cookieInstructions);
   }
 }

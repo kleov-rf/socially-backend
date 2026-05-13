@@ -3,7 +3,7 @@ plugins {
     alias(libs.plugins.spring.dependency.management)
 }
 
-group = "com.socially.auth.callback.application"
+group = "com.socially.user.create.application"
 version = "0.0.1-SNAPSHOT"
 
 java {
@@ -23,10 +23,6 @@ dependencyManagement {
 }
 
 dependencies {
-    implementation(project(":auth:kernel:domain"))
-    implementation(project(":auth:kernel:infrastructure:right"))
-    implementation(project(":auth:callback:domain"))
-    implementation(project(":user:create:application"))
     implementation(project(":user:kernel:domain"))
 
     implementation(libs.spring.context)
