@@ -18,8 +18,8 @@ public final class CreateUserCommandHandler implements CreateUserUseCase {
   private final Clock clock;
 
   @Override
-  public User execute(CreateUserCommand command) {
+  public void execute(CreateUserCommand command) {
     User user = createUserCommandMapper.toDomain(command, clock.instant());
-    return userRepository.create(user);
+    userRepository.create(user);
   }
 }

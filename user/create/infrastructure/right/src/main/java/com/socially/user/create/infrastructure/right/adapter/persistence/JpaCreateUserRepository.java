@@ -3,7 +3,6 @@ package com.socially.user.create.infrastructure.right.adapter.persistence;
 import com.socially.user.create.domain.port.right.CreateUserRepository;
 import com.socially.user.kernel.domain.entity.User;
 import com.socially.user.kernel.infrastructure.right.adapter.persistence.UserEntityRepository;
-import com.socially.user.kernel.infrastructure.right.adapter.persistence.entity.UserEntity;
 import com.socially.user.kernel.infrastructure.right.adapter.persistence.mapper.UserEntityMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -16,8 +15,10 @@ public class JpaCreateUserRepository implements CreateUserRepository {
   private final UserEntityMapper entityMapper;
 
   @Override
-  public User create(User user) {
-    UserEntity savedEntity = entityRepository.save(entityMapper.toEntity(user));
-    return entityMapper.toDomain(savedEntity);
+  public void create(User user) {
+    if (entityRepository.existsByEmail(user.email().value())) {
+      return;
+    }
+    entityRepository.save(entityMapper.toEntity(user));
   }
 }
