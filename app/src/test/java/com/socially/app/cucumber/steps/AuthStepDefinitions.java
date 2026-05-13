@@ -2,6 +2,7 @@ package com.socially.app.cucumber.steps;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -26,6 +28,7 @@ public class AuthStepDefinitions {
   @Autowired private MockMvc mockMvc;
 
   @Autowired private ObjectMapper objectMapper;
+  @Autowired private JdbcTemplate jdbcTemplate;
 
   private MvcResult mvcResult;
   private String state;
@@ -33,6 +36,7 @@ public class AuthStepDefinitions {
 
   @Before("@auth")
   public void resetScenarioState() {
+    jdbcTemplate.execute("DELETE FROM users");
     mvcResult = null;
     state = null;
     cookies = new HashMap<>();
@@ -70,6 +74,18 @@ public class AuthStepDefinitions {
                     .param("state", state)
                     .cookie(cookieArray))
             .andReturn();
+    cookies.putAll(parseSetCookieHeaders(mvcResult));
+  }
+
+  @When("I refresh the auth session")
+  public void iRefreshTheAuthSession() throws Exception {
+    Cookie[] cookieArray =
+        cookies.entrySet().stream()
+            .map(entry -> new Cookie(entry.getKey(), entry.getValue()))
+            .toArray(Cookie[]::new);
+
+    mvcResult = mockMvc.perform(post("/api/auth/refresh").cookie(cookieArray)).andReturn();
+    cookies.putAll(parseSetCookieHeaders(mvcResult));
   }
 
   @Then("the auth response status should be {int}")
@@ -83,7 +99,8 @@ public class AuthStepDefinitions {
     assertThat(root.path("accessToken").asText()).isEqualTo("phase1-access-token");
     assertThat(root.path("tokenType").asText()).isEqualTo("Bearer");
     assertThat(root.path("expiresIn").asLong()).isEqualTo(3600L);
-    assertThat(root.path("user").path("id").asText()).isEqualTo("auth-user-1");
+    assertThat(root.path("user").path("id").asText())
+        .matches("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
     assertThat(root.path("user").path("email").asText()).isEqualTo("auth.user@example.com");
     assertThat(root.path("user").path("name").asText()).isEqualTo("Auth User");
   }
@@ -92,6 +109,12 @@ public class AuthStepDefinitions {
   public void theAuthResponseShouldSetRefreshTokenCookie() {
     String setCookieHeaders = String.join(",", mvcResult.getResponse().getHeaders("Set-Cookie"));
     assertThat(setCookieHeaders).contains("socially_refresh_token=");
+  }
+
+  @And("the users table should contain {int} records")
+  public void theUsersTableShouldContainRecords(int expectedCount) {
+    Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM users", Integer.class);
+    assertThat(count).isEqualTo(expectedCount);
   }
 
   private static Map<String, String> queryParams(String url) {
