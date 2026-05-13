@@ -10,10 +10,17 @@ import com.socially.auth.kernel.domain.AuthResultMapper;
 import com.socially.auth.kernel.domain.CookieInstruction;
 import com.socially.auth.kernel.domain.OAuthTokenResponse;
 import com.socially.auth.kernel.domain.properties.AuthProperties;
+import com.socially.auth.kernel.infrastructure.right.adapter.user.mapper.AuthUserToCreateUserCommandMapper;
 import com.socially.auth.refresh.application.exception.InvalidRefreshedIdTokenException;
 import com.socially.auth.refresh.application.exception.MissingRefreshSessionException;
 import com.socially.auth.refresh.application.mapper.RefreshCookieInstructionsMapper;
 import com.socially.auth.refresh.domain.port.right.RefreshTokenExchangeOAuthClient;
+import com.socially.user.create.application.input.CreateUserCommand;
+import com.socially.user.create.application.port.left.CreateUserUseCase;
+import com.socially.user.kernel.domain.entity.User;
+import com.socially.user.kernel.domain.valueobject.Email;
+import com.socially.user.kernel.domain.valueobject.Id;
+import java.time.Instant;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,12 +35,28 @@ class RefreshSessionCommandHandlerTest {
   @Mock private AuthProperties authProperties;
   @Mock private RefreshCookieInstructionsMapper refreshCookieInstructionsMapper;
   @Mock private AuthResultMapper authResultMapper;
+  @Mock private AuthUserToCreateUserCommandMapper authUserToCreateUserCommandMapper;
+  @Mock private CreateUserUseCase createUserUseCase;
 
   @InjectMocks private RefreshSessionCommandHandler handler;
 
   private static final OAuthTokenResponse TOKEN_RESPONSE =
       new OAuthTokenResponse("access", "id-token", "refresh-2", "Bearer", 3600L);
-  private static final AuthResult AUTH_RESULT = new AuthResult("access", "Bearer", 3600L, null);
+  private static final AuthResult AUTH_RESULT =
+      new AuthResult(
+          "access",
+          "Bearer",
+          3600L,
+          new com.socially.auth.kernel.domain.AuthUser("auth-id", "e@x.com", "Jane Doe"));
+  private static final CreateUserCommand CREATE_USER_COMMAND =
+      new CreateUserCommand("e@x.com", "Jane", "Doe");
+  private static final User CREATED_USER =
+      User.create(
+          Id.from("550e8400-e29b-41d4-a716-446655440111"),
+          Email.from("e@x.com"),
+          "Jane",
+          "Doe",
+          Instant.parse("2024-06-01T12:00:00Z"));
   private static final CookieInstruction COOKIE_INSTRUCTION =
       new CookieInstruction("socially_refresh_token", "refresh-2", 86_400L);
 
@@ -54,6 +77,9 @@ class RefreshSessionCommandHandlerTest {
         .thenReturn(TOKEN_RESPONSE);
     when(refreshCookieInstructionsMapper.toCookieInstruction(TOKEN_RESPONSE)).thenReturn(null);
     when(authResultMapper.toAuthResult(TOKEN_RESPONSE)).thenReturn(AUTH_RESULT);
+    when(authUserToCreateUserCommandMapper.toCommand(AUTH_RESULT.user()))
+        .thenReturn(CREATE_USER_COMMAND);
+    when(createUserUseCase.execute(CREATE_USER_COMMAND)).thenReturn(CREATED_USER);
 
     handler.execute(Map.of("socially_refresh_token", "refresh-1"));
 
@@ -67,6 +93,9 @@ class RefreshSessionCommandHandlerTest {
         .thenReturn(TOKEN_RESPONSE);
     when(refreshCookieInstructionsMapper.toCookieInstruction(TOKEN_RESPONSE)).thenReturn(null);
     when(authResultMapper.toAuthResult(TOKEN_RESPONSE)).thenReturn(AUTH_RESULT);
+    when(authUserToCreateUserCommandMapper.toCommand(AUTH_RESULT.user()))
+        .thenReturn(CREATE_USER_COMMAND);
+    when(createUserUseCase.execute(CREATE_USER_COMMAND)).thenReturn(CREATED_USER);
 
     handler.execute(Map.of("socially_refresh_token", "refresh-1"));
 
@@ -80,6 +109,9 @@ class RefreshSessionCommandHandlerTest {
         .thenReturn(TOKEN_RESPONSE);
     when(refreshCookieInstructionsMapper.toCookieInstruction(TOKEN_RESPONSE)).thenReturn(null);
     when(authResultMapper.toAuthResult(TOKEN_RESPONSE)).thenReturn(AUTH_RESULT);
+    when(authUserToCreateUserCommandMapper.toCommand(AUTH_RESULT.user()))
+        .thenReturn(CREATE_USER_COMMAND);
+    when(createUserUseCase.execute(CREATE_USER_COMMAND)).thenReturn(CREATED_USER);
 
     handler.execute(Map.of("socially_refresh_token", "refresh-1"));
 
@@ -111,10 +143,14 @@ class RefreshSessionCommandHandlerTest {
         .thenReturn(TOKEN_RESPONSE);
     when(refreshCookieInstructionsMapper.toCookieInstruction(TOKEN_RESPONSE)).thenReturn(null);
     when(authResultMapper.toAuthResult(TOKEN_RESPONSE)).thenReturn(AUTH_RESULT);
+    when(authUserToCreateUserCommandMapper.toCommand(AUTH_RESULT.user()))
+        .thenReturn(CREATE_USER_COMMAND);
+    when(createUserUseCase.execute(CREATE_USER_COMMAND)).thenReturn(CREATED_USER);
 
     var result = handler.execute(Map.of("socially_refresh_token", "refresh-1"));
 
     assertEquals(AUTH_RESULT, result.authResult());
+    assertEquals(CREATED_USER, result.user());
   }
 
   @Test
@@ -125,6 +161,9 @@ class RefreshSessionCommandHandlerTest {
     when(refreshCookieInstructionsMapper.toCookieInstruction(TOKEN_RESPONSE))
         .thenReturn(COOKIE_INSTRUCTION);
     when(authResultMapper.toAuthResult(TOKEN_RESPONSE)).thenReturn(AUTH_RESULT);
+    when(authUserToCreateUserCommandMapper.toCommand(AUTH_RESULT.user()))
+        .thenReturn(CREATE_USER_COMMAND);
+    when(createUserUseCase.execute(CREATE_USER_COMMAND)).thenReturn(CREATED_USER);
 
     var result = handler.execute(Map.of("socially_refresh_token", "refresh-1"));
 

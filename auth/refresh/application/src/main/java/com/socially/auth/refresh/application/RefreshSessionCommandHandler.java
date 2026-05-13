@@ -5,12 +5,14 @@ import com.socially.auth.kernel.domain.AuthResultMapper;
 import com.socially.auth.kernel.domain.CookieInstruction;
 import com.socially.auth.kernel.domain.OAuthTokenResponse;
 import com.socially.auth.kernel.domain.properties.AuthProperties;
+import com.socially.auth.kernel.infrastructure.right.adapter.user.mapper.AuthUserToCreateUserCommandMapper;
 import com.socially.auth.refresh.application.exception.InvalidRefreshedIdTokenException;
 import com.socially.auth.refresh.application.exception.MissingRefreshSessionException;
 import com.socially.auth.refresh.application.mapper.RefreshCookieInstructionsMapper;
 import com.socially.auth.refresh.application.output.RefreshSessionCommandResult;
 import com.socially.auth.refresh.application.port.left.RefreshSessionUseCase;
 import com.socially.auth.refresh.domain.port.right.RefreshTokenExchangeOAuthClient;
+import com.socially.user.create.application.port.left.CreateUserUseCase;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,8 @@ public class RefreshSessionCommandHandler implements RefreshSessionUseCase {
   private final RefreshTokenExchangeOAuthClient refreshTokenExchangeOAuthClient;
   private final RefreshCookieInstructionsMapper refreshCookieInstructionsMapper;
   private final AuthResultMapper authResultMapper;
+  private final AuthUserToCreateUserCommandMapper authUserToCreateUserCommandMapper;
+  private final CreateUserUseCase createUserUseCase;
 
   @Override
   public RefreshSessionCommandResult execute(Map<String, String> requestCookies) {
@@ -37,7 +41,9 @@ public class RefreshSessionCommandHandler implements RefreshSessionUseCase {
     CookieInstruction cookieInstruction =
         refreshCookieInstructionsMapper.toCookieInstruction(tokenResponse);
     var authResult = decodeAuthResult(tokenResponse);
-    return new RefreshSessionCommandResult(authResult, cookieInstruction);
+    var user =
+        createUserUseCase.execute(authUserToCreateUserCommandMapper.toCommand(authResult.user()));
+    return new RefreshSessionCommandResult(authResult, user, cookieInstruction);
   }
 
   private AuthResult decodeAuthResult(OAuthTokenResponse tokenResponse) {
