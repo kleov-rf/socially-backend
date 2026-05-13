@@ -12,6 +12,7 @@ COPY gradlew build.gradle.kts settings.gradle.kts ./
 COPY app app
 COPY donation donation
 COPY auth auth
+COPY user user
 COPY commons commons
 
 # Build the application (no daemon, produce boot JAR from app module)
