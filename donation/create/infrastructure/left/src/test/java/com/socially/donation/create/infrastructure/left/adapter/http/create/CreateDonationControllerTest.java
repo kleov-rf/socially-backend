@@ -8,6 +8,7 @@ import com.socially.donation.create.application.input.CreateDonationCommand;
 import com.socially.donation.create.application.port.left.CreateDonationUseCase;
 import com.socially.donation.create.infrastructure.left.adapter.http.create.input.CreateDonationRequest;
 import com.socially.donation.create.infrastructure.left.adapter.http.create.input.mapper.CreateDonationRequestMapper;
+import java.security.Principal;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -20,18 +21,28 @@ import org.springframework.http.ResponseEntity;
 class CreateDonationControllerTest {
 
   @Mock private CreateDonationUseCase createDonationUseCase;
-
   @Mock private CreateDonationRequestMapper mapper;
-
+  @Mock private Principal principal;
   @InjectMocks private CreateDonationController controller;
 
   @Test
-  void create_should_call_handler_with_command() {
+  void create_should_call_mapper_with_request_and_principal() {
     var request = new CreateDonationRequest("id-123", "Test Title", "Test Description");
-    var command = new CreateDonationCommand("id-123", "Test Title", "Test Description");
-    when(mapper.toCommand(request)).thenReturn(command);
+    var command = new CreateDonationCommand("id-123", "Test Title", "Test Description", principal);
+    when(mapper.toCommand(request, principal)).thenReturn(command);
 
-    controller.create(request);
+    controller.create(request, principal);
+
+    verify(mapper).toCommand(request, principal);
+  }
+
+  @Test
+  void create_should_call_use_case_with_mapped_command() {
+    var request = new CreateDonationRequest("id-123", "Test Title", "Test Description");
+    var command = new CreateDonationCommand("id-123", "Test Title", "Test Description", principal);
+    when(mapper.toCommand(request, principal)).thenReturn(command);
+
+    controller.create(request, principal);
 
     verify(createDonationUseCase).execute(command);
   }
@@ -39,10 +50,10 @@ class CreateDonationControllerTest {
   @Test
   void create_should_return_created_status() {
     var request = new CreateDonationRequest("id-123", "Test Title", "Test Description");
-    var command = new CreateDonationCommand("id-123", "Test Title", "Test Description");
-    when(mapper.toCommand(request)).thenReturn(command);
+    var command = new CreateDonationCommand("id-123", "Test Title", "Test Description", principal);
+    when(mapper.toCommand(request, principal)).thenReturn(command);
 
-    ResponseEntity<Void> response = controller.create(request);
+    ResponseEntity<Void> response = controller.create(request, principal);
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
   }

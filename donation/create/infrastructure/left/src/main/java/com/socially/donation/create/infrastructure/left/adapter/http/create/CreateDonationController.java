@@ -6,6 +6,7 @@ import com.socially.donation.create.application.port.left.CreateDonationUseCase;
 import com.socially.donation.create.infrastructure.left.adapter.http.create.input.CreateDonationRequest;
 import com.socially.donation.create.infrastructure.left.adapter.http.create.input.mapper.CreateDonationRequestMapper;
 import jakarta.validation.Valid;
+import java.security.Principal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,8 +25,9 @@ public class CreateDonationController {
   private final CreateDonationRequestMapper mapper;
 
   @PostMapping
-  public ResponseEntity<Void> create(@Valid @RequestBody CreateDonationRequest request) {
-    CreateDonationCommand command = mapper.toCommand(request);
+  public ResponseEntity<Void> create(
+      @Valid @RequestBody CreateDonationRequest request, Principal principal) {
+    CreateDonationCommand command = mapper.toCommand(request, principal);
     createDonationUseCase.execute(command);
     return ResponseEntity.status(HttpStatus.CREATED).build();
   }
