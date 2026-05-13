@@ -17,13 +17,13 @@ import com.socially.auth.kernel.domain.exception.UserNotFoundAfterCreateExceptio
 import com.socially.auth.kernel.domain.properties.AuthProperties;
 import com.socially.auth.kernel.infrastructure.right.adapter.oauth.mapper.AuthResultMapper;
 import com.socially.auth.kernel.infrastructure.right.adapter.user.mapper.AuthUserToCreateUserCommandMapper;
+import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.user.create.application.input.CreateUserCommand;
 import com.socially.user.create.application.port.left.CreateUserUseCase;
 import com.socially.user.findbyemail.application.input.FindUserByEmailQuery;
 import com.socially.user.findbyemail.application.port.left.FindUserByEmailUseCase;
 import com.socially.user.kernel.domain.entity.User;
 import com.socially.user.kernel.domain.valueobject.Email;
-import com.socially.commons.kernel.domain.valueobject.Id;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;

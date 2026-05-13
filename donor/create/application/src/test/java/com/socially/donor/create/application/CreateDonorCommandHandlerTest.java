@@ -3,11 +3,11 @@ package com.socially.donor.create.application;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donor.create.application.input.CreateDonorCommand;
 import com.socially.donor.create.application.input.mapper.CreateDonorCommandMapper;
 import com.socially.donor.create.domain.port.right.CreateDonorRepository;
 import com.socially.donor.kernel.domain.entity.Donor;
-import com.socially.commons.kernel.domain.valueobject.Id;
 import java.time.Clock;
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
@@ -34,12 +34,7 @@ class CreateDonorCommandHandlerTest {
     var command = new CreateDonorCommand(DONOR_ID, USER_ID, "donor@example.com", "Jane", "Doe");
     Donor mappedDonor =
         Donor.create(
-            Id.from(DONOR_ID),
-            Id.from(USER_ID),
-            "donor@example.com",
-            "Jane",
-            "Doe",
-            CREATED_AT);
+            Id.from(DONOR_ID), Id.from(USER_ID), "donor@example.com", "Jane", "Doe", CREATED_AT);
     when(clock.instant()).thenReturn(CREATED_AT);
     when(createDonorCommandMapper.toDomain(command, CREATED_AT)).thenReturn(mappedDonor);
 
@@ -53,12 +48,7 @@ class CreateDonorCommandHandlerTest {
     var command = new CreateDonorCommand(DONOR_ID, USER_ID, "donor@example.com", "Jane", "Doe");
     Donor mappedDonor =
         Donor.create(
-            Id.from(DONOR_ID),
-            Id.from(USER_ID),
-            "donor@example.com",
-            "Jane",
-            "Doe",
-            CREATED_AT);
+            Id.from(DONOR_ID), Id.from(USER_ID), "donor@example.com", "Jane", "Doe", CREATED_AT);
     when(clock.instant()).thenReturn(CREATED_AT);
     when(createDonorCommandMapper.toDomain(command, CREATED_AT)).thenReturn(mappedDonor);
 
@@ -72,12 +62,7 @@ class CreateDonorCommandHandlerTest {
     var command = new CreateDonorCommand(DONOR_ID, USER_ID, "donor@example.com", "Jane", "Doe");
     Donor mappedDonor =
         Donor.create(
-            Id.from(DONOR_ID),
-            Id.from(USER_ID),
-            "donor@example.com",
-            "Jane",
-            "Doe",
-            CREATED_AT);
+            Id.from(DONOR_ID), Id.from(USER_ID), "donor@example.com", "Jane", "Doe", CREATED_AT);
     when(clock.instant()).thenReturn(CREATED_AT);
     when(createDonorCommandMapper.toDomain(command, CREATED_AT)).thenReturn(mappedDonor);
 

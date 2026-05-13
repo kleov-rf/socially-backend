@@ -1,7 +1,7 @@
 package com.socially.user.kernel.domain.entity;
 
-import com.socially.user.kernel.domain.valueobject.Email;
 import com.socially.commons.kernel.domain.valueobject.Id;
+import com.socially.user.kernel.domain.valueobject.Email;
 import java.time.Instant;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;

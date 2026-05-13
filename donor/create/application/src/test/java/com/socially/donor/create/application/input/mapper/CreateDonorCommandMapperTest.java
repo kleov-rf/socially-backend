@@ -2,8 +2,8 @@ package com.socially.donor.create.application.input.mapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.socially.donor.create.application.input.CreateDonorCommand;
 import com.socially.commons.kernel.domain.valueobject.Id;
+import com.socially.donor.create.application.input.CreateDonorCommand;
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
 

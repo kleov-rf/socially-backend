@@ -6,11 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.user.findbyemail.application.input.FindUserByEmailQuery;
 import com.socially.user.findbyemail.domain.port.right.FindUserByEmailRepository;
 import com.socially.user.kernel.domain.entity.User;
 import com.socially.user.kernel.domain.valueobject.Email;
-import com.socially.commons.kernel.domain.valueobject.Id;
 import java.time.Instant;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;

@@ -4,8 +4,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.socially.donor.kernel.domain.entity.Donor;
 import com.socially.commons.kernel.domain.valueobject.Id;
+import com.socially.donor.kernel.domain.entity.Donor;
 import com.socially.donor.kernel.infrastructure.right.adapter.persistence.DonorEntityRepository;
 import com.socially.donor.kernel.infrastructure.right.adapter.persistence.entity.DonorEntity;
 import com.socially.donor.kernel.infrastructure.right.adapter.persistence.mapper.DonorEntityMapper;
@@ -31,12 +31,7 @@ class JpaCreateDonorRepositoryTest {
 
   private static Donor donor() {
     return Donor.create(
-        Id.from(DONOR_ID),
-        Id.from(USER_ID),
-        "donor@example.com",
-        "Jane",
-        "Doe",
-        CREATED_AT);
+        Id.from(DONOR_ID), Id.from(USER_ID), "donor@example.com", "Jane", "Doe", CREATED_AT);
   }
 
   private static DonorEntity mappedEntity() {

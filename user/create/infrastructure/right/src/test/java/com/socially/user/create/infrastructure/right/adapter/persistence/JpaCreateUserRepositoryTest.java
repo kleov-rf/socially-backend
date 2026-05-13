@@ -4,9 +4,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.user.kernel.domain.entity.User;
 import com.socially.user.kernel.domain.valueobject.Email;
-import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.user.kernel.infrastructure.right.adapter.persistence.UserEntityRepository;
 import com.socially.user.kernel.infrastructure.right.adapter.persistence.mapper.UserEntityMapper;
 import java.time.Instant;

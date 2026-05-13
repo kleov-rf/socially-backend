@@ -1,7 +1,7 @@
 package com.socially.donor.kernel.infrastructure.right.adapter.persistence.mapper;
 
-import com.socially.donor.kernel.domain.entity.Donor;
 import com.socially.commons.kernel.domain.valueobject.Id;
+import com.socially.donor.kernel.domain.entity.Donor;
 import com.socially.donor.kernel.infrastructure.right.adapter.persistence.entity.DonorEntity;
 import org.springframework.stereotype.Component;
 

@@ -2,8 +2,8 @@ package com.socially.donor.kernel.infrastructure.right.adapter.persistence.mappe
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.socially.donor.kernel.domain.entity.Donor;
 import com.socially.commons.kernel.domain.valueobject.Id;
+import com.socially.donor.kernel.domain.entity.Donor;
 import com.socially.donor.kernel.infrastructure.right.adapter.persistence.entity.DonorEntity;
 import java.time.Instant;
 import java.util.UUID;
@@ -19,12 +19,7 @@ class DonorEntityMapperTest {
 
   private static final Donor DONOR =
       Donor.create(
-          Id.from(DONOR_ID),
-          Id.from(USER_ID),
-          "donor@example.com",
-          "Jane",
-          "Doe",
-          CREATED_AT);
+          Id.from(DONOR_ID), Id.from(USER_ID), "donor@example.com", "Jane", "Doe", CREATED_AT);
 
   private static final Instant ENTITY_CREATED_AT = Instant.parse("2025-01-01T00:00:00Z");
   private static final DonorEntity ENTITY =

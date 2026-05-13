@@ -2,9 +2,9 @@ package com.socially.user.kernel.infrastructure.right.adapter.persistence.mapper
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.user.kernel.domain.entity.User;
 import com.socially.user.kernel.domain.valueobject.Email;
-import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.user.kernel.infrastructure.right.adapter.persistence.entity.UserEntity;
 import java.time.Instant;
 import java.util.UUID;

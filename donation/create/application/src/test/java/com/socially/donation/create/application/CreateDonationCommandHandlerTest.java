@@ -10,13 +10,13 @@ import static org.mockito.Mockito.when;
 
 import com.socially.auth.me.application.exception.UnauthenticatedRequestException;
 import com.socially.auth.me.application.port.left.GetCurrentAuthUserUseCase;
+import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donation.create.application.input.CreateDonationCommand;
 import com.socially.donation.create.application.input.mapper.CreateDonationCommandMapper;
 import com.socially.donation.create.domain.port.right.CreateDonationRepository;
 import com.socially.donation.kernel.domain.entity.Donation;
 import com.socially.donation.kernel.domain.valueobject.Description;
 import com.socially.donation.kernel.domain.valueobject.DonorId;
-import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donation.kernel.domain.valueobject.Title;
 import com.socially.donor.create.application.input.CreateDonorCommand;
 import com.socially.donor.create.application.port.left.CreateDonorUseCase;
@@ -56,13 +56,7 @@ class CreateDonationCommandHandlerTest {
   @BeforeEach
   void setUp() {
     command = new CreateDonationCommand(DONATION_ID, "Test Title", "Test Description", PRINCIPAL);
-    user =
-        User.create(
-            Id.from(USER_ID),
-            Email.from("user@example.com"),
-            "Jane",
-            "Doe",
-            CREATED_AT);
+    user = User.create(Id.from(USER_ID), Email.from("user@example.com"), "Jane", "Doe", CREATED_AT);
   }
 
   @Test

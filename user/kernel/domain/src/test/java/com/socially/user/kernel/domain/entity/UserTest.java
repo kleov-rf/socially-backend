@@ -2,8 +2,8 @@ package com.socially.user.kernel.domain.entity;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.socially.user.kernel.domain.valueobject.Email;
 import com.socially.commons.kernel.domain.valueobject.Id;
+import com.socially.user.kernel.domain.valueobject.Email;
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
 

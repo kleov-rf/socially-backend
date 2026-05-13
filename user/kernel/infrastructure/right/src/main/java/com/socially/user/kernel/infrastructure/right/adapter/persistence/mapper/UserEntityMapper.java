@@ -1,8 +1,8 @@
 package com.socially.user.kernel.infrastructure.right.adapter.persistence.mapper;
 
+import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.user.kernel.domain.entity.User;
 import com.socially.user.kernel.domain.valueobject.Email;
-import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.user.kernel.infrastructure.right.adapter.persistence.entity.UserEntity;
 import org.springframework.stereotype.Component;
 
