@@ -1,5 +1,5 @@
 @auth
-Feature: Google auth flow
+Feature: Authentication flows
   As a Socially user
   I want to complete Google login through backend auth endpoints
   So that the SPA receives token payload and refresh cookie
