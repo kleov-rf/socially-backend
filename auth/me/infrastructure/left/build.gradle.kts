@@ -22,7 +22,9 @@ repositories {
 dependencies {
     implementation(project(":commons:observability"))
     implementation(project(":auth:kernel:domain"))
+    implementation(project(":auth:kernel:infrastructure:left"))
     implementation(project(":auth:me:application"))
+    implementation(project(":user:kernel:domain"))
 
     implementation(libs.spring.boot.starter.webmvc)
 

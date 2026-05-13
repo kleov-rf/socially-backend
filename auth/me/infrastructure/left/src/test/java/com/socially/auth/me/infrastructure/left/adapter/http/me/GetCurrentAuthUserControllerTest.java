@@ -6,9 +6,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.socially.auth.kernel.domain.AuthUser;
+import com.socially.auth.kernel.domain.UserResponseDto;
+import com.socially.auth.kernel.infrastructure.left.adapter.http.output.mapper.UserResponseDtoMapper;
 import com.socially.auth.me.application.port.left.GetCurrentAuthUserUseCase;
-import com.socially.auth.me.infrastructure.left.adapter.http.me.output.AuthUserResponse;
-import com.socially.auth.me.infrastructure.left.adapter.http.me.output.mapper.AuthUserResponseMapper;
 import java.security.Principal;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,14 +22,14 @@ import org.springframework.http.ResponseEntity;
 class GetCurrentAuthUserControllerTest {
 
   @Mock private GetCurrentAuthUserUseCase useCase;
-  @Mock private AuthUserResponseMapper authUserResponseMapper;
+  @Mock private UserResponseDtoMapper userResponseDtoMapper;
 
   @InjectMocks private GetCurrentAuthUserController sut;
 
   @Test
   void me_should_call_use_case_with_received_principal() {
     Principal principal = () -> "ignored";
-    when(useCase.execute(principal)).thenReturn(new AuthUser("id", "e@x.com", "N"));
+    when(useCase.execute(principal)).thenReturn(new AuthUser("id-1", "e@x.com", "N"));
 
     sut.me(principal);
 
@@ -41,22 +41,22 @@ class GetCurrentAuthUserControllerTest {
     Principal principal = () -> "ignored";
     AuthUser authUser = new AuthUser("id-1", "a@b.com", "Full");
     when(useCase.execute(principal)).thenReturn(authUser);
-    when(authUserResponseMapper.toResponse(authUser))
-        .thenReturn(new AuthUserResponse("id-1", "a@b.com", "Full"));
+    when(userResponseDtoMapper.toResponse(authUser))
+        .thenReturn(new UserResponseDto("id-1", "a@b.com", "Full"));
 
     sut.me(principal);
 
-    verify(authUserResponseMapper).toResponse(authUser);
+    verify(userResponseDtoMapper).toResponse(authUser);
   }
 
   @Test
   void me_should_return_response_with_ok_status() {
     Principal principal = () -> "ignored";
     when(useCase.execute(principal)).thenReturn(new AuthUser("id", "e@x.com", null));
-    when(authUserResponseMapper.toResponse(any(AuthUser.class)))
-        .thenReturn(new AuthUserResponse("id", "e@x.com", null));
+    when(userResponseDtoMapper.toResponse(any(AuthUser.class)))
+        .thenReturn(new UserResponseDto("id", "e@x.com", null));
 
-    ResponseEntity<AuthUserResponse> response = sut.me(principal);
+    ResponseEntity<UserResponseDto> response = sut.me(principal);
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
   }
@@ -64,12 +64,12 @@ class GetCurrentAuthUserControllerTest {
   @Test
   void me_should_return_response_with_mapped_user_response() {
     Principal principal = () -> "ignored";
-    AuthUser authUser = new AuthUser("sub-x", "user@example.com", "Jane Doe");
-    AuthUserResponse mapped = new AuthUserResponse("sub-x", "user@example.com", "Jane Doe");
-    when(useCase.execute(principal)).thenReturn(authUser);
-    when(authUserResponseMapper.toResponse(authUser)).thenReturn(mapped);
+    AuthUser user = new AuthUser("sub-x", "user@example.com", "Jane Doe");
+    UserResponseDto mapped = new UserResponseDto("sub-x", "user@example.com", "Jane Doe");
+    when(useCase.execute(principal)).thenReturn(user);
+    when(userResponseDtoMapper.toResponse(user)).thenReturn(mapped);
 
-    ResponseEntity<AuthUserResponse> response = sut.me(principal);
+    ResponseEntity<UserResponseDto> response = sut.me(principal);
 
     assertEquals(mapped, response.getBody());
   }

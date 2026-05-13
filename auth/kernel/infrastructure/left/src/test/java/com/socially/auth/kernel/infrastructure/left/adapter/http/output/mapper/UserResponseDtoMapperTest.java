@@ -2,6 +2,7 @@ package com.socially.auth.kernel.infrastructure.left.adapter.http.output.mapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import com.socially.auth.kernel.domain.AuthUser;
 import com.socially.user.kernel.domain.entity.User;
 import com.socially.user.kernel.domain.valueobject.Email;
 import com.socially.user.kernel.domain.valueobject.Id;
@@ -55,5 +56,32 @@ class UserResponseDtoMapperTest {
     var response = sut.toResponse(user);
 
     assertEquals("Jane Doe", response.name());
+  }
+
+  @Test
+  void toResponse_should_map_auth_user_id() {
+    AuthUser authUser = new AuthUser("sub-1", "auth@example.com", "Auth Name");
+
+    var response = sut.toResponse(authUser);
+
+    assertEquals("sub-1", response.id());
+  }
+
+  @Test
+  void toResponse_should_map_auth_user_email() {
+    AuthUser authUser = new AuthUser("sub-1", "auth@example.com", "Auth Name");
+
+    var response = sut.toResponse(authUser);
+
+    assertEquals("auth@example.com", response.email());
+  }
+
+  @Test
+  void toResponse_should_map_auth_user_name() {
+    AuthUser authUser = new AuthUser("sub-1", "auth@example.com", "Auth Name");
+
+    var response = sut.toResponse(authUser);
+
+    assertEquals("Auth Name", response.name());
   }
 }
