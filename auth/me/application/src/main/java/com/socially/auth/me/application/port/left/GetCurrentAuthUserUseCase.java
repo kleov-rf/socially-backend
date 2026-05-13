@@ -1,8 +1,8 @@
 package com.socially.auth.me.application.port.left;
 
-import com.socially.auth.kernel.domain.AuthUser;
+import com.socially.user.kernel.domain.entity.User;
 import java.security.Principal;
 
 public interface GetCurrentAuthUserUseCase {
-  AuthUser execute(Principal principal);
+  User execute(Principal principal);
 }

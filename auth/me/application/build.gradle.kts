@@ -24,6 +24,9 @@ dependencyManagement {
 
 dependencies {
     implementation(project(":auth:kernel:domain"))
+    implementation(project(":auth:kernel:infrastructure:right"))
+    implementation(project(":user:create:application"))
+    implementation(project(":user:kernel:domain"))
 
     implementation(libs.spring.context)
 
@@ -31,6 +34,8 @@ dependencies {
     annotationProcessor(libs.lombok)
 
     testImplementation(libs.junit.jupiter)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.junit.jupiter)
     testImplementation(libs.spring.boot.starter.oauth2.resource.server)
     testRuntimeOnly(libs.junit.platform.launcher)
 }
