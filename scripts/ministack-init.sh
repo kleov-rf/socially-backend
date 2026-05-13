@@ -14,6 +14,8 @@ OUTPUT_FILE="/tmp/ministack/cognito-outputs.env"
 # Hosted UI username/password sign-in (local dev only; override via ministack container env if needed).
 LOCAL_DEV_USERNAME="${LOCAL_DEV_COGNITO_USERNAME:-dev@socially.local}"
 LOCAL_DEV_PASSWORD="${LOCAL_DEV_COGNITO_PASSWORD:-SociallyDev1!}"
+LOCAL_DEV_GIVEN_NAME="${LOCAL_DEV_COGNITO_GIVEN_NAME:-Dev}"
+LOCAL_DEV_FAMILY_NAME="${LOCAL_DEV_COGNITO_FAMILY_NAME:-User}"
 
 aws_local() {
   aws --endpoint-url "${AWS_ENDPOINT}" --region "${AWS_DEFAULT_REGION}" "$@"
@@ -44,7 +46,11 @@ ensure_local_dev_user() {
   aws_local cognito-idp admin-create-user \
     --user-pool-id "${pool_id}" \
     --username "${LOCAL_DEV_USERNAME}" \
-    --user-attributes "Name=email,Value=${LOCAL_DEV_USERNAME}" "Name=email_verified,Value=true" \
+    --user-attributes \
+      "Name=email,Value=${LOCAL_DEV_USERNAME}" \
+      "Name=email_verified,Value=true" \
+      "Name=given_name,Value=${LOCAL_DEV_GIVEN_NAME}" \
+      "Name=family_name,Value=${LOCAL_DEV_FAMILY_NAME}" \
     --message-action SUPPRESS \
     --temporary-password "TempPassw0rd!" >/dev/null
 

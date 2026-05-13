@@ -121,7 +121,7 @@ JWTs from MiniStack use an AWS-style `iss` claim while JWKS is loaded via `http:
 
 The Cognito token endpoint exposed via MiniStack accepts `grant_type=refresh_token` with the SPA app client id (no secret), matching AWS semantics and backing `POST /api/auth/refresh` for reloading the SPA with an existing httpOnly refresh cookie.
 
-**Hosted UI username/password:** `dev@socially.local` / `SociallyDev1!` (created by `scripts/ministack-init.sh`). Override via ministack env `LOCAL_DEV_COGNITO_USERNAME` / `LOCAL_DEV_COGNITO_PASSWORD`. If your MiniStack volume predates that logic, run `docker compose up -d --force-recreate ministack`, wait for Cognito init, then `./scripts/start-local.sh` again.
+**Hosted UI username/password:** `dev@socially.local` / `SociallyDev1!` (created by `scripts/ministack-init.sh`). The seed user also gets profile attributes `given_name=Dev` and `family_name=User`. Override via ministack env `LOCAL_DEV_COGNITO_USERNAME` / `LOCAL_DEV_COGNITO_PASSWORD` / `LOCAL_DEV_COGNITO_GIVEN_NAME` / `LOCAL_DEV_COGNITO_FAMILY_NAME`. If your MiniStack volume predates that logic, run `docker compose up -d --force-recreate ministack`, wait for Cognito init, then `./scripts/start-local.sh` again.
 
 Quick checks:
 
