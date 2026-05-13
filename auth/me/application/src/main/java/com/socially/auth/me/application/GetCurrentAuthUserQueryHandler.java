@@ -11,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 @RequiredArgsConstructor
 @Service
@@ -31,20 +30,7 @@ public class GetCurrentAuthUserQueryHandler implements GetCurrentAuthUserUseCase
   private AuthUser userFromJwt(Jwt jwt) {
     String givenName = jwt.getClaimAsString("given_name");
     String familyName = jwt.getClaimAsString("family_name");
-    String fullName = joinNames(givenName, familyName);
-    return new AuthUser(jwt.getClaimAsString("sub"), jwt.getClaimAsString("email"), fullName);
-  }
-
-  private String joinNames(String givenName, String familyName) {
-    if (StringUtils.hasText(givenName) && StringUtils.hasText(familyName)) {
-      return givenName + " " + familyName;
-    }
-    if (StringUtils.hasText(givenName)) {
-      return givenName;
-    }
-    if (StringUtils.hasText(familyName)) {
-      return familyName;
-    }
-    return null;
+    return new AuthUser(
+        jwt.getClaimAsString("sub"), jwt.getClaimAsString("email"), givenName, familyName);
   }
 }

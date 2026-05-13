@@ -1,12 +1,15 @@
-package com.socially.auth.kernel.domain;
+package com.socially.auth.kernel.infrastructure.right.adapter.oauth.mapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.socially.auth.kernel.domain.AuthUser;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -35,7 +38,8 @@ class AuthUserMapperTest {
 
     assertNull(user.id());
     assertNull(user.email());
-    assertNull(user.name());
+    assertNull(user.givenName());
+    assertNull(user.familyName());
     verify(mapper, never()).readTree(any(byte[].class));
   }
 
@@ -79,20 +83,17 @@ class AuthUserMapperTest {
     assertEquals("email@example.com", user.email());
   }
 
-  @ParameterizedTest
-  @CsvSource(
-      value = {"Jane,Brown,Jane Brown", "Jane,null,Jane", "null,Brown,Brown", "null,null,null"},
-      nullValues = "null")
-  void fromIdToken_should_return_auth_user_full_name(
-      String givenName, String familyName, String expectedFullName) throws IOException {
+  @Test
+  void fromIdToken_should_return_auth_user_given_and_family_name() throws IOException {
     String idToken =
         createTokenWithPayload(
-            parseValuesIntoJson("sub-456", "other@example.com", givenName, familyName));
-    mockObjectMapperReadTree("sub-456", "other@example.com", givenName, familyName);
+            parseValuesIntoJson("sub-456", "other@example.com", "Jane", "Brown"));
+    mockObjectMapperReadTree("sub-456", "other@example.com", "Jane", "Brown");
 
     AuthUser user = sut.fromIdToken(idToken);
 
-    assertEquals(expectedFullName, user.name());
+    assertEquals("Jane", user.givenName());
+    assertEquals("Brown", user.familyName());
   }
 
   @Test

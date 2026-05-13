@@ -48,7 +48,7 @@ class CallbackGoogleControllerTest {
 
   private static final AuthResult AUTH_RESULT =
       new AuthResult(
-          "access-token", "Bearer", 3600L, new AuthUser("id-1", "user@example.com", "John Doe"));
+          "access-token", "Bearer", 3600L, new AuthUser("id-1", "user@example.com", "John", "Doe"));
   private static final User USER =
       User.create(
           Id.from("550e8400-e29b-41d4-a716-446655440000"),

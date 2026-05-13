@@ -1,12 +1,10 @@
-package com.socially.auth.kernel.domain;
+package com.socially.auth.kernel.infrastructure.right.adapter.oauth.mapper;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.socially.auth.kernel.domain.AuthUser;
 import java.util.Base64;
-import java.util.List;
-import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
-import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -18,7 +16,7 @@ public final class AuthUserMapper {
 
   public AuthUser fromIdToken(String idToken) {
     if (!StringUtils.hasText(idToken)) {
-      return new AuthUser(null, null, null);
+      return new AuthUser(null, null, null, null);
     }
 
     String[] tokenParts = idToken.split("\\.");
@@ -35,22 +33,9 @@ public final class AuthUserMapper {
       String givenName = payload.path("given_name").asText(null);
       String familyName = payload.path("family_name").asText(null);
 
-      String fullName = buildFullName(givenName, familyName);
-
-      return new AuthUser(id, email, fullName);
+      return new AuthUser(id, email, givenName, familyName);
     } catch (Exception exception) {
       throw new IllegalArgumentException("Unable to decode id_token payload", exception);
     }
-  }
-
-  private static @Nullable String buildFullName(String givenName, String familyName) {
-    Stream<String> names = Stream.of(givenName, familyName);
-    List<String> nonEmptyNames = names.filter(StringUtils::hasText).toList();
-
-    if (nonEmptyNames.isEmpty()) {
-      return null;
-    }
-
-    return String.join(" ", nonEmptyNames);
   }
 }

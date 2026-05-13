@@ -10,11 +10,11 @@ import com.socially.auth.callback.application.exception.MissingTemporaryOAuthCoo
 import com.socially.auth.callback.application.mapper.CallbackCookieInstructionsMapper;
 import com.socially.auth.callback.domain.port.right.AuthorizationCodeExchangeOAuthClient;
 import com.socially.auth.kernel.domain.AuthResult;
-import com.socially.auth.kernel.domain.AuthResultMapper;
 import com.socially.auth.kernel.domain.AuthUser;
 import com.socially.auth.kernel.domain.CookieInstruction;
 import com.socially.auth.kernel.domain.OAuthTokenResponse;
 import com.socially.auth.kernel.domain.properties.AuthProperties;
+import com.socially.auth.kernel.infrastructure.right.adapter.oauth.mapper.AuthResultMapper;
 import com.socially.auth.kernel.infrastructure.right.adapter.user.mapper.AuthUserToCreateUserCommandMapper;
 import com.socially.user.create.application.input.CreateUserCommand;
 import com.socially.user.create.application.port.left.CreateUserUseCase;
@@ -48,7 +48,7 @@ class CompleteOAuthCallbackCommandHandlerTest {
   private static final String ID_TOKEN = "id-token-1";
   private static final String STATE_COOKIE_NAME = "socially_oauth_state";
   private static final String PKCE_COOKIE_NAME = "socially_oauth_pkce";
-  private static final AuthUser USER = new AuthUser("user-id-1", "user@example.com", "John Doe");
+  private static final AuthUser USER = new AuthUser("user-id-1", "user@example.com", "John", "Doe");
   private static final CreateUserCommand CREATE_USER_COMMAND =
       new CreateUserCommand("user@example.com", "John", "Doe");
   private static final User CREATED_USER =

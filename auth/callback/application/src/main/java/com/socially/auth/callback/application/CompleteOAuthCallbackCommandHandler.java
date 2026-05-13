@@ -6,9 +6,9 @@ import com.socially.auth.callback.application.mapper.CallbackCookieInstructionsM
 import com.socially.auth.callback.application.output.CompleteOAuthCallbackOutcome;
 import com.socially.auth.callback.application.port.left.CompleteOAuthCallbackUseCase;
 import com.socially.auth.callback.domain.port.right.AuthorizationCodeExchangeOAuthClient;
-import com.socially.auth.kernel.domain.AuthResultMapper;
 import com.socially.auth.kernel.domain.OAuthTokenResponse;
 import com.socially.auth.kernel.domain.properties.AuthProperties;
+import com.socially.auth.kernel.infrastructure.right.adapter.oauth.mapper.AuthResultMapper;
 import com.socially.auth.kernel.infrastructure.right.adapter.user.mapper.AuthUserToCreateUserCommandMapper;
 import com.socially.user.create.application.port.left.CreateUserUseCase;
 import java.util.Map;

@@ -50,7 +50,7 @@ class GetCurrentAuthUserQueryHandlerTest {
             "Doe",
             CREATED_AT);
     when(authUserToCreateUserCommandMapper.toCommand(
-            new AuthUser("sub-99", "id-test@example.com", "Jane Doe")))
+            new AuthUser("sub-99", "id-test@example.com", "Jane", "Doe")))
         .thenReturn(CREATE_USER_COMMAND);
     when(createUserUseCase.execute(CREATE_USER_COMMAND)).thenReturn(createdUser);
 
@@ -62,7 +62,8 @@ class GetCurrentAuthUserQueryHandlerTest {
                 authUser ->
                     "sub-99".equals(authUser.id())
                         && "id-test@example.com".equals(authUser.email())
-                        && "Jane Doe".equals(authUser.name())));
+                        && "Jane".equals(authUser.givenName())
+                        && "Doe".equals(authUser.familyName())));
   }
 
   @Test
@@ -76,7 +77,7 @@ class GetCurrentAuthUserQueryHandlerTest {
             "Doe",
             CREATED_AT);
     when(authUserToCreateUserCommandMapper.toCommand(
-            new AuthUser("sub-99", "id-test@example.com", "Jane Doe")))
+            new AuthUser("sub-99", "id-test@example.com", "Jane", "Doe")))
         .thenReturn(CREATE_USER_COMMAND);
     when(createUserUseCase.execute(CREATE_USER_COMMAND)).thenReturn(createdUser);
 
@@ -96,7 +97,7 @@ class GetCurrentAuthUserQueryHandlerTest {
             "Doe",
             CREATED_AT);
     when(authUserToCreateUserCommandMapper.toCommand(
-            new AuthUser("sub-99", "id-test@example.com", "Jane Doe")))
+            new AuthUser("sub-99", "id-test@example.com", "Jane", "Doe")))
         .thenReturn(CREATE_USER_COMMAND);
     when(createUserUseCase.execute(CREATE_USER_COMMAND)).thenReturn(createdUser);
 

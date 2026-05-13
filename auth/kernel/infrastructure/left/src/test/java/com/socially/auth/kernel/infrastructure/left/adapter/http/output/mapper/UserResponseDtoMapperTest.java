@@ -1,6 +1,7 @@
 package com.socially.auth.kernel.infrastructure.left.adapter.http.output.mapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import com.socially.auth.kernel.domain.AuthUser;
 import com.socially.user.kernel.domain.entity.User;
@@ -60,7 +61,7 @@ class UserResponseDtoMapperTest {
 
   @Test
   void toResponse_should_map_auth_user_id() {
-    AuthUser authUser = new AuthUser("sub-1", "auth@example.com", "Auth Name");
+    AuthUser authUser = new AuthUser("sub-1", "auth@example.com", "Auth", "User");
 
     var response = sut.toResponse(authUser);
 
@@ -69,7 +70,7 @@ class UserResponseDtoMapperTest {
 
   @Test
   void toResponse_should_map_auth_user_email() {
-    AuthUser authUser = new AuthUser("sub-1", "auth@example.com", "Auth Name");
+    AuthUser authUser = new AuthUser("sub-1", "auth@example.com", "Auth", "User");
 
     var response = sut.toResponse(authUser);
 
@@ -77,11 +78,38 @@ class UserResponseDtoMapperTest {
   }
 
   @Test
-  void toResponse_should_map_auth_user_name() {
-    AuthUser authUser = new AuthUser("sub-1", "auth@example.com", "Auth Name");
+  void toResponse_should_map_auth_user_name_with_given_and_family_name() {
+    AuthUser authUser = new AuthUser("sub-1", "auth@example.com", "Auth", "User");
 
     var response = sut.toResponse(authUser);
 
-    assertEquals("Auth Name", response.name());
+    assertEquals("Auth User", response.name());
+  }
+
+  @Test
+  void toResponse_should_map_auth_user_name_with_only_given_name() {
+    AuthUser authUser = new AuthUser("sub-1", "auth@example.com", "Auth", null);
+
+    var response = sut.toResponse(authUser);
+
+    assertEquals("Auth", response.name());
+  }
+
+  @Test
+  void toResponse_should_map_auth_user_name_with_only_family_name() {
+    AuthUser authUser = new AuthUser("sub-1", "auth@example.com", null, "User");
+
+    var response = sut.toResponse(authUser);
+
+    assertEquals("User", response.name());
+  }
+
+  @Test
+  void toResponse_should_map_auth_user_name_as_null_when_given_and_family_are_blank() {
+    AuthUser authUser = new AuthUser("sub-1", "auth@example.com", null, null);
+
+    var response = sut.toResponse(authUser);
+
+    assertNull(response.name());
   }
 }

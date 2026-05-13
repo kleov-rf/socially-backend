@@ -6,10 +6,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.socially.auth.kernel.domain.AuthResult;
-import com.socially.auth.kernel.domain.AuthResultMapper;
 import com.socially.auth.kernel.domain.CookieInstruction;
 import com.socially.auth.kernel.domain.OAuthTokenResponse;
 import com.socially.auth.kernel.domain.properties.AuthProperties;
+import com.socially.auth.kernel.infrastructure.right.adapter.oauth.mapper.AuthResultMapper;
 import com.socially.auth.kernel.infrastructure.right.adapter.user.mapper.AuthUserToCreateUserCommandMapper;
 import com.socially.auth.refresh.application.exception.InvalidRefreshedIdTokenException;
 import com.socially.auth.refresh.application.exception.MissingRefreshSessionException;
@@ -47,7 +47,7 @@ class RefreshSessionCommandHandlerTest {
           "access",
           "Bearer",
           3600L,
-          new com.socially.auth.kernel.domain.AuthUser("auth-id", "e@x.com", "Jane Doe"));
+          new com.socially.auth.kernel.domain.AuthUser("auth-id", "e@x.com", "Jane", "Doe"));
   private static final CreateUserCommand CREATE_USER_COMMAND =
       new CreateUserCommand("e@x.com", "Jane", "Doe");
   private static final User CREATED_USER =

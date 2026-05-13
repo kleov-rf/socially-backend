@@ -1,10 +1,10 @@
 package com.socially.auth.refresh.application;
 
 import com.socially.auth.kernel.domain.AuthResult;
-import com.socially.auth.kernel.domain.AuthResultMapper;
 import com.socially.auth.kernel.domain.CookieInstruction;
 import com.socially.auth.kernel.domain.OAuthTokenResponse;
 import com.socially.auth.kernel.domain.properties.AuthProperties;
+import com.socially.auth.kernel.infrastructure.right.adapter.oauth.mapper.AuthResultMapper;
 import com.socially.auth.kernel.infrastructure.right.adapter.user.mapper.AuthUserToCreateUserCommandMapper;
 import com.socially.auth.refresh.application.exception.InvalidRefreshedIdTokenException;
 import com.socially.auth.refresh.application.exception.MissingRefreshSessionException;
