@@ -30,6 +30,7 @@ jobs:
     name: Pre-checks
     uses: ./.github/workflows/_tests.yaml
     with:
+      name: unit-tests
       gradle_task: :app:test
       upload_jacoco: true
 
@@ -37,6 +38,7 @@ jobs:
     name: Pre-checks
     uses: ./.github/workflows/_tests.yaml
     with:
+      name: integration-tests
       gradle_task: :app:testIntegration
       upload_jacoco: false
 

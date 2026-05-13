@@ -3,6 +3,10 @@ name: _tests
 on:
   workflow_call:
     inputs:
+      name:
+        required: true
+        type: string
+        description: "Display name for the tests job"
       gradle_task:
         required: true
         type: string
@@ -15,6 +19,7 @@ on:
 
 jobs:
   tests:
+    name: ${{ inputs.name }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
