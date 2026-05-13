@@ -30,6 +30,8 @@ public class SecurityConfiguration {
                 .permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/auth/refresh")
                 .permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/donations")
+                .authenticated()
                 .requestMatchers("/api/auth/me", "/api/auth/logout")
                 .authenticated()
                 .anyRequest()
