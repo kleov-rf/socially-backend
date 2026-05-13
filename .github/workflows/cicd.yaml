@@ -26,20 +26,36 @@ jobs:
     uses: ./.github/workflows/_snyk-scan.yaml
     secrets: inherit
 
+  unit-tests:
+    name: Pre-checks
+    uses: ./.github/workflows/_tests.yaml
+    with:
+      gradle_task: :app:test
+      upload_jacoco: true
+
+  integration-tests:
+    name: Pre-checks
+    uses: ./.github/workflows/_tests.yaml
+    with:
+      gradle_task: :app:testIntegration
+      upload_jacoco: false
+
   sonar-scan:
     name: Pre-checks
+    needs: [ unit-tests ]
     uses: ./.github/workflows/_sonar-scan.yaml
     secrets: inherit
 
   build:
     name: Image
+    needs: [ unit-tests, integration-tests, snyk-scan ]
     uses: ./.github/workflows/_build-image.yaml
     with:
       environment: ${{ (github.event_name == 'workflow_dispatch' && inputs.environment) || 'dev' }}
 
   push:
     name: Image
-    needs: [ snyk-scan, sonar-scan, build ]
+    needs: [ build ]
     uses: ./.github/workflows/_push-image.yaml
     with:
       environment: ${{ (github.event_name == 'workflow_dispatch' && inputs.environment) || 'dev' }}

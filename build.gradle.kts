@@ -65,6 +65,9 @@ subprojects {
 
     tasks.withType<Test> {
         useJUnitPlatform()
+    }
+
+    tasks.named<Test>("test") {
         // Always generate the XML report after unit tests so Sonar can import coverage.
         finalizedBy("jacocoTestReport")
     }
