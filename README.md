@@ -181,6 +181,7 @@ Notes:
 Notes:
 
 - Runs Cucumber scenarios against PostgreSQL via Testcontainers.
+- Includes both `@auth` and non-auth integration scenarios in a single run.
 - Uses the **`test`** Spring profile by default; test-only config overlays from `app/src/test/resources/application.yaml`, not `local`.
 - Requires Docker available on the host.
 

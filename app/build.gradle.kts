@@ -135,26 +135,6 @@ tasks.register<Test>("testIntegration") {
     dependsOn("testClasses")
 }
 
-tasks.register<Test>("testIntegrationAuth") {
-    group = "verification"
-    description = "Run auth Cucumber integration tests without Testcontainers dependencies."
-
-    testClassesDirs = sourceSets.test.get().output.classesDirs
-    classpath = sourceSets.test.get().runtimeClasspath
-
-    useJUnitPlatform()
-
-    systemProperty("spring.profiles.active", System.getProperty("spring.profiles.active", "test"))
-
-    filter {
-        includeTestsMatching("*AuthCucumberTestRunner*")
-        excludeTestsMatching("com.socially.app.cucumber.CucumberTestRunner")
-        isFailOnNoMatchingTests = false
-    }
-
-    dependsOn("testClasses")
-}
-
 tasks.named<Jar>("jar") {
     enabled = false
 }
