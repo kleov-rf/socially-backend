@@ -61,16 +61,16 @@ class UserResponseDtoMapperTest {
 
   @Test
   void toResponse_should_map_auth_user_id() {
-    AuthUser authUser = new AuthUser("sub-1", "auth@example.com", "Auth", "User");
+    AuthUser authUser = new AuthUser("auth-1", "auth@example.com", null, null);
 
     var response = sut.toResponse(authUser);
 
-    assertEquals("sub-1", response.id());
+    assertEquals("auth-1", response.id());
   }
 
   @Test
   void toResponse_should_map_auth_user_email() {
-    AuthUser authUser = new AuthUser("sub-1", "auth@example.com", "Auth", "User");
+    AuthUser authUser = new AuthUser("auth-1", "auth@example.com", null, null);
 
     var response = sut.toResponse(authUser);
 
@@ -78,8 +78,8 @@ class UserResponseDtoMapperTest {
   }
 
   @Test
-  void toResponse_should_map_auth_user_name_with_given_and_family_name() {
-    AuthUser authUser = new AuthUser("sub-1", "auth@example.com", "Auth", "User");
+  void toResponse_should_map_auth_user_name_when_given_and_family_present() {
+    AuthUser authUser = new AuthUser("auth-1", "auth@example.com", "Auth", "User");
 
     var response = sut.toResponse(authUser);
 
@@ -87,8 +87,8 @@ class UserResponseDtoMapperTest {
   }
 
   @Test
-  void toResponse_should_map_auth_user_name_with_only_given_name() {
-    AuthUser authUser = new AuthUser("sub-1", "auth@example.com", "Auth", null);
+  void toResponse_should_map_auth_user_name_when_only_given_name_present() {
+    AuthUser authUser = new AuthUser("auth-1", "auth@example.com", "Auth", null);
 
     var response = sut.toResponse(authUser);
 
@@ -96,8 +96,8 @@ class UserResponseDtoMapperTest {
   }
 
   @Test
-  void toResponse_should_map_auth_user_name_with_only_family_name() {
-    AuthUser authUser = new AuthUser("sub-1", "auth@example.com", null, "User");
+  void toResponse_should_map_auth_user_name_when_only_family_name_present() {
+    AuthUser authUser = new AuthUser("auth-1", "auth@example.com", null, "User");
 
     var response = sut.toResponse(authUser);
 
@@ -105,8 +105,8 @@ class UserResponseDtoMapperTest {
   }
 
   @Test
-  void toResponse_should_map_auth_user_name_as_null_when_given_and_family_are_blank() {
-    AuthUser authUser = new AuthUser("sub-1", "auth@example.com", null, null);
+  void toResponse_should_map_null_name_when_auth_user_given_and_family_are_blank() {
+    AuthUser authUser = new AuthUser("auth-1", "auth@example.com", null, null);
 
     var response = sut.toResponse(authUser);
 

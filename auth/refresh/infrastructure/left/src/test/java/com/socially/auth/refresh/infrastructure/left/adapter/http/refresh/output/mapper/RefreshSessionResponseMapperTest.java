@@ -28,7 +28,7 @@ class RefreshSessionResponseMapperTest {
   @Test
   void toResponse_should_map_result_access_token() {
     AuthResult result =
-        new AuthResult("access-token", "Bearer", 60L, new AuthUser("i", "e", "n", null));
+        new AuthResult("access-token", "Bearer", 60L, new AuthUser("i", "e", "n", "x"));
     when(userResponseDtoMapper.toResponse(sampleUser())).thenReturn(sampleUserResponseDto());
 
     RefreshSessionResponse response = sut.toResponse(result, sampleUser());
@@ -38,7 +38,7 @@ class RefreshSessionResponseMapperTest {
 
   @Test
   void toResponse_should_map_result_token_type() {
-    AuthResult result = new AuthResult("a", "JWT", 60L, new AuthUser("i", "e", "n", null));
+    AuthResult result = new AuthResult("a", "JWT", 60L, new AuthUser("i", "e", "n", "x"));
     when(userResponseDtoMapper.toResponse(sampleUser())).thenReturn(sampleUserResponseDto());
 
     RefreshSessionResponse response = sut.toResponse(result, sampleUser());
@@ -48,7 +48,7 @@ class RefreshSessionResponseMapperTest {
 
   @Test
   void toResponse_should_map_result_expires_in() {
-    AuthResult result = new AuthResult("a", "Bearer", 999L, new AuthUser("i", "e", "n", null));
+    AuthResult result = new AuthResult("a", "Bearer", 999L, new AuthUser("i", "e", "n", "x"));
     when(userResponseDtoMapper.toResponse(sampleUser())).thenReturn(sampleUserResponseDto());
 
     RefreshSessionResponse response = sut.toResponse(result, sampleUser());
@@ -58,7 +58,7 @@ class RefreshSessionResponseMapperTest {
 
   @Test
   void toResponse_should_map_result_expires_in_when_expires_in_is_not_present() {
-    AuthResult result = new AuthResult("a", "Bearer", null, new AuthUser("i", "e", "n", null));
+    AuthResult result = new AuthResult("a", "Bearer", null, new AuthUser("i", "e", "n", "x"));
     when(userResponseDtoMapper.toResponse(sampleUser())).thenReturn(sampleUserResponseDto());
 
     RefreshSessionResponse response = sut.toResponse(result, sampleUser());
