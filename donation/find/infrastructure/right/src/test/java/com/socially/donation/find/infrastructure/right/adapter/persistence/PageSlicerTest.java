@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 
 class PageSlicerTest {
   private static final Instant CREATED_AT = Instant.parse("2024-06-01T12:00:00Z");
+  private static final String DONOR_ID = "550e8400-e29b-41d4-a716-446655449999";
 
   private final PageSlicer sut = new PageSlicer();
 
@@ -105,6 +106,7 @@ class PageSlicerTest {
     return DonationEntity.create(
         Id.from(String.format("550e8400-e29b-41d4-a716-4466554400%02d", Integer.parseInt(sequence)))
             .value(),
+        Id.from(DONOR_ID).value(),
         "Title " + sequence,
         "Description " + sequence,
         CREATED_AT,

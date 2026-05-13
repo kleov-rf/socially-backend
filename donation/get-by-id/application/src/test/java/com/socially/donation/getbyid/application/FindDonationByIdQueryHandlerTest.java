@@ -11,6 +11,7 @@ import com.socially.donation.getbyid.application.output.mapper.DonationDtoMapper
 import com.socially.donation.getbyid.domain.port.right.FindDonationByIdRepository;
 import com.socially.donation.kernel.domain.entity.Donation;
 import com.socially.donation.kernel.domain.valueobject.Description;
+import com.socially.donation.kernel.domain.valueobject.DonorId;
 import com.socially.donation.kernel.domain.valueobject.Id;
 import com.socially.donation.kernel.domain.valueobject.Title;
 import java.time.Instant;
@@ -25,6 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class FindDonationByIdQueryHandlerTest {
 
   private static final String DONATION_ID = "550e8400-e29b-41d4-a716-446655440000";
+  private static final String DONOR_ID = "550e8400-e29b-41d4-a716-446655440001";
   private static final Instant CREATED_AT = Instant.parse("2024-06-01T12:00:00Z");
   private static final Instant LAST_UPDATED_AT = Instant.parse("2024-06-20T09:00:00Z");
 
@@ -48,6 +50,7 @@ class FindDonationByIdQueryHandlerTest {
     Donation donation =
         Donation.create(
             Id.from(DONATION_ID),
+            DonorId.from(DONOR_ID),
             Title.from("Test Title"),
             Description.from("Test Description"),
             CREATED_AT,

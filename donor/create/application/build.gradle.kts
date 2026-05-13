@@ -3,7 +3,7 @@ plugins {
     alias(libs.plugins.spring.dependency.management)
 }
 
-group = "com.socially.donation.create.application"
+group = "com.socially.donor.create.application"
 version = "0.0.1-SNAPSHOT"
 
 java {
@@ -23,10 +23,7 @@ dependencyManagement {
 }
 
 dependencies {
-    implementation(project(":auth:me:application"))
-    implementation(project(":donor:create:application"))
-    implementation(project(":donation:create:domain"))
-    implementation(project(":user:kernel:domain"))
+    implementation(project(":donor:create:domain"))
 
     implementation(libs.spring.context)
     compileOnly(libs.jakarta.validation.api)

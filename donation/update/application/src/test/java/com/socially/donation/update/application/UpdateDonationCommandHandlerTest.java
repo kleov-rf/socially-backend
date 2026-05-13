@@ -8,6 +8,7 @@ import static org.mockito.Mockito.*;
 import com.socially.donation.getbyid.domain.port.right.FindDonationByIdRepository;
 import com.socially.donation.kernel.domain.entity.Donation;
 import com.socially.donation.kernel.domain.valueobject.Description;
+import com.socially.donation.kernel.domain.valueobject.DonorId;
 import com.socially.donation.kernel.domain.valueobject.Id;
 import com.socially.donation.kernel.domain.valueobject.Title;
 import com.socially.donation.update.application.input.UpdateDonationCommand;
@@ -25,6 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class UpdateDonationCommandHandlerTest {
 
   private static final String DONATION_ID = "550e8400-e29b-41d4-a716-446655440000";
+  private static final String DONOR_ID = "550e8400-e29b-41d4-a716-446655440001";
   private static final Instant CREATED_AT = Instant.parse("2024-06-01T12:00:00Z");
   private static final Instant LAST_UPDATED_AT = Instant.parse("2024-06-15T08:00:00Z");
   private static final Instant PATCH_AT = Instant.parse("2025-01-15T10:00:00Z");
@@ -43,6 +45,7 @@ class UpdateDonationCommandHandlerTest {
     Donation existingDonation =
         Donation.create(
             Id.from(DONATION_ID),
+            DonorId.from(DONOR_ID),
             Title.from("Old Title"),
             Description.from("Old Description"),
             CREATED_AT,
@@ -84,6 +87,7 @@ class UpdateDonationCommandHandlerTest {
     Donation existingDonation =
         Donation.create(
             Id.from(DONATION_ID),
+            DonorId.from(DONOR_ID),
             Title.from("Old Title"),
             Description.from("Old Description"),
             CREATED_AT,
@@ -105,6 +109,7 @@ class UpdateDonationCommandHandlerTest {
     Donation existingDonation =
         Donation.create(
             Id.from(DONATION_ID),
+            DonorId.from(DONOR_ID),
             Title.from("Old Title"),
             Description.from("Old Description"),
             CREATED_AT,
@@ -131,6 +136,7 @@ class UpdateDonationCommandHandlerTest {
     Donation existingDonation =
         Donation.create(
             Id.from(DONATION_ID),
+            DonorId.from(DONOR_ID),
             Title.from("Old Title"),
             Description.from("Old Description"),
             CREATED_AT,
@@ -157,6 +163,7 @@ class UpdateDonationCommandHandlerTest {
     Donation existingDonation =
         Donation.create(
             Id.from(DONATION_ID),
+            DonorId.from(DONOR_ID),
             Title.from("Old Title"),
             Description.from("Old Description"),
             CREATED_AT,
@@ -184,6 +191,7 @@ class UpdateDonationCommandHandlerTest {
     Donation existingDonation =
         Donation.create(
             Id.from(DONATION_ID),
+            DonorId.from(DONOR_ID),
             Title.from("Old Title"),
             Description.from("Old Description"),
             CREATED_AT,

@@ -20,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class CursorMetadataBuilderTest {
   private static final Instant CREATED_AT = Instant.parse("2024-06-01T12:00:00Z");
+  private static final String DONOR_ID = "550e8400-e29b-41d4-a716-446655449999";
 
   @Mock private KeysetCursorCodec cursorCodec;
 
@@ -78,6 +79,7 @@ class CursorMetadataBuilderTest {
   private static DonationEntity entity(String suffix) {
     return DonationEntity.create(
         Id.from("550e8400-e29b-41d4-a716-4466554400" + suffix).value(),
+        Id.from(DONOR_ID).value(),
         "Title",
         "Description",
         CREATED_AT,

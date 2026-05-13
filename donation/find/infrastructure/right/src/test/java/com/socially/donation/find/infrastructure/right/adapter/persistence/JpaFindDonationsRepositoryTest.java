@@ -12,6 +12,7 @@ import com.socially.donation.find.domain.pagination.PageSize;
 import com.socially.donation.find.domain.pagination.PaginationCriteria;
 import com.socially.donation.kernel.domain.entity.Donation;
 import com.socially.donation.kernel.domain.valueobject.Description;
+import com.socially.donation.kernel.domain.valueobject.DonorId;
 import com.socially.donation.kernel.domain.valueobject.Id;
 import com.socially.donation.kernel.domain.valueobject.Title;
 import com.socially.donation.kernel.infrastructure.right.adapter.persistence.DonationEntityRepository;
@@ -29,6 +30,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class JpaFindDonationsRepositoryTest {
   private static final String DONATION_ID = "550e8400-e29b-41d4-a716-446655440000";
+  private static final String DONOR_ID = "550e8400-e29b-41d4-a716-446655440001";
   private static final Instant CREATED_AT = Instant.parse("2024-06-01T12:00:00Z");
 
   @Mock private SearchPatternNormalizer searchPatternNormalizer;
@@ -137,12 +139,19 @@ class JpaFindDonationsRepositoryTest {
 
   private static DonationEntity donationEntity(
       String id, String title, String description, Instant createdAt) {
-    return DonationEntity.create(Id.from(id).value(), title, description, createdAt, createdAt);
+    return DonationEntity.create(
+        Id.from(id).value(),
+        DonorId.from(DONOR_ID).value(),
+        title,
+        description,
+        createdAt,
+        createdAt);
   }
 
   private static Donation mappedDonation(DonationEntity entity) {
     return Donation.create(
         Id.from(entity.getId().toString()),
+        DonorId.from(entity.getDonorId().toString()),
         Title.from(entity.getTitle()),
         Description.from(entity.getDescription()),
         entity.getCreatedAt(),
