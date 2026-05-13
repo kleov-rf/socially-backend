@@ -33,13 +33,7 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: ${{ runner.os }}-gradle
 
-      - name: Download JaCoCo XML artifact
-        uses: actions/download-artifact@v8
-        with:
-          name: unit-jacoco-xml
-          path: app/build/reports/jacoco/test
-
-      - name: Analyze with Sonar
+      - name: Build (run tests) and analyze
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: ./gradlew --no-daemon build -x test sonar --info
+        run: ./gradlew build sonar --info

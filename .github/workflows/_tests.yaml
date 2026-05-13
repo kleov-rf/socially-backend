@@ -2,24 +2,9 @@ name: _tests
 
 on:
   workflow_call:
-    inputs:
-      name:
-        required: true
-        type: string
-        description: "Display name for the tests job"
-      gradle_task:
-        required: true
-        type: string
-        description: "Gradle task to execute (for example :app:test)"
-      upload_jacoco:
-        required: false
-        type: boolean
-        default: false
-        description: "Upload JaCoCo XML artifact for downstream jobs"
 
 jobs:
-  tests:
-    name: ${{ inputs.name }}
+  integration:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -32,19 +17,5 @@ jobs:
           distribution: temurin
           cache: gradle
 
-      - name: Run Gradle tests
-        if: ${{ inputs.gradle_task != ':app:testIntegration' }}
-        run: ./gradlew --no-daemon ${{ inputs.gradle_task }}
-
       - name: Run Gradle integration tests (verbose logs)
-        if: ${{ inputs.gradle_task == ':app:testIntegration' }}
-        run: ./gradlew --no-daemon --console=plain --info ${{ inputs.gradle_task }}
-
-      - name: Upload JaCoCo XML artifact
-        if: ${{ inputs.upload_jacoco }}
-        uses: actions/upload-artifact@v6
-        with:
-          name: unit-jacoco-xml
-          path: app/build/reports/jacoco/test/jacocoTestReport.xml
-          if-no-files-found: error
-          retention-days: 1
+        run: ./gradlew --no-daemon --console=plain --info :app:testIntegration
