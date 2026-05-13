@@ -1,10 +1,10 @@
 package com.socially.auth.me.application;
 
 import com.socially.auth.kernel.domain.AuthUser;
+import com.socially.auth.kernel.domain.exception.UserNotFoundAfterCreateException;
 import com.socially.auth.kernel.infrastructure.right.adapter.user.mapper.AuthUserToCreateUserCommandMapper;
 import com.socially.auth.me.application.exception.UnauthenticatedRequestException;
 import com.socially.auth.me.application.port.left.GetCurrentAuthUserUseCase;
-import com.socially.auth.kernel.domain.exception.UserNotFoundAfterCreateException;
 import com.socially.user.create.application.port.left.CreateUserUseCase;
 import com.socially.user.findbyemail.application.input.FindUserByEmailQuery;
 import com.socially.user.findbyemail.application.port.left.FindUserByEmailUseCase;

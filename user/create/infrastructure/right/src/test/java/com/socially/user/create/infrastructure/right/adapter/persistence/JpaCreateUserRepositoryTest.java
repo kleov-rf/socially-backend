@@ -1,7 +1,7 @@
 package com.socially.user.create.infrastructure.right.adapter.persistence;
 
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.socially.user.kernel.domain.entity.User;
