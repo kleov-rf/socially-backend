@@ -29,6 +29,7 @@ dependencies {
     implementation(project(":donation:create:infrastructure:left"))
     implementation(project(":donor:create:infrastructure:right"))
     implementation(project(":donor:find-by-user-id:infrastructure:right"))
+    implementation(project(":donor:find-by-id:infrastructure:right"))
     implementation(project(":donation:delete:infrastructure:left"))
     implementation(project(":donation:get-by-id:infrastructure:left"))
     implementation(project(":donation:update:infrastructure:left"))
