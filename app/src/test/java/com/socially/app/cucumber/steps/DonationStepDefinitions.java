@@ -19,6 +19,7 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import java.time.Instant;
 import java.util.UUID;
+import java.util.regex.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -307,6 +308,15 @@ public class DonationStepDefinitions {
     assertThat(jsonNode.get("id").asText()).isEqualTo(id);
     assertThat(jsonNode.get("title").asText()).isEqualTo(expectedTitle);
     assertThat(jsonNode.get("description").asText()).isEqualTo(expectedDescription);
+    JsonNode donorNode = jsonNode.get("donor");
+    assertThat(donorNode).isNotNull();
+    assertThat(donorNode.isObject()).isTrue();
+    assertThat(donorNode.get("email").asText()).isEqualTo("donor@example.com");
+    assertThat(donorNode.get("givenName").asText()).isEqualTo("Donor");
+    assertThat(donorNode.get("familyName").asText()).isEqualTo("User");
+    assertThat(donorNode.get("id").asText())
+        .matches(Pattern.compile("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"));
+    assertThatCode(() -> UUID.fromString(donorNode.get("id").asText())).doesNotThrowAnyException();
     assertThat(jsonNode.has("createdAt")).isTrue();
     assertThat(jsonNode.get("createdAt").asText()).isNotBlank();
     assertThatCode(() -> Instant.parse(jsonNode.get("createdAt").asText()))
