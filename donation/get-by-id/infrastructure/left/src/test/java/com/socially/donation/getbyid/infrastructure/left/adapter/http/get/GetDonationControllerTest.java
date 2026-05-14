@@ -7,8 +7,10 @@ import static org.mockito.Mockito.when;
 import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donation.getbyid.application.input.FindDonationByIdQuery;
 import com.socially.donation.getbyid.application.output.DonationDto;
+import com.socially.donation.getbyid.application.output.DonorSummaryDto;
 import com.socially.donation.getbyid.application.port.left.FindDonationByIdUseCase;
 import com.socially.donation.getbyid.infrastructure.left.adapter.http.get.output.DonationResponseDto;
+import com.socially.donation.getbyid.infrastructure.left.adapter.http.get.output.DonorResponseDto;
 import com.socially.donation.getbyid.infrastructure.left.adapter.http.get.output.mapper.DonationResponseMapper;
 import com.socially.donation.kernel.domain.valueobject.Description;
 import com.socially.donation.kernel.domain.valueobject.Title;
@@ -25,8 +27,12 @@ import org.springframework.http.HttpStatus;
 class GetDonationControllerTest {
 
   private static final String DONATION_ID = "550e8400-e29b-41d4-a716-446655440000";
+  private static final String DONOR_ID = "550e8400-e29b-41d4-a716-446655440001";
   private static final Instant CREATED_AT = Instant.parse("2024-06-01T12:00:00Z");
   private static final Instant LAST_UPDATED_AT = Instant.parse("2024-06-20T09:00:00Z");
+
+  private static final DonorSummaryDto DONOR_SUMMARY =
+      new DonorSummaryDto(DONOR_ID, "donor@example.com", "Donor", "User");
 
   @Mock private FindDonationByIdUseCase findDonationByIdUseCase;
 
@@ -49,7 +55,8 @@ class GetDonationControllerTest {
             Title.from("Test Title"),
             Description.from("Test Description"),
             CREATED_AT,
-            LAST_UPDATED_AT);
+            LAST_UPDATED_AT,
+            DONOR_SUMMARY);
     when(findDonationByIdUseCase.execute(new FindDonationByIdQuery(DONATION_ID)))
         .thenReturn(Optional.of(queryResult));
 
@@ -66,10 +73,16 @@ class GetDonationControllerTest {
             Title.from("Test Title"),
             Description.from("Test Description"),
             CREATED_AT,
-            LAST_UPDATED_AT);
+            LAST_UPDATED_AT,
+            DONOR_SUMMARY);
     var expectedResponse =
         new DonationResponseDto(
-            DONATION_ID, "Test Title", "Test Description", CREATED_AT, LAST_UPDATED_AT);
+            DONATION_ID,
+            "Test Title",
+            "Test Description",
+            CREATED_AT,
+            LAST_UPDATED_AT,
+            new DonorResponseDto(DONOR_ID, "donor@example.com", "Donor", "User"));
     when(findDonationByIdUseCase.execute(new FindDonationByIdQuery(DONATION_ID)))
         .thenReturn(Optional.of(queryResult));
     when(mapper.toResponse(queryResult)).thenReturn(expectedResponse);

@@ -6,4 +6,9 @@ import com.socially.donation.kernel.domain.valueobject.Title;
 import java.time.Instant;
 
 public record DonationDto(
-    Id id, Title title, Description description, Instant createdAt, Instant lastUpdatedAt) {}
+    Id id,
+    Title title,
+    Description description,
+    Instant createdAt,
+    Instant lastUpdatedAt,
+    DonorSummaryDto donor) {}
