@@ -8,11 +8,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-@RequiredArgsConstructor
 @Component
+@RequiredArgsConstructor
 public final class AuthUserMapper {
 
   private final ObjectMapper objectMapper;
+  private final OidcJsonPayloadClaims jsonPayloadClaims;
+  private final AuthUserEmailMapper authUserEmailMapper;
 
   public AuthUser fromIdToken(String idToken) {
     if (!StringUtils.hasText(idToken)) {
@@ -28,14 +30,17 @@ public final class AuthUserMapper {
       byte[] decodedPayload = Base64.getUrlDecoder().decode(tokenParts[1]);
       JsonNode payload = objectMapper.readTree(decodedPayload);
 
-      String id = payload.path("sub").asText(null);
-      String email = payload.path("email").asText(null);
-      String givenName = payload.path("given_name").asText(null);
-      String familyName = payload.path("family_name").asText(null);
-
-      return new AuthUser(id, email, givenName, familyName);
+      return new AuthUser(
+          blankToNull(jsonPayloadClaims.text(payload, "sub")),
+          authUserEmailMapper.resolveEmail(payload),
+          blankToNull(jsonPayloadClaims.text(payload, "given_name")),
+          blankToNull(jsonPayloadClaims.text(payload, "family_name")));
     } catch (Exception exception) {
       throw new IllegalArgumentException("Unable to decode id_token payload", exception);
     }
+  }
+
+  private String blankToNull(String value) {
+    return StringUtils.hasText(value) ? value.trim() : null;
   }
 }

@@ -2,6 +2,7 @@ package com.socially.auth.me.application;
 
 import com.socially.auth.kernel.domain.AuthUser;
 import com.socially.auth.kernel.domain.exception.UserNotFoundAfterCreateException;
+import com.socially.auth.kernel.infrastructure.right.adapter.oauth.mapper.AuthUserEmailMapper;
 import com.socially.auth.kernel.infrastructure.right.adapter.user.mapper.AuthUserToCreateUserCommandMapper;
 import com.socially.auth.me.application.exception.UnauthenticatedRequestException;
 import com.socially.auth.me.application.port.left.GetCurrentAuthUserUseCase;
@@ -14,13 +15,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 @RequiredArgsConstructor
 @Service
 public class GetCurrentAuthUserQueryHandler implements GetCurrentAuthUserUseCase {
-  private final AuthUserToCreateUserCommandMapper authUserToCreateUserCommandMapper;
   private final CreateUserUseCase createUserUseCase;
   private final FindUserByEmailUseCase findUserByEmailUseCase;
+
+  private final AuthUserToCreateUserCommandMapper authUserToCreateUserCommandMapper;
+  private final AuthUserEmailMapper authUserEmailMapper;
 
   @Override
   public User execute(Principal principal) {
@@ -39,9 +43,14 @@ public class GetCurrentAuthUserQueryHandler implements GetCurrentAuthUserUseCase
   }
 
   private AuthUser userFromJwt(Jwt jwt) {
-    String givenName = jwt.getClaimAsString("given_name");
-    String familyName = jwt.getClaimAsString("family_name");
     return new AuthUser(
-        jwt.getClaimAsString("sub"), jwt.getClaimAsString("email"), givenName, familyName);
+        blankToNull(jwt.getClaimAsString("sub")),
+        authUserEmailMapper.resolveEmail(jwt),
+        blankToNull(jwt.getClaimAsString("given_name")),
+        blankToNull(jwt.getClaimAsString("family_name")));
+  }
+
+  private static String blankToNull(String value) {
+    return StringUtils.hasText(value) ? value.trim() : null;
   }
 }

@@ -4,10 +4,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.socially.auth.kernel.domain.AuthUser;
 import java.io.IOException;
@@ -24,7 +28,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class AuthUserMapperTest {
 
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
   @Mock private ObjectMapper mapper;
+  @Mock private OidcJsonPayloadClaims jsonPayloadClaims;
+  @Mock private AuthUserEmailMapper authUserEmailMapper;
 
   @InjectMocks private AuthUserMapper sut;
 
@@ -52,9 +60,12 @@ class AuthUserMapperTest {
   void fromIdToken_should_call_object_mapper_to_read_payload_tree() throws Exception {
     String payload = "{\"sub\":\"id-1\"}";
     String token = createTokenWithPayload(payload);
-
-    when(mapper.readTree(any(byte[].class)))
-        .thenAnswer(invocation -> new ObjectMapper().readTree((byte[]) invocation.getArgument(0)));
+    JsonNode tree = OBJECT_MAPPER.readTree(payload);
+    when(mapper.readTree(any(byte[].class))).thenReturn(tree);
+    when(jsonPayloadClaims.text(same(tree), eq("sub"))).thenReturn("id-1");
+    when(authUserEmailMapper.resolveEmail(same(tree))).thenReturn(null);
+    when(jsonPayloadClaims.text(same(tree), eq("given_name"))).thenReturn(null);
+    when(jsonPayloadClaims.text(same(tree), eq("family_name"))).thenReturn(null);
 
     sut.fromIdToken(token);
 
@@ -65,48 +76,68 @@ class AuthUserMapperTest {
   void fromIdToken_should_return_auth_user_id() throws IOException {
     String idToken =
         createTokenWithPayload(parseValuesIntoJson("sub-123", "email@example.com", "John", "Doe"));
-    mockObjectMapperReadTree("sub-123", "email@example.com", "John", "Doe");
+    JsonNode payload = stubPayloadFromTokenJson(idToken);
 
     AuthUser user = sut.fromIdToken(idToken);
 
     assertEquals("sub-123", user.id());
+    verify(jsonPayloadClaims).text(same(payload), eq("sub"));
   }
 
   @Test
   void fromIdToken_should_return_auth_user_email() throws IOException {
     String idToken =
         createTokenWithPayload(parseValuesIntoJson("sub-123", "email@example.com", "John", "Doe"));
-    mockObjectMapperReadTree("sub-123", "email@example.com", "John", "Doe");
+    JsonNode payload = stubPayloadFromTokenJson(idToken);
 
     AuthUser user = sut.fromIdToken(idToken);
 
     assertEquals("email@example.com", user.email());
+    verify(authUserEmailMapper).resolveEmail(same(payload));
   }
 
   @Test
-  void fromIdToken_should_return_auth_user_given_and_family_name() throws IOException {
+  void fromIdToken_should_return_auth_user_given_name() throws IOException {
     String idToken =
-        createTokenWithPayload(
-            parseValuesIntoJson("sub-456", "other@example.com", "Jane", "Brown"));
-    mockObjectMapperReadTree("sub-456", "other@example.com", "Jane", "Brown");
+        createTokenWithPayload(parseValuesIntoJson("sub-123", "email@example.com", "John", "Doe"));
+    JsonNode payload = stubPayloadFromTokenJson(idToken);
 
     AuthUser user = sut.fromIdToken(idToken);
 
-    assertEquals("Jane", user.givenName());
-    assertEquals("Brown", user.familyName());
+    assertEquals("John", user.givenName());
+    verify(jsonPayloadClaims).text(same(payload), eq("given_name"));
   }
 
   @Test
-  void fromIdToken_should_throw_exception_when_failing_parsing_payload() {
-    assertThrows(
-        IllegalArgumentException.class, () -> sut.fromIdToken(createTokenWithPayload("not-json")));
+  void fromIdToken_should_return_auth_user_family_name() throws IOException {
+    String idToken =
+        createTokenWithPayload(parseValuesIntoJson("sub-123", "email@example.com", "John", "Doe"));
+    JsonNode payload = stubPayloadFromTokenJson(idToken);
+
+    AuthUser user = sut.fromIdToken(idToken);
+
+    assertEquals("Doe", user.familyName());
+    verify(jsonPayloadClaims).text(same(payload), eq("family_name"));
   }
 
-  private void mockObjectMapperReadTree(
-      String sub, String email, String givenName, String familyName) throws IOException {
+  @Test
+  void fromIdToken_should_throw_exception_when_failing_parsing_payload() throws Exception {
+    String idToken = createTokenWithPayload("not-json");
     when(mapper.readTree(any(byte[].class)))
-        .thenReturn(
-            new ObjectMapper().readTree(parseValuesIntoJson(sub, email, givenName, familyName)));
+        .thenThrow(new JsonParseException(null, "Unexpected character"));
+
+    assertThrows(IllegalArgumentException.class, () -> sut.fromIdToken(idToken));
+  }
+
+  private JsonNode stubPayloadFromTokenJson(String idToken) throws IOException {
+    String payloadJson = new String(Base64.getUrlDecoder().decode(idToken.split("\\.")[1]));
+    JsonNode payload = OBJECT_MAPPER.readTree(payloadJson);
+    when(mapper.readTree(any(byte[].class))).thenReturn(payload);
+    when(jsonPayloadClaims.text(same(payload), eq("sub"))).thenReturn("sub-123");
+    when(authUserEmailMapper.resolveEmail(same(payload))).thenReturn("email@example.com");
+    when(jsonPayloadClaims.text(same(payload), eq("given_name"))).thenReturn("John");
+    when(jsonPayloadClaims.text(same(payload), eq("family_name"))).thenReturn("Doe");
+    return payload;
   }
 
   private static String parseValuesIntoJson(
