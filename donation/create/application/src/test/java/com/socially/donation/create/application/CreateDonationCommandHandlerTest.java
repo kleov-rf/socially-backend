@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -20,11 +22,15 @@ import com.socially.donation.kernel.domain.valueobject.DonorId;
 import com.socially.donation.kernel.domain.valueobject.Title;
 import com.socially.donor.create.application.input.CreateDonorCommand;
 import com.socially.donor.create.application.port.left.CreateDonorUseCase;
+import com.socially.donor.findbyuserid.application.input.FindDonorByUserIdQuery;
+import com.socially.donor.findbyuserid.application.port.left.FindDonorByUserIdUseCase;
+import com.socially.donor.kernel.domain.entity.Donor;
 import com.socially.user.kernel.domain.entity.User;
 import com.socially.user.kernel.domain.valueobject.Email;
 import java.security.Principal;
 import java.time.Clock;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,6 +50,7 @@ class CreateDonationCommandHandlerTest {
   private static final Principal PRINCIPAL = () -> "user@example.com";
 
   @Mock private GetCurrentAuthUserUseCase getCurrentAuthUserUseCase;
+  @Mock private FindDonorByUserIdUseCase findDonorByUserIdUseCase;
   @Mock private CreateDonorUseCase createDonorUseCase;
   @Mock private CreateDonationRepository donationRepository;
   @Mock private CreateDonationCommandMapper createDonationCommandMapper;
@@ -57,6 +64,9 @@ class CreateDonationCommandHandlerTest {
   void setUp() {
     command = new CreateDonationCommand(DONATION_ID, "Test Title", "Test Description", PRINCIPAL);
     user = User.create(Id.from(USER_ID), Email.from("user@example.com"), "Jane", "Doe", CREATED_AT);
+    lenient()
+        .when(findDonorByUserIdUseCase.execute(new FindDonorByUserIdQuery(USER_ID)))
+        .thenReturn(Optional.empty());
   }
 
   @Test
@@ -76,6 +86,7 @@ class CreateDonationCommandHandlerTest {
     handler.execute(command);
 
     verify(getCurrentAuthUserUseCase).execute(PRINCIPAL);
+    verify(findDonorByUserIdUseCase).execute(new FindDonorByUserIdQuery(USER_ID));
   }
 
   @Test
@@ -148,11 +159,63 @@ class CreateDonationCommandHandlerTest {
   }
 
   @Test
+  void execute_should_not_call_create_donor_when_existing_donor_found() {
+    Donor existingDonor =
+        Donor.create(
+            Id.from(DONOR_ID), Id.from(USER_ID), "user@example.com", "Jane", "Doe", CREATED_AT);
+    when(findDonorByUserIdUseCase.execute(new FindDonorByUserIdQuery(USER_ID)))
+        .thenReturn(Optional.of(existingDonor));
+    when(getCurrentAuthUserUseCase.execute(PRINCIPAL)).thenReturn(user);
+    when(clock.instant()).thenReturn(CREATED_AT);
+    when(createDonationCommandMapper.toDomain(eq(command), eq(DONOR_ID), eq(CREATED_AT)))
+        .thenReturn(
+            Donation.create(
+                Id.from(DONATION_ID),
+                DonorId.from(DONOR_ID),
+                Title.from("Test Title"),
+                Description.from("Test Description"),
+                CREATED_AT,
+                CREATED_AT));
+
+    handler.execute(command);
+
+    verify(createDonorUseCase, never()).execute(any());
+  }
+
+  @Test
+  void execute_should_call_mapper_with_existing_donor_id_when_existing_donor_found() {
+    Donor existingDonor =
+        Donor.create(
+            Id.from(DONOR_ID), Id.from(USER_ID), "user@example.com", "Jane", "Doe", CREATED_AT);
+    when(findDonorByUserIdUseCase.execute(new FindDonorByUserIdQuery(USER_ID)))
+        .thenReturn(Optional.of(existingDonor));
+    when(getCurrentAuthUserUseCase.execute(PRINCIPAL)).thenReturn(user);
+    when(clock.instant()).thenReturn(CREATED_AT);
+    when(createDonationCommandMapper.toDomain(eq(command), eq(DONOR_ID), eq(CREATED_AT)))
+        .thenReturn(
+            Donation.create(
+                Id.from(DONATION_ID),
+                DonorId.from(DONOR_ID),
+                Title.from("Test Title"),
+                Description.from("Test Description"),
+                CREATED_AT,
+                CREATED_AT));
+
+    handler.execute(command);
+
+    verify(createDonationCommandMapper).toDomain(eq(command), eq(DONOR_ID), eq(CREATED_AT));
+  }
+
+  @Test
   void execute_should_throw_and_stop_when_user_is_unauthenticated() {
     when(getCurrentAuthUserUseCase.execute(PRINCIPAL))
         .thenThrow(new UnauthenticatedRequestException());
 
     assertThrows(UnauthenticatedRequestException.class, () -> handler.execute(command));
-    verifyNoInteractions(createDonorUseCase, createDonationCommandMapper, donationRepository);
+    verifyNoInteractions(
+        findDonorByUserIdUseCase,
+        createDonorUseCase,
+        createDonationCommandMapper,
+        donationRepository);
   }
 }
