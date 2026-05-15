@@ -9,6 +9,20 @@ Feature: Donation management
     When I create the donation without authentication
     Then the response status should be 403
 
+  Scenario: Deleting a donation without authentication is rejected
+    Given I have a donation with random id, title "No Auth Delete" and description "Should not be deleted"
+    When I create the donation
+    Then the response status should be 201
+    When I delete the donation by id without authentication
+    Then the response status should be 403
+
+  Scenario: Deleting another user's donation is rejected
+    Given I have a donation with random id, title "Protected Donation" and description "Only owner can delete"
+    When I create the donation
+    Then the response status should be 201
+    When I delete the donation by id as another user
+    Then the response status should be 403
+
   Scenario: Create a donation and retrieve it by ID
     Given I have a donation with random id, title "Winter Clothes Drive" and description "Collecting warm clothes for homeless shelters"
     When I create the donation
@@ -111,7 +125,7 @@ Feature: Donation management
     When I partially update the donation title to "Updated after deletion"
     Then the response status should be 404
     When I delete the donation by id
-    Then the response status should be 204
+    Then the response status should be 404
 
   Scenario: Create a donation, patch only title, and keep description unchanged
     Given I have a donation with random id, title "Neighborhood Library" and description "Books and shelves for local students"

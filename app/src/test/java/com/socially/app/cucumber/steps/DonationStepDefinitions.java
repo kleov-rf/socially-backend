@@ -99,7 +99,19 @@ public class DonationStepDefinitions {
 
   @When("I delete the donation by id")
   public void iDeleteTheDonationById() throws Exception {
+    mvcResult =
+        mockMvc.perform(delete("/api/donations/" + id).with(cucumberDonorJwt())).andReturn();
+  }
+
+  @When("I delete the donation by id without authentication")
+  public void iDeleteTheDonationByIdWithoutAuthentication() throws Exception {
     mvcResult = mockMvc.perform(delete("/api/donations/" + id)).andReturn();
+  }
+
+  @When("I delete the donation by id as another user")
+  public void iDeleteTheDonationByIdAsAnotherUser() throws Exception {
+    mvcResult =
+        mockMvc.perform(delete("/api/donations/" + id).with(cucumberOtherUserJwt())).andReturn();
   }
 
   @When("I partially update the donation title to {string}")
@@ -356,6 +368,17 @@ public class DonationStepDefinitions {
                     .subject("cucumber-donor-sub")
                     .claim("email", "donor@example.com")
                     .claim("given_name", "Donor")
+                    .claim("family_name", "User"));
+  }
+
+  private static RequestPostProcessor cucumberOtherUserJwt() {
+    return jwt()
+        .jwt(
+            builder ->
+                builder
+                    .subject("cucumber-other-user-sub")
+                    .claim("email", "other@example.com")
+                    .claim("given_name", "Other")
                     .claim("family_name", "User"));
   }
 }
