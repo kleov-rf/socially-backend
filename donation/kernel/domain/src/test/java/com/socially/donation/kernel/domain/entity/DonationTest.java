@@ -63,6 +63,34 @@ class DonationTest {
   }
 
   @Test
+  void belongsToDonor_should_return_true_when_donor_id_matches() {
+    Donation donation =
+        Donation.create(
+            Id.from(DONATION_ID),
+            Id.from(DONOR_ID),
+            Title.from("Title"),
+            Description.from("Description"),
+            CREATED_AT,
+            LAST_UPDATED_AT);
+
+    assertTrue(donation.belongsToDonor(Id.from(DONOR_ID)));
+  }
+
+  @Test
+  void belongsToDonor_should_return_false_when_donor_id_differs() {
+    Donation donation =
+        Donation.create(
+            Id.from(DONATION_ID),
+            Id.from(DONOR_ID),
+            Title.from("Title"),
+            Description.from("Description"),
+            CREATED_AT,
+            LAST_UPDATED_AT);
+
+    assertFalse(donation.belongsToDonor(Id.from(DIFFERENT_ID)));
+  }
+
+  @Test
   void withTitle_should_replace_title_and_keep_description_and_id() {
     Donation donation =
         Donation.create(

@@ -40,7 +40,7 @@ public final class DeleteDonationCommandHandler implements DeleteDonationUseCase
       throw new DonationForbiddenException(command.id());
     }
 
-    if (!donation.donorId().equals(donor.get().id())) {
+    if (!donation.belongsToDonor(donor.get().id())) {
       throw new DonationForbiddenException(command.id());
     }
 

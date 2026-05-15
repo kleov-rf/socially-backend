@@ -48,6 +48,10 @@ public final class Donation {
     return donorId;
   }
 
+  public boolean belongsToDonor(Id donorId) {
+    return this.donorId.equals(donorId);
+  }
+
   public Description description() {
     return description;
   }
