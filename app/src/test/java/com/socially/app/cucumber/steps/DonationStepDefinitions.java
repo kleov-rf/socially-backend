@@ -18,6 +18,8 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -285,7 +287,7 @@ public class DonationStepDefinitions {
     JsonNode items = root.path("items");
     assertThat(items.isArray()).isTrue();
 
-    assertThat(items.findValuesAsText("id")).contains(expectedIds);
+    assertThat(donationIdsFromListItems(items)).contains(expectedIds);
   }
 
   @And("the donations page should include only donation id of donation {int}")
@@ -296,7 +298,15 @@ public class DonationStepDefinitions {
     JsonNode items = root.path("items");
     assertThat(items.isArray()).isTrue();
     assertThat(items.size()).isEqualTo(1);
-    assertThat(items.findValuesAsText("id")).containsExactly(expectedDonationId(donationNumber));
+    assertThat(donationIdsFromListItems(items)).containsExactly(expectedDonationId(donationNumber));
+  }
+
+  private static List<String> donationIdsFromListItems(JsonNode items) {
+    List<String> donationIds = new ArrayList<>();
+    for (JsonNode item : items) {
+      donationIds.add(item.path("id").asText());
+    }
+    return donationIds;
   }
 
   @And("the donation should have the expected id, title {string} and description {string}")
