@@ -32,6 +32,8 @@ public class SecurityConfiguration {
                 .permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/donations")
                 .authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/api/donations/*")
+                .authenticated()
                 .requestMatchers("/api/auth/me", "/api/auth/logout")
                 .authenticated()
                 .anyRequest()

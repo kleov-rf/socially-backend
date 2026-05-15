@@ -23,7 +23,13 @@ dependencyManagement {
 }
 
 dependencies {
+    implementation(project(":auth:me:application"))
+    implementation(project(":donor:find-by-user-id:application"))
+    implementation(project(":donor:kernel:domain"))
     implementation(project(":donation:delete:domain"))
+    implementation(project(":donation:get-by-id:domain"))
+    implementation(project(":donation:kernel:domain"))
+    implementation(project(":user:kernel:domain"))
 
     implementation(libs.spring.context)
     compileOnly(libs.jakarta.validation.api)

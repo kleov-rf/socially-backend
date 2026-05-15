@@ -1,9 +1,18 @@
 package com.socially.donation.delete.application;
 
+import com.socially.auth.me.application.port.left.GetCurrentAuthUserUseCase;
 import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donation.delete.application.input.DeleteDonationCommand;
 import com.socially.donation.delete.application.port.left.DeleteDonationUseCase;
 import com.socially.donation.delete.domain.port.right.DeleteDonationRepository;
+import com.socially.donation.getbyid.domain.port.right.FindDonationByIdRepository;
+import com.socially.donation.kernel.domain.entity.Donation;
+import com.socially.donor.findbyuserid.application.input.FindDonorByUserIdQuery;
+import com.socially.donor.findbyuserid.application.port.left.FindDonorByUserIdUseCase;
+import com.socially.donor.kernel.domain.entity.Donor;
+import com.socially.user.kernel.domain.entity.User;
+import java.util.Optional;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -11,10 +20,34 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public final class DeleteDonationCommandHandler implements DeleteDonationUseCase {
 
+  private final FindDonationByIdRepository findDonationByIdRepository;
+  private final GetCurrentAuthUserUseCase getCurrentAuthUserUseCase;
+  private final FindDonorByUserIdUseCase findDonorByUserIdUseCase;
   private final DeleteDonationRepository donationRepository;
 
   @Override
   public void execute(DeleteDonationCommand command) {
-    donationRepository.deleteById(Id.from(command.id()));
+    Id donationId = Id.from(command.id());
+    Donation donation =
+        findDonationByIdRepository
+            .findById(donationId)
+            .orElseThrow(() -> new DonationNotFoundException(command.id()));
+
+    User user = getCurrentAuthUserUseCase.execute(command.principal());
+    Optional<Donor> donor =
+        findDonorByUserIdUseCase.execute(new FindDonorByUserIdQuery(user.id().value().toString()));
+
+    if (donor.isEmpty()) {
+      throw new DonationForbiddenException(command.id());
+    }
+
+    UUID donationDonorId = donation.donorId().value();
+    UUID userDonorId = donor.get().id().value();
+
+    if (!donationDonorId.equals(userDonorId)) {
+      throw new DonationForbiddenException(command.id());
+    }
+
+    donationRepository.deleteById(donationId);
   }
 }
