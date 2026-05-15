@@ -16,7 +16,6 @@ import com.socially.donation.delete.domain.port.right.DeleteDonationRepository;
 import com.socially.donation.getbyid.domain.port.right.FindDonationByIdRepository;
 import com.socially.donation.kernel.domain.entity.Donation;
 import com.socially.donation.kernel.domain.valueobject.Description;
-import com.socially.donation.kernel.domain.valueobject.DonorId;
 import com.socially.donation.kernel.domain.valueobject.Title;
 import com.socially.donor.findbyuserid.application.input.FindDonorByUserIdQuery;
 import com.socially.donor.findbyuserid.application.port.left.FindDonorByUserIdUseCase;
@@ -61,7 +60,7 @@ class DeleteDonationCommandHandlerTest {
     donation =
         Donation.create(
             Id.from(DONATION_ID),
-            DonorId.from(DONOR_ID),
+            Id.from(DONOR_ID),
             Title.from("Test Title"),
             Description.from("Test Description"),
             CREATED_AT,

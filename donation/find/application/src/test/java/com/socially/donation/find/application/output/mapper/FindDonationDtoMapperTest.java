@@ -6,7 +6,6 @@ import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donation.find.application.output.FindDonationDto;
 import com.socially.donation.kernel.domain.entity.Donation;
 import com.socially.donation.kernel.domain.valueobject.Description;
-import com.socially.donation.kernel.domain.valueobject.DonorId;
 import com.socially.donation.kernel.domain.valueobject.Title;
 import com.socially.donor.kernel.domain.entity.Donor;
 import java.time.Instant;
@@ -29,7 +28,7 @@ class FindDonationDtoMapperTest {
   private static Donation sampleDonation() {
     return Donation.create(
         Id.from(DONATION_ID),
-        DonorId.from(DONOR_ID),
+        Id.from(DONOR_ID),
         Title.from("Test Title"),
         Description.from("Test Description"),
         CREATED_AT,
@@ -52,7 +51,7 @@ class FindDonationDtoMapperTest {
     var donation =
         Donation.create(
             expectedId,
-            DonorId.from(DONOR_ID),
+            Id.from(DONOR_ID),
             Title.from("Test Title"),
             Description.from("Test Description"),
             CREATED_AT,
@@ -69,7 +68,7 @@ class FindDonationDtoMapperTest {
     var donation =
         Donation.create(
             Id.from(DONATION_ID),
-            DonorId.from(DONOR_ID),
+            Id.from(DONOR_ID),
             expectedTitle,
             Description.from("Test Description"),
             CREATED_AT,
@@ -86,7 +85,7 @@ class FindDonationDtoMapperTest {
     var donation =
         Donation.create(
             Id.from(DONATION_ID),
-            DonorId.from(DONOR_ID),
+            Id.from(DONOR_ID),
             Title.from("Test Title"),
             expectedDescription,
             CREATED_AT,
@@ -103,7 +102,7 @@ class FindDonationDtoMapperTest {
     var donation =
         Donation.create(
             Id.from(DONATION_ID),
-            DonorId.from(DONOR_ID),
+            Id.from(DONOR_ID),
             Title.from("Test Title"),
             Description.from("Test Description"),
             expectedCreatedAt,
@@ -120,7 +119,7 @@ class FindDonationDtoMapperTest {
     var donation =
         Donation.create(
             Id.from(DONATION_ID),
-            DonorId.from(DONOR_ID),
+            Id.from(DONOR_ID),
             Title.from("Test Title"),
             Description.from("Test Description"),
             CREATED_AT,

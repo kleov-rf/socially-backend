@@ -2,7 +2,6 @@ package com.socially.donation.kernel.domain.entity;
 
 import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donation.kernel.domain.valueobject.Description;
-import com.socially.donation.kernel.domain.valueobject.DonorId;
 import com.socially.donation.kernel.domain.valueobject.Title;
 import java.time.Instant;
 import lombok.EqualsAndHashCode;
@@ -13,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 public final class Donation {
 
   @EqualsAndHashCode.Include private final Id id;
-  private final DonorId donorId;
+  private final Id donorId;
   private final Title title;
   private final Description description;
   private final Instant createdAt;
@@ -21,7 +20,7 @@ public final class Donation {
 
   public static Donation create(
       Id id,
-      DonorId donorId,
+      Id donorId,
       Title title,
       Description description,
       Instant createdAt,
@@ -45,7 +44,7 @@ public final class Donation {
     return title;
   }
 
-  public DonorId donorId() {
+  public Id donorId() {
     return donorId;
   }
 

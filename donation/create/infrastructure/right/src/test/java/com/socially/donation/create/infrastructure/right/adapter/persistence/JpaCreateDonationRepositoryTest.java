@@ -7,7 +7,6 @@ import static org.mockito.Mockito.when;
 import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donation.kernel.domain.entity.Donation;
 import com.socially.donation.kernel.domain.valueobject.Description;
-import com.socially.donation.kernel.domain.valueobject.DonorId;
 import com.socially.donation.kernel.domain.valueobject.Title;
 import com.socially.donation.kernel.infrastructure.right.adapter.persistence.DonationEntityRepository;
 import com.socially.donation.kernel.infrastructure.right.adapter.persistence.entity.DonationEntity;
@@ -36,7 +35,7 @@ class JpaCreateDonationRepositoryTest {
     Donation donation =
         Donation.create(
             Id.from(DONATION_ID),
-            DonorId.from(DONOR_ID),
+            Id.from(DONOR_ID),
             Title.from("Test Title"),
             Description.from("Test Description"),
             CREATED_AT,
@@ -44,7 +43,7 @@ class JpaCreateDonationRepositoryTest {
     DonationEntity mappedEntity =
         DonationEntity.create(
             Id.from(DONATION_ID).value(),
-            DonorId.from(DONOR_ID).value(),
+            Id.from(DONOR_ID).value(),
             "Test Title",
             "Test Description",
             CREATED_AT,

@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donation.kernel.domain.entity.Donation;
 import com.socially.donation.kernel.domain.valueobject.Description;
-import com.socially.donation.kernel.domain.valueobject.DonorId;
 import com.socially.donation.kernel.domain.valueobject.Title;
 import com.socially.donation.kernel.infrastructure.right.adapter.persistence.entity.DonationEntity;
 import java.time.Instant;
@@ -28,7 +27,7 @@ class DonationEntityMapperTest {
   private static final Donation DONATION =
       Donation.create(
           Id.from(DONATION_ID),
-          DonorId.from(DONOR_ID),
+          Id.from(DONOR_ID),
           Title.from("Test Title"),
           Description.from("Test Description"),
           CREATED_AT,
@@ -112,7 +111,7 @@ class DonationEntityMapperTest {
   void toDomain_should_map_donor_id() {
     Donation result = donationEntityMapper.toDomain(ENTITY);
 
-    assertEquals(DonorId.from(DONOR_ID), result.donorId());
+    assertEquals(Id.from(DONOR_ID), result.donorId());
   }
 
   @Test

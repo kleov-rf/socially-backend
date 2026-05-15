@@ -6,7 +6,6 @@ import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donation.getbyid.application.output.DonationDto;
 import com.socially.donation.kernel.domain.entity.Donation;
 import com.socially.donation.kernel.domain.valueobject.Description;
-import com.socially.donation.kernel.domain.valueobject.DonorId;
 import com.socially.donation.kernel.domain.valueobject.Title;
 import com.socially.donor.kernel.domain.entity.Donor;
 import java.time.Instant;
@@ -29,7 +28,7 @@ class DonationDtoMapperTest {
   private static Donation sampleDonation() {
     return Donation.create(
         Id.from(DONATION_ID),
-        DonorId.from(DONOR_ID),
+        Id.from(DONOR_ID),
         Title.from("Test Title"),
         Description.from("Test Description"),
         CREATED_AT,

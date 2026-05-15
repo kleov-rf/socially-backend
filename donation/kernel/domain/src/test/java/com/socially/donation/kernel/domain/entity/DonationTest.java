@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donation.kernel.domain.valueobject.Description;
-import com.socially.donation.kernel.domain.valueobject.DonorId;
 import com.socially.donation.kernel.domain.valueobject.Title;
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
@@ -24,7 +23,7 @@ class DonationTest {
     Donation donation1 =
         Donation.create(
             Id.from(DONATION_ID),
-            DonorId.from(DONOR_ID),
+            Id.from(DONOR_ID),
             Title.from("Title 1"),
             Description.from("Description 1"),
             CREATED_AT,
@@ -32,7 +31,7 @@ class DonationTest {
     Donation donation2 =
         Donation.create(
             Id.from(DONATION_ID),
-            DonorId.from(DONOR_ID),
+            Id.from(DONOR_ID),
             Title.from("Title 2"),
             Description.from("Description 2"),
             OTHER_INSTANT,
@@ -46,7 +45,7 @@ class DonationTest {
     Donation donation1 =
         Donation.create(
             Id.from(DONATION_ID),
-            DonorId.from(DONOR_ID),
+            Id.from(DONOR_ID),
             Title.from("Same Title"),
             Description.from("Same Description"),
             CREATED_AT,
@@ -54,7 +53,7 @@ class DonationTest {
     Donation donation2 =
         Donation.create(
             Id.from(DIFFERENT_ID),
-            DonorId.from(DONOR_ID),
+            Id.from(DONOR_ID),
             Title.from("Same Title"),
             Description.from("Same Description"),
             CREATED_AT,
@@ -68,7 +67,7 @@ class DonationTest {
     Donation donation =
         Donation.create(
             Id.from(DONATION_ID),
-            DonorId.from(DONOR_ID),
+            Id.from(DONOR_ID),
             Title.from("Old Title"),
             Description.from("Old Description"),
             CREATED_AT,
@@ -78,7 +77,7 @@ class DonationTest {
 
     assertEquals(Title.from("New Title"), updated.title());
     assertEquals(Description.from("Old Description"), updated.description());
-    assertEquals(DonorId.from(DONOR_ID), updated.donorId());
+    assertEquals(Id.from(DONOR_ID), updated.donorId());
     assertEquals(Id.from(DONATION_ID), updated.id());
     assertEquals(CREATED_AT, updated.createdAt());
     assertEquals(NEW_LAST_UPDATED_AT, updated.lastUpdatedAt());
@@ -89,7 +88,7 @@ class DonationTest {
     Donation donation =
         Donation.create(
             Id.from(DONATION_ID),
-            DonorId.from(DONOR_ID),
+            Id.from(DONOR_ID),
             Title.from("Old Title"),
             Description.from("Old Description"),
             CREATED_AT,
@@ -100,7 +99,7 @@ class DonationTest {
 
     assertEquals(Title.from("Old Title"), updated.title());
     assertEquals(Description.from("New Description"), updated.description());
-    assertEquals(DonorId.from(DONOR_ID), updated.donorId());
+    assertEquals(Id.from(DONOR_ID), updated.donorId());
     assertEquals(Id.from(DONATION_ID), updated.id());
     assertEquals(CREATED_AT, updated.createdAt());
     assertEquals(NEW_LAST_UPDATED_AT, updated.lastUpdatedAt());

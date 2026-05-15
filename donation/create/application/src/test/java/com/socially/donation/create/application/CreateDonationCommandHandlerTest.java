@@ -18,7 +18,6 @@ import com.socially.donation.create.application.input.mapper.CreateDonationComma
 import com.socially.donation.create.domain.port.right.CreateDonationRepository;
 import com.socially.donation.kernel.domain.entity.Donation;
 import com.socially.donation.kernel.domain.valueobject.Description;
-import com.socially.donation.kernel.domain.valueobject.DonorId;
 import com.socially.donation.kernel.domain.valueobject.Title;
 import com.socially.donor.create.application.input.CreateDonorCommand;
 import com.socially.donor.create.application.port.left.CreateDonorUseCase;
@@ -77,7 +76,7 @@ class CreateDonationCommandHandlerTest {
         .thenReturn(
             Donation.create(
                 Id.from(DONATION_ID),
-                DonorId.from(DONOR_ID),
+                Id.from(DONOR_ID),
                 Title.from("Test Title"),
                 Description.from("Test Description"),
                 CREATED_AT,
@@ -97,7 +96,7 @@ class CreateDonationCommandHandlerTest {
         .thenReturn(
             Donation.create(
                 Id.from(DONATION_ID),
-                DonorId.from(DONOR_ID),
+                Id.from(DONOR_ID),
                 Title.from("Test Title"),
                 Description.from("Test Description"),
                 CREATED_AT,
@@ -124,7 +123,7 @@ class CreateDonationCommandHandlerTest {
         .thenReturn(
             Donation.create(
                 Id.from(DONATION_ID),
-                DonorId.from(DONOR_ID),
+                Id.from(DONOR_ID),
                 Title.from("Test Title"),
                 Description.from("Test Description"),
                 CREATED_AT,
@@ -143,7 +142,7 @@ class CreateDonationCommandHandlerTest {
     Donation mappedDonation =
         Donation.create(
             Id.from(DONATION_ID),
-            DonorId.from(DONOR_ID),
+            Id.from(DONOR_ID),
             Title.from("Test Title"),
             Description.from("Test Description"),
             CREATED_AT,
@@ -171,7 +170,7 @@ class CreateDonationCommandHandlerTest {
         .thenReturn(
             Donation.create(
                 Id.from(DONATION_ID),
-                DonorId.from(DONOR_ID),
+                Id.from(DONOR_ID),
                 Title.from("Test Title"),
                 Description.from("Test Description"),
                 CREATED_AT,
@@ -195,7 +194,7 @@ class CreateDonationCommandHandlerTest {
         .thenReturn(
             Donation.create(
                 Id.from(DONATION_ID),
-                DonorId.from(DONOR_ID),
+                Id.from(DONOR_ID),
                 Title.from("Test Title"),
                 Description.from("Test Description"),
                 CREATED_AT,

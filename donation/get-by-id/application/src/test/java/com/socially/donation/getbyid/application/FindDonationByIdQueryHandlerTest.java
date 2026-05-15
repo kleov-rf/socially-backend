@@ -16,7 +16,6 @@ import com.socially.donation.getbyid.application.output.mapper.DonationDtoMapper
 import com.socially.donation.getbyid.domain.port.right.FindDonationByIdRepository;
 import com.socially.donation.kernel.domain.entity.Donation;
 import com.socially.donation.kernel.domain.valueobject.Description;
-import com.socially.donation.kernel.domain.valueobject.DonorId;
 import com.socially.donation.kernel.domain.valueobject.Title;
 import com.socially.donor.findbyid.application.input.FindDonorByIdQuery;
 import com.socially.donor.findbyid.application.port.left.FindDonorByIdUseCase;
@@ -60,7 +59,7 @@ class FindDonationByIdQueryHandlerTest {
     Donation donation =
         Donation.create(
             Id.from(DONATION_ID),
-            DonorId.from(DONOR_ID),
+            Id.from(DONOR_ID),
             Title.from("Test Title"),
             Description.from("Test Description"),
             CREATED_AT,
@@ -90,7 +89,7 @@ class FindDonationByIdQueryHandlerTest {
     Donation donation =
         Donation.create(
             Id.from(DONATION_ID),
-            DonorId.from(DONOR_ID),
+            Id.from(DONOR_ID),
             Title.from("Test Title"),
             Description.from("Test Description"),
             CREATED_AT,
@@ -120,7 +119,7 @@ class FindDonationByIdQueryHandlerTest {
     Donation donation =
         Donation.create(
             Id.from(DONATION_ID),
-            DonorId.from(DONOR_ID),
+            Id.from(DONOR_ID),
             Title.from("Test Title"),
             Description.from("Test Description"),
             CREATED_AT,
@@ -150,7 +149,7 @@ class FindDonationByIdQueryHandlerTest {
     Donation donation =
         Donation.create(
             Id.from(DONATION_ID),
-            DonorId.from(DONOR_ID),
+            Id.from(DONOR_ID),
             Title.from("Test Title"),
             Description.from("Test Description"),
             CREATED_AT,

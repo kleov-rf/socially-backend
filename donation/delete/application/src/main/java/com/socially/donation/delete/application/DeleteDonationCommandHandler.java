@@ -12,7 +12,6 @@ import com.socially.donor.findbyuserid.application.port.left.FindDonorByUserIdUs
 import com.socially.donor.kernel.domain.entity.Donor;
 import com.socially.user.kernel.domain.entity.User;
 import java.util.Optional;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -41,10 +40,7 @@ public final class DeleteDonationCommandHandler implements DeleteDonationUseCase
       throw new DonationForbiddenException(command.id());
     }
 
-    UUID donationDonorId = donation.donorId().value();
-    UUID userDonorId = donor.get().id().value();
-
-    if (!donationDonorId.equals(userDonorId)) {
+    if (!donation.donorId().equals(donor.get().id())) {
       throw new DonationForbiddenException(command.id());
     }
 

@@ -13,7 +13,6 @@ import com.socially.donation.find.domain.pagination.PageSize;
 import com.socially.donation.find.domain.pagination.PaginationCriteria;
 import com.socially.donation.kernel.domain.entity.Donation;
 import com.socially.donation.kernel.domain.valueobject.Description;
-import com.socially.donation.kernel.domain.valueobject.DonorId;
 import com.socially.donation.kernel.domain.valueobject.Title;
 import com.socially.donation.kernel.infrastructure.right.adapter.persistence.DonationEntityRepository;
 import com.socially.donation.kernel.infrastructure.right.adapter.persistence.entity.DonationEntity;
@@ -140,18 +139,13 @@ class JpaFindDonationsRepositoryTest {
   private static DonationEntity donationEntity(
       String id, String title, String description, Instant createdAt) {
     return DonationEntity.create(
-        Id.from(id).value(),
-        DonorId.from(DONOR_ID).value(),
-        title,
-        description,
-        createdAt,
-        createdAt);
+        Id.from(id).value(), Id.from(DONOR_ID).value(), title, description, createdAt, createdAt);
   }
 
   private static Donation mappedDonation(DonationEntity entity) {
     return Donation.create(
         Id.from(entity.getId().toString()),
-        DonorId.from(entity.getDonorId().toString()),
+        Id.from(entity.getDonorId().toString()),
         Title.from(entity.getTitle()),
         Description.from(entity.getDescription()),
         entity.getCreatedAt(),
