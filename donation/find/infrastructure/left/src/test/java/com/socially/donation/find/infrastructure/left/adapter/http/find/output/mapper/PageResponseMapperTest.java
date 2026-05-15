@@ -6,9 +6,11 @@ import static org.mockito.Mockito.when;
 
 import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donation.find.application.output.FindDonationDto;
+import com.socially.donation.find.application.output.FindDonorSummaryDto;
 import com.socially.donation.find.domain.pagination.Metadata;
 import com.socially.donation.find.domain.pagination.Page;
 import com.socially.donation.find.infrastructure.left.adapter.http.find.output.FindDonationResponse;
+import com.socially.donation.find.infrastructure.left.adapter.http.find.output.FindDonorResponse;
 import com.socially.donation.kernel.domain.valueobject.Description;
 import com.socially.donation.kernel.domain.valueobject.Title;
 import java.time.Instant;
@@ -23,6 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class PageResponseMapperTest {
 
   private static final String DONATION_ID = "550e8400-e29b-41d4-a716-446655440000";
+  private static final String DONOR_ID = "550e8400-e29b-41d4-a716-446655440001";
   private static final Instant CREATED_AT = Instant.parse("2024-06-01T12:00:00Z");
   private static final Instant LAST_UPDATED_AT = Instant.parse("2024-06-20T09:00:00Z");
   private static final String NEXT_CURSOR = "next-cursor";
@@ -122,12 +125,18 @@ class PageResponseMapperTest {
         Title.from("Test Title"),
         Description.from("Test Description"),
         CREATED_AT,
-        LAST_UPDATED_AT);
+        LAST_UPDATED_AT,
+        new FindDonorSummaryDto(DONOR_ID, "Jane", "Doe"));
   }
 
   private FindDonationResponse givenDonationResponse() {
     return new FindDonationResponse(
-        DONATION_ID, "Test Title", "Test Description", CREATED_AT, LAST_UPDATED_AT);
+        DONATION_ID,
+        "Test Title",
+        "Test Description",
+        CREATED_AT,
+        LAST_UPDATED_AT,
+        new FindDonorResponse(DONOR_ID, "Jane", "Doe"));
   }
 
   private Page<FindDonationDto> givenPage(FindDonationDto donationDto) {

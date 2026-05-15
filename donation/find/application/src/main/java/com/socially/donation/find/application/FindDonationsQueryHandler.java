@@ -7,6 +7,9 @@ import com.socially.donation.find.application.port.left.FindDonationsUseCase;
 import com.socially.donation.find.domain.pagination.Page;
 import com.socially.donation.find.domain.port.right.FindDonationsRepository;
 import com.socially.donation.kernel.domain.entity.Donation;
+import com.socially.donor.findbyid.application.input.FindDonorByIdQuery;
+import com.socially.donor.findbyid.application.port.left.FindDonorByIdUseCase;
+import com.socially.donor.kernel.domain.entity.Donor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,14 +18,29 @@ import org.springframework.stereotype.Service;
 public final class FindDonationsQueryHandler implements FindDonationsUseCase {
 
   private final FindDonationsRepository donationRepository;
+  private final FindDonorByIdUseCase findDonorByIdUseCase;
   private final FindDonationDtoMapper donationDtoMapper;
 
   @Override
   public Page<FindDonationDto> execute(FindDonationsQuery query) {
     Page<Donation> donations =
         donationRepository.find(query.paginationCriteria(), query.filterCriteria());
-    return Page.create(
-        donations.items().stream().map(donationDtoMapper::fromDomain).toList(),
-        donations.metadata());
+
+    return Page.create(donations.items().stream().map(this::toDto).toList(), donations.metadata());
+  }
+
+  private FindDonationDto toDto(Donation donation) {
+    Donor donor =
+        findDonorByIdUseCase
+            .execute(new FindDonorByIdQuery(donation.donorId().value().toString()))
+            .orElseThrow(
+                () ->
+                    new IllegalStateException(
+                        "Donation "
+                            + donation.id().value()
+                            + " references missing donor "
+                            + donation.donorId().value()));
+
+    return donationDtoMapper.fromDomain(donation, donor);
   }
 }

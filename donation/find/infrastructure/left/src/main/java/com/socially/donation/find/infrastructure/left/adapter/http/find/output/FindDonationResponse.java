@@ -8,4 +8,5 @@ public record FindDonationResponse(
     @NotNull String title,
     @NotNull String description,
     @NotNull Instant createdAt,
-    @NotNull Instant lastUpdatedAt) {}
+    @NotNull Instant lastUpdatedAt,
+    @NotNull FindDonorResponse donor) {}

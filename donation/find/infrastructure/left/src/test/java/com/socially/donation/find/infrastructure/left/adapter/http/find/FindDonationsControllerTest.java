@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donation.find.application.input.FindDonationsQuery;
 import com.socially.donation.find.application.output.FindDonationDto;
+import com.socially.donation.find.application.output.FindDonorSummaryDto;
 import com.socially.donation.find.application.port.left.FindDonationsUseCase;
 import com.socially.donation.find.domain.filter.FilterCriteria;
 import com.socially.donation.find.domain.pagination.Metadata;
@@ -14,6 +15,7 @@ import com.socially.donation.find.domain.pagination.PageSize;
 import com.socially.donation.find.domain.pagination.PaginationCriteria;
 import com.socially.donation.find.infrastructure.left.adapter.http.find.input.mapper.FindDonationsQueryMapper;
 import com.socially.donation.find.infrastructure.left.adapter.http.find.output.FindDonationResponse;
+import com.socially.donation.find.infrastructure.left.adapter.http.find.output.FindDonorResponse;
 import com.socially.donation.find.infrastructure.left.adapter.http.find.output.MetadataResponse;
 import com.socially.donation.find.infrastructure.left.adapter.http.find.output.PageResponse;
 import com.socially.donation.find.infrastructure.left.adapter.http.find.output.mapper.PageResponseMapper;
@@ -33,6 +35,7 @@ import org.springframework.http.ResponseEntity;
 class FindDonationsControllerTest {
 
   private static final String DONATION_ID = "550e8400-e29b-41d4-a716-446655440000";
+  private static final String DONOR_ID = "550e8400-e29b-41d4-a716-446655440001";
   private static final Instant CREATED_AT = Instant.parse("2024-06-01T12:00:00Z");
   private static final Instant LAST_UPDATED_AT = Instant.parse("2024-06-20T09:00:00Z");
 
@@ -90,7 +93,8 @@ class FindDonationsControllerTest {
             Title.from("Test Title"),
             Description.from("Test Description"),
             CREATED_AT,
-            LAST_UPDATED_AT);
+            LAST_UPDATED_AT,
+            new FindDonorSummaryDto(DONOR_ID, "Jane", "Doe"));
     FindDonationsQuery query =
         new FindDonationsQuery(
             PaginationCriteria.create(
@@ -106,7 +110,12 @@ class FindDonationsControllerTest {
         new PageResponse<>(
             List.of(
                 new FindDonationResponse(
-                    DONATION_ID, "Test Title", "Test Description", CREATED_AT, LAST_UPDATED_AT)),
+                    DONATION_ID,
+                    "Test Title",
+                    "Test Description",
+                    CREATED_AT,
+                    LAST_UPDATED_AT,
+                    new FindDonorResponse(DONOR_ID, "Jane", "Doe"))),
             new MetadataResponse("next-cursor", "previous-cursor", true, true, 10, 100L));
     when(pageResponseMapper.toResponse(page)).thenReturn(mappedPageResponse);
 
