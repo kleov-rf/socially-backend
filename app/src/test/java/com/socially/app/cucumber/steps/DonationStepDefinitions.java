@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.socially.app.cucumber.CucumberOAuthJwt;
 import com.socially.donation.create.infrastructure.left.adapter.http.create.input.CreateDonationRequest;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
@@ -80,6 +81,21 @@ public class DonationStepDefinitions {
             .perform(
                 post("/api/donations")
                     .with(cucumberDonorJwt())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(requestBody))
+            .andReturn();
+  }
+
+  @When("I create the donation as the logged-in OAuth user")
+  public void iCreateTheDonationAsTheLoggedInOauthUser() throws Exception {
+    String requestBody =
+        objectMapper.writeValueAsString(new CreateDonationRequest(id, title, description));
+
+    mvcResult =
+        mockMvc
+            .perform(
+                post("/api/donations")
+                    .with(CucumberOAuthJwt.postProcessor())
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(requestBody))
             .andReturn();

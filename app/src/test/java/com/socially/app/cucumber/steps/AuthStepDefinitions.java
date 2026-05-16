@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.socially.app.cucumber.CucumberOAuthJwt;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
@@ -88,6 +89,12 @@ public class AuthStepDefinitions {
     cookies.putAll(parseSetCookieHeaders(mvcResult));
   }
 
+  @When("I request the current user profile")
+  public void iRequestTheCurrentUserProfile() throws Exception {
+    mvcResult =
+        mockMvc.perform(get("/api/auth/me").with(CucumberOAuthJwt.postProcessor())).andReturn();
+  }
+
   @Then("the auth response status should be {int}")
   public void theAuthResponseStatusShouldBe(int status) {
     assertThat(mvcResult.getResponse().getStatus()).isEqualTo(status);
@@ -115,6 +122,26 @@ public class AuthStepDefinitions {
   public void theUsersTableShouldContainRecords(int expectedCount) {
     Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM users", Integer.class);
     assertThat(count).isEqualTo(expectedCount);
+  }
+
+  @And("the auth profile response should include donor for the OAuth user")
+  public void theAuthProfileResponseShouldIncludeDonorForTheOauthUser() throws Exception {
+    JsonNode root = objectMapper.readTree(mvcResult.getResponse().getContentAsString());
+    assertThat(root.path("user").path("email").asText()).isEqualTo("auth.user@example.com");
+    assertThat(root.path("user").path("id").asText())
+        .matches("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
+
+    JsonNode profiles = root.path("profiles");
+    assertThat(profiles.path("organization").isNull()).isTrue();
+
+    JsonNode donor = profiles.path("donor");
+    assertThat(donor.isMissingNode()).isFalse();
+    assertThat(donor.isNull()).isFalse();
+    assertThat(donor.path("email").asText()).isEqualTo("auth.user@example.com");
+    assertThat(donor.path("givenName").asText()).isEqualTo("Auth");
+    assertThat(donor.path("familyName").asText()).isEqualTo("User");
+    assertThat(donor.path("id").asText())
+        .matches("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
   }
 
   private static Map<String, String> queryParams(String url) {
