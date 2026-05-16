@@ -8,9 +8,9 @@ import org.springframework.stereotype.Component;
 
 @Component
 public final class CreateDonorCommandMapper {
-  public Donor toDomain(CreateDonorCommand command, Instant now) {
+  public Donor toDomain(Id donorId, CreateDonorCommand command, Instant now) {
     return Donor.create(
-        Id.from(command.id()),
+        donorId,
         Id.from(command.userId()),
         command.email(),
         command.givenName(),

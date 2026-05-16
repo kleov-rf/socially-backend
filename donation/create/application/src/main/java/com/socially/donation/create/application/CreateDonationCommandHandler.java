@@ -14,7 +14,6 @@ import com.socially.donor.kernel.domain.entity.Donor;
 import com.socially.donor.kernel.domain.exception.DonorNotFoundAfterCreateException;
 import com.socially.user.kernel.domain.entity.User;
 import java.time.Clock;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -33,10 +32,8 @@ public final class CreateDonationCommandHandler implements CreateDonationUseCase
   public void execute(CreateDonationCommand command) {
     User user = getCurrentAuthUserUseCase.execute(command.principal());
 
-    String provisionalDonorId = UUID.randomUUID().toString();
     createDonorUseCase.execute(
         new CreateDonorCommand(
-            provisionalDonorId,
             user.id().value().toString(),
             user.email().value(),
             user.givenName(),
@@ -46,8 +43,8 @@ public final class CreateDonationCommandHandler implements CreateDonationUseCase
         findDonorByUserIdUseCase
             .execute(new FindDonorByUserIdQuery(user.id().value().toString()))
             .orElseThrow(DonorNotFoundAfterCreateException::new);
-    String donorId = donor.id().value().toString();
 
+    String donorId = donor.id().value().toString();
     Donation donation = createDonationCommandMapper.toDomain(command, donorId, clock.instant());
     donationRepository.create(donation);
   }

@@ -1,5 +1,7 @@
 package com.socially.donor.create.application;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -16,6 +18,7 @@ import java.time.Instant;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -36,7 +39,7 @@ class CreateDonorCommandHandlerTest {
 
   @Test
   void execute_should_call_find_donor_by_user_id_with_command_user_id() {
-    var command = new CreateDonorCommand(DONOR_ID, USER_ID, "donor@example.com", "Jane", "Doe");
+    var command = new CreateDonorCommand(USER_ID, "donor@example.com", "Jane", "Doe");
     when(findDonorByUserIdUseCase.execute(new FindDonorByUserIdQuery(USER_ID)))
         .thenReturn(Optional.empty());
 
@@ -47,7 +50,7 @@ class CreateDonorCommandHandlerTest {
 
   @Test
   void execute_should_not_call_repository_create_when_donor_already_exists() {
-    var command = new CreateDonorCommand(DONOR_ID, USER_ID, "donor@example.com", "Jane", "Doe");
+    var command = new CreateDonorCommand(USER_ID, "donor@example.com", "Jane", "Doe");
     Donor existingDonor =
         Donor.create(
             Id.from(DONOR_ID), Id.from(USER_ID), "donor@example.com", "Jane", "Doe", CREATED_AT);
@@ -56,12 +59,12 @@ class CreateDonorCommandHandlerTest {
 
     handler.execute(command);
 
-    verify(donorRepository, never()).create(org.mockito.ArgumentMatchers.any());
+    verify(donorRepository, never()).create(any());
   }
 
   @Test
   void execute_should_not_call_command_mapper_when_donor_already_exists() {
-    var command = new CreateDonorCommand(DONOR_ID, USER_ID, "donor@example.com", "Jane", "Doe");
+    var command = new CreateDonorCommand(USER_ID, "donor@example.com", "Jane", "Doe");
     Donor existingDonor =
         Donor.create(
             Id.from(DONOR_ID), Id.from(USER_ID), "donor@example.com", "Jane", "Doe", CREATED_AT);
@@ -70,36 +73,56 @@ class CreateDonorCommandHandlerTest {
 
     handler.execute(command);
 
-    verify(createDonorCommandMapper, never())
-        .toDomain(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
+    verify(createDonorCommandMapper, never()).toDomain(any(), any(), any());
+  }
+
+  @Test
+  void execute_should_call_mapper_with_generated_donor_id() {
+    var command = new CreateDonorCommand(USER_ID, "donor@example.com", "Jane", "Doe");
+    Donor mappedDonor =
+        Donor.create(
+            Id.from(DONOR_ID), Id.from(USER_ID), "donor@example.com", "Jane", "Doe", CREATED_AT);
+    when(findDonorByUserIdUseCase.execute(new FindDonorByUserIdQuery(USER_ID)))
+        .thenReturn(Optional.empty());
+    when(clock.instant()).thenReturn(CREATED_AT);
+    when(createDonorCommandMapper.toDomain(any(Id.class), eq(command), eq(CREATED_AT)))
+        .thenReturn(mappedDonor);
+
+    handler.execute(command);
+
+    ArgumentCaptor<Id> donorIdCaptor = ArgumentCaptor.forClass(Id.class);
+    verify(createDonorCommandMapper).toDomain(donorIdCaptor.capture(), eq(command), eq(CREATED_AT));
+    donorIdCaptor.getValue().value();
   }
 
   @Test
   void execute_should_call_mapper_with_received_command_and_clock_instant() {
-    var command = new CreateDonorCommand(DONOR_ID, USER_ID, "donor@example.com", "Jane", "Doe");
+    var command = new CreateDonorCommand(USER_ID, "donor@example.com", "Jane", "Doe");
     Donor mappedDonor =
         Donor.create(
             Id.from(DONOR_ID), Id.from(USER_ID), "donor@example.com", "Jane", "Doe", CREATED_AT);
     when(findDonorByUserIdUseCase.execute(new FindDonorByUserIdQuery(USER_ID)))
         .thenReturn(Optional.empty());
     when(clock.instant()).thenReturn(CREATED_AT);
-    when(createDonorCommandMapper.toDomain(command, CREATED_AT)).thenReturn(mappedDonor);
+    when(createDonorCommandMapper.toDomain(any(Id.class), eq(command), eq(CREATED_AT)))
+        .thenReturn(mappedDonor);
 
     handler.execute(command);
 
-    verify(createDonorCommandMapper).toDomain(command, CREATED_AT);
+    verify(createDonorCommandMapper).toDomain(any(Id.class), eq(command), eq(CREATED_AT));
   }
 
   @Test
   void execute_should_call_clock_instant() {
-    var command = new CreateDonorCommand(DONOR_ID, USER_ID, "donor@example.com", "Jane", "Doe");
+    var command = new CreateDonorCommand(USER_ID, "donor@example.com", "Jane", "Doe");
     Donor mappedDonor =
         Donor.create(
             Id.from(DONOR_ID), Id.from(USER_ID), "donor@example.com", "Jane", "Doe", CREATED_AT);
     when(findDonorByUserIdUseCase.execute(new FindDonorByUserIdQuery(USER_ID)))
         .thenReturn(Optional.empty());
     when(clock.instant()).thenReturn(CREATED_AT);
-    when(createDonorCommandMapper.toDomain(command, CREATED_AT)).thenReturn(mappedDonor);
+    when(createDonorCommandMapper.toDomain(any(Id.class), eq(command), eq(CREATED_AT)))
+        .thenReturn(mappedDonor);
 
     handler.execute(command);
 
@@ -108,14 +131,15 @@ class CreateDonorCommandHandlerTest {
 
   @Test
   void execute_should_call_repository_create_with_mapped_donor() {
-    var command = new CreateDonorCommand(DONOR_ID, USER_ID, "donor@example.com", "Jane", "Doe");
+    var command = new CreateDonorCommand(USER_ID, "donor@example.com", "Jane", "Doe");
     Donor mappedDonor =
         Donor.create(
             Id.from(DONOR_ID), Id.from(USER_ID), "donor@example.com", "Jane", "Doe", CREATED_AT);
     when(findDonorByUserIdUseCase.execute(new FindDonorByUserIdQuery(USER_ID)))
         .thenReturn(Optional.empty());
     when(clock.instant()).thenReturn(CREATED_AT);
-    when(createDonorCommandMapper.toDomain(command, CREATED_AT)).thenReturn(mappedDonor);
+    when(createDonorCommandMapper.toDomain(any(Id.class), eq(command), eq(CREATED_AT)))
+        .thenReturn(mappedDonor);
 
     handler.execute(command);
 

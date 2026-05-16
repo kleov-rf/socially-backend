@@ -30,7 +30,6 @@ import java.security.Principal;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.Optional;
-import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -112,7 +111,6 @@ class CreateDonationCommandHandlerTest {
         ArgumentCaptor.forClass(CreateDonorCommand.class);
     verify(createDonorUseCase).execute(donorCommandCaptor.capture());
     CreateDonorCommand donorCommand = donorCommandCaptor.getValue();
-    UUID.fromString(donorCommand.id());
     assertEquals(USER_ID, donorCommand.userId());
     assertEquals("user@example.com", donorCommand.email());
     assertEquals("Jane", donorCommand.givenName());
