@@ -27,8 +27,7 @@ dependencies {
     implementation(project(":auth:kernel:infrastructure:right"))
     implementation(project(":donor:find-by-user-id:application"))
     implementation(project(":donor:kernel:domain"))
-    implementation(project(":user:create:application"))
-    implementation(project(":user:find-by-email:application"))
+    implementation(project(":user:find-by-federated-identity:application"))
     implementation(project(":user:kernel:domain"))
 
     implementation(libs.spring.context)

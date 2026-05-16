@@ -13,21 +13,15 @@ import com.socially.auth.kernel.domain.AuthResult;
 import com.socially.auth.kernel.domain.AuthUser;
 import com.socially.auth.kernel.domain.CookieInstruction;
 import com.socially.auth.kernel.domain.OAuthTokenResponse;
-import com.socially.auth.kernel.domain.exception.UserNotFoundAfterCreateException;
 import com.socially.auth.kernel.domain.properties.AuthProperties;
 import com.socially.auth.kernel.infrastructure.right.adapter.oauth.mapper.AuthResultMapper;
-import com.socially.auth.kernel.infrastructure.right.adapter.user.mapper.AuthUserToCreateUserCommandMapper;
+import com.socially.auth.kernel.infrastructure.right.adapter.user.AuthenticatedUserResolver;
 import com.socially.commons.kernel.domain.valueobject.Id;
-import com.socially.user.create.application.input.CreateUserCommand;
-import com.socially.user.create.application.port.left.CreateUserUseCase;
-import com.socially.user.findbyemail.application.input.FindUserByEmailQuery;
-import com.socially.user.findbyemail.application.port.left.FindUserByEmailUseCase;
 import com.socially.user.kernel.domain.entity.User;
 import com.socially.user.kernel.domain.valueobject.Email;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -41,9 +35,7 @@ class CompleteOAuthCallbackCommandHandlerTest {
   @Mock private AuthProperties authProperties;
   @Mock private CallbackCookieInstructionsMapper callbackCookieInstructionsMapper;
   @Mock private AuthResultMapper authResultMapper;
-  @Mock private AuthUserToCreateUserCommandMapper authUserToCreateUserCommandMapper;
-  @Mock private CreateUserUseCase createUserUseCase;
-  @Mock private FindUserByEmailUseCase findUserByEmailUseCase;
+  @Mock private AuthenticatedUserResolver authenticatedUserResolver;
 
   @InjectMocks private CompleteOAuthCallbackCommandHandler sut;
 
@@ -53,10 +45,9 @@ class CompleteOAuthCallbackCommandHandlerTest {
   private static final String ID_TOKEN = "id-token-1";
   private static final String STATE_COOKIE_NAME = "socially_oauth_state";
   private static final String PKCE_COOKIE_NAME = "socially_oauth_pkce";
-  private static final AuthUser USER = new AuthUser("user-id-1", "user@example.com", "John", "Doe");
-  private static final CreateUserCommand CREATE_USER_COMMAND =
-      new CreateUserCommand("user@example.com", "John", "Doe");
-  private static final User CREATED_USER =
+  private static final AuthUser USER =
+      new AuthUser("https://idp.example", "user-id-1", "user@example.com", "John", "Doe");
+  private static final User RESOLVED_USER =
       User.create(
           Id.from("550e8400-e29b-41d4-a716-446655440000"),
           Email.from("user@example.com"),
@@ -141,53 +132,23 @@ class CompleteOAuthCallbackCommandHandlerTest {
   }
 
   @Test
+  void execute_should_call_authenticated_user_resolver_with_auth_user_from_result() {
+    stubSuccessfulExecution();
+
+    sut.execute(CODE, STATE, validRequestCookies());
+
+    verify(authenticatedUserResolver).resolve(USER);
+  }
+
+  @Test
   void execute_should_return_outcome_with_mapped_values() {
     stubSuccessfulExecution();
 
     var outcome = sut.execute(CODE, STATE, validRequestCookies());
 
     assertEquals(AUTH_RESULT, outcome.authResult());
-    assertEquals(CREATED_USER, outcome.user());
+    assertEquals(RESOLVED_USER, outcome.user());
     assertEquals(COOKIE_INSTRUCTIONS, outcome.cookieInstructions());
-  }
-
-  @Test
-  void execute_should_call_create_use_case_with_mapped_command() {
-    stubSuccessfulExecution();
-
-    sut.execute(CODE, STATE, validRequestCookies());
-
-    verify(createUserUseCase).execute(CREATE_USER_COMMAND);
-  }
-
-  @Test
-  void execute_should_call_find_by_email_use_case_with_command_email() {
-    stubSuccessfulExecution();
-
-    sut.execute(CODE, STATE, validRequestCookies());
-
-    verify(findUserByEmailUseCase).execute(new FindUserByEmailQuery(CREATE_USER_COMMAND.email()));
-  }
-
-  @Test
-  void execute_should_throw_exception_when_created_user_cannot_be_found() {
-    when(authProperties.stateCookieName()).thenReturn(STATE_COOKIE_NAME);
-    when(authProperties.pkceCookieName()).thenReturn(PKCE_COOKIE_NAME);
-    when(authorizationCodeExchangeOAuthClient.exchangeAuthorizationCode(CODE, CODE_VERIFIER))
-        .thenReturn(TOKEN_RESPONSE);
-    when(callbackCookieInstructionsMapper.toCookieInstructions(TOKEN_RESPONSE))
-        .thenReturn(COOKIE_INSTRUCTIONS);
-    when(authResultMapper.toAuthResult(TOKEN_RESPONSE)).thenReturn(AUTH_RESULT);
-    when(authUserToCreateUserCommandMapper.toCommand(USER)).thenReturn(CREATE_USER_COMMAND);
-    when(findUserByEmailUseCase.execute(new FindUserByEmailQuery(CREATE_USER_COMMAND.email())))
-        .thenReturn(Optional.empty());
-
-    UserNotFoundAfterCreateException exception =
-        assertThrows(
-            UserNotFoundAfterCreateException.class,
-            () -> sut.execute(CODE, STATE, validRequestCookies()));
-
-    assertEquals("User not found after create", exception.getMessage());
   }
 
   @Test
@@ -216,9 +177,7 @@ class CompleteOAuthCallbackCommandHandlerTest {
     when(callbackCookieInstructionsMapper.toCookieInstructions(TOKEN_RESPONSE))
         .thenReturn(COOKIE_INSTRUCTIONS);
     when(authResultMapper.toAuthResult(TOKEN_RESPONSE)).thenReturn(AUTH_RESULT);
-    when(authUserToCreateUserCommandMapper.toCommand(USER)).thenReturn(CREATE_USER_COMMAND);
-    when(findUserByEmailUseCase.execute(new FindUserByEmailQuery(CREATE_USER_COMMAND.email())))
-        .thenReturn(Optional.of(CREATED_USER));
+    when(authenticatedUserResolver.resolve(USER)).thenReturn(RESOLVED_USER);
   }
 
   private Map<String, String> validRequestCookies() {

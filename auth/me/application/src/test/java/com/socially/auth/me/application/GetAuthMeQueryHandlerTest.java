@@ -9,7 +9,9 @@ import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.socially.auth.kernel.infrastructure.right.adapter.oauth.mapper.AuthUserEmailMapper;
+import com.socially.auth.kernel.domain.AuthUser;
+import com.socially.auth.kernel.infrastructure.right.adapter.oauth.mapper.AuthUserFromJwtMapper;
+import com.socially.auth.kernel.infrastructure.right.adapter.user.AuthUserClaimsValidator;
 import com.socially.auth.me.application.exception.MeUserNotFoundException;
 import com.socially.auth.me.application.exception.UnauthenticatedRequestException;
 import com.socially.auth.me.application.output.AuthMeQueryResult;
@@ -17,8 +19,8 @@ import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donor.findbyuserid.application.input.FindDonorByUserIdQuery;
 import com.socially.donor.findbyuserid.application.port.left.FindDonorByUserIdUseCase;
 import com.socially.donor.kernel.domain.entity.Donor;
-import com.socially.user.findbyemail.application.input.FindUserByEmailQuery;
-import com.socially.user.findbyemail.application.port.left.FindUserByEmailUseCase;
+import com.socially.user.findbyfederatedidentity.application.input.FindUserByFederatedIdentityQuery;
+import com.socially.user.findbyfederatedidentity.application.port.left.FindUserByFederatedIdentityUseCase;
 import com.socially.user.kernel.domain.entity.User;
 import com.socially.user.kernel.domain.valueobject.Email;
 import java.time.Instant;
@@ -39,10 +41,13 @@ class GetAuthMeQueryHandlerTest {
   private static final Instant ISSUED_AT = Instant.parse("2024-01-01T00:00:00Z");
   private static final Instant EXPIRES_AT = Instant.parse("2024-01-01T01:00:00Z");
   private static final Instant CREATED_AT = Instant.parse("2024-06-01T12:00:00Z");
+  private static final AuthUser AUTH_USER =
+      new AuthUser("https://idp.example", "sub-99", "me@example.com", "Jane", "Doe");
 
-  @Mock private FindUserByEmailUseCase findUserByEmailUseCase;
+  @Mock private FindUserByFederatedIdentityUseCase findUserByFederatedIdentityUseCase;
   @Mock private FindDonorByUserIdUseCase findDonorByUserIdUseCase;
-  @Mock private AuthUserEmailMapper authUserEmailMapper;
+  @Mock private AuthUserFromJwtMapper authUserFromJwtMapper;
+  @Mock private AuthUserClaimsValidator authUserClaimsValidator;
 
   @InjectMocks private GetAuthMeQueryHandler handler;
 
@@ -56,11 +61,12 @@ class GetAuthMeQueryHandlerTest {
   }
 
   @Test
-  void execute_should_call_auth_user_email_mapper_with_current_jwt() {
-    Jwt jwt = jwtWithClaims(baseClaims("sub-99", "me@example.com"));
+  void execute_should_call_auth_user_from_jwt_mapper_with_current_jwt() {
+    Jwt jwt = jwtWithClaims(baseClaims());
     User user = sampleUser();
-    when(authUserEmailMapper.resolveEmail(same(jwt))).thenReturn("me@example.com");
-    when(findUserByEmailUseCase.execute(new FindUserByEmailQuery("me@example.com")))
+    when(authUserFromJwtMapper.fromJwt(same(jwt))).thenReturn(AUTH_USER);
+    when(findUserByFederatedIdentityUseCase.execute(
+            new FindUserByFederatedIdentityQuery("https://idp.example", "sub-99")))
         .thenReturn(Optional.of(user));
     when(findDonorByUserIdUseCase.execute(
             new FindDonorByUserIdQuery("550e8400-e29b-41d4-a716-446655440000")))
@@ -68,15 +74,16 @@ class GetAuthMeQueryHandlerTest {
 
     handler.execute(new JwtAuthenticationToken(jwt));
 
-    verify(authUserEmailMapper).resolveEmail(same(jwt));
+    verify(authUserFromJwtMapper).fromJwt(same(jwt));
   }
 
   @Test
-  void execute_should_call_find_by_email_with_email_from_jwt_resolution() {
-    Jwt jwt = jwtWithClaims(baseClaims("sub-99", "me@example.com"));
+  void execute_should_call_auth_user_claims_validator_with_mapped_auth_user() {
+    Jwt jwt = jwtWithClaims(baseClaims());
     User user = sampleUser();
-    when(authUserEmailMapper.resolveEmail(any(Jwt.class))).thenReturn("me@example.com");
-    when(findUserByEmailUseCase.execute(new FindUserByEmailQuery("me@example.com")))
+    when(authUserFromJwtMapper.fromJwt(any(Jwt.class))).thenReturn(AUTH_USER);
+    when(findUserByFederatedIdentityUseCase.execute(
+            new FindUserByFederatedIdentityQuery("https://idp.example", "sub-99")))
         .thenReturn(Optional.of(user));
     when(findDonorByUserIdUseCase.execute(
             new FindDonorByUserIdQuery("550e8400-e29b-41d4-a716-446655440000")))
@@ -84,14 +91,33 @@ class GetAuthMeQueryHandlerTest {
 
     handler.execute(new JwtAuthenticationToken(jwt));
 
-    verify(findUserByEmailUseCase).execute(new FindUserByEmailQuery("me@example.com"));
+    verify(authUserClaimsValidator).requireIssuerAndSubject(AUTH_USER);
+  }
+
+  @Test
+  void execute_should_call_find_by_federated_identity_with_issuer_and_subject() {
+    Jwt jwt = jwtWithClaims(baseClaims());
+    User user = sampleUser();
+    when(authUserFromJwtMapper.fromJwt(any(Jwt.class))).thenReturn(AUTH_USER);
+    when(findUserByFederatedIdentityUseCase.execute(
+            new FindUserByFederatedIdentityQuery("https://idp.example", "sub-99")))
+        .thenReturn(Optional.of(user));
+    when(findDonorByUserIdUseCase.execute(
+            new FindDonorByUserIdQuery("550e8400-e29b-41d4-a716-446655440000")))
+        .thenReturn(Optional.empty());
+
+    handler.execute(new JwtAuthenticationToken(jwt));
+
+    verify(findUserByFederatedIdentityUseCase)
+        .execute(new FindUserByFederatedIdentityQuery("https://idp.example", "sub-99"));
   }
 
   @Test
   void execute_should_throw_me_user_not_found_when_user_missing() {
-    Jwt jwt = jwtWithClaims(baseClaims("sub-99", "missing@example.com"));
-    when(authUserEmailMapper.resolveEmail(any(Jwt.class))).thenReturn("missing@example.com");
-    when(findUserByEmailUseCase.execute(new FindUserByEmailQuery("missing@example.com")))
+    Jwt jwt = jwtWithClaims(baseClaims());
+    when(authUserFromJwtMapper.fromJwt(any(Jwt.class))).thenReturn(AUTH_USER);
+    when(findUserByFederatedIdentityUseCase.execute(
+            new FindUserByFederatedIdentityQuery("https://idp.example", "sub-99")))
         .thenReturn(Optional.empty());
 
     assertThrows(
@@ -100,10 +126,11 @@ class GetAuthMeQueryHandlerTest {
 
   @Test
   void execute_should_call_find_donor_by_user_id_with_user_id_string() {
-    Jwt jwt = jwtWithClaims(baseClaims("sub-99", "me@example.com"));
+    Jwt jwt = jwtWithClaims(baseClaims());
     User user = sampleUser();
-    when(authUserEmailMapper.resolveEmail(any(Jwt.class))).thenReturn("me@example.com");
-    when(findUserByEmailUseCase.execute(new FindUserByEmailQuery("me@example.com")))
+    when(authUserFromJwtMapper.fromJwt(any(Jwt.class))).thenReturn(AUTH_USER);
+    when(findUserByFederatedIdentityUseCase.execute(
+            new FindUserByFederatedIdentityQuery("https://idp.example", "sub-99")))
         .thenReturn(Optional.of(user));
     when(findDonorByUserIdUseCase.execute(
             new FindDonorByUserIdQuery("550e8400-e29b-41d4-a716-446655440000")))
@@ -117,10 +144,11 @@ class GetAuthMeQueryHandlerTest {
 
   @Test
   void execute_should_return_empty_donor_when_no_donor_profile() {
-    Jwt jwt = jwtWithClaims(baseClaims("sub-99", "me@example.com"));
+    Jwt jwt = jwtWithClaims(baseClaims());
     User user = sampleUser();
-    when(authUserEmailMapper.resolveEmail(any(Jwt.class))).thenReturn("me@example.com");
-    when(findUserByEmailUseCase.execute(new FindUserByEmailQuery("me@example.com")))
+    when(authUserFromJwtMapper.fromJwt(any(Jwt.class))).thenReturn(AUTH_USER);
+    when(findUserByFederatedIdentityUseCase.execute(
+            new FindUserByFederatedIdentityQuery("https://idp.example", "sub-99")))
         .thenReturn(Optional.of(user));
     when(findDonorByUserIdUseCase.execute(
             new FindDonorByUserIdQuery("550e8400-e29b-41d4-a716-446655440000")))
@@ -134,11 +162,12 @@ class GetAuthMeQueryHandlerTest {
 
   @Test
   void execute_should_return_donor_when_profile_present() {
-    Jwt jwt = jwtWithClaims(baseClaims("sub-99", "me@example.com"));
+    Jwt jwt = jwtWithClaims(baseClaims());
     User user = sampleUser();
     Donor donor = sampleDonor();
-    when(authUserEmailMapper.resolveEmail(any(Jwt.class))).thenReturn("me@example.com");
-    when(findUserByEmailUseCase.execute(new FindUserByEmailQuery("me@example.com")))
+    when(authUserFromJwtMapper.fromJwt(any(Jwt.class))).thenReturn(AUTH_USER);
+    when(findUserByFederatedIdentityUseCase.execute(
+            new FindUserByFederatedIdentityQuery("https://idp.example", "sub-99")))
         .thenReturn(Optional.of(user));
     when(findDonorByUserIdUseCase.execute(
             eq(new FindDonorByUserIdQuery("550e8400-e29b-41d4-a716-446655440000"))))
@@ -168,10 +197,11 @@ class GetAuthMeQueryHandlerTest {
         CREATED_AT);
   }
 
-  private static Map<String, Object> baseClaims(String sub, String email) {
+  private static Map<String, Object> baseClaims() {
     Map<String, Object> claims = new HashMap<>();
-    claims.put("sub", sub);
-    claims.put("email", email);
+    claims.put("iss", "https://idp.example");
+    claims.put("sub", "sub-99");
+    claims.put("email", "me@example.com");
     claims.put("given_name", "Jane");
     claims.put("family_name", "Doe");
     return claims;
