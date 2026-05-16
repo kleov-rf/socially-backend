@@ -1,6 +1,5 @@
 package com.socially.user.create.infrastructure.right.adapter.persistence;
 
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -28,32 +27,9 @@ class JpaCreateUserRepositoryTest {
   @InjectMocks private JpaCreateUserRepository sut;
 
   @Test
-  void create_should_check_if_user_exists_by_email() {
+  void create_should_call_entity_mapper_with_received_user() {
     User user =
         User.create(Id.from(USER_ID), Email.from("user@example.com"), "Jane", "Doe", CREATED_AT);
-    when(entityRepository.existsByEmail("user@example.com")).thenReturn(true);
-
-    sut.create(user);
-
-    verify(entityRepository).existsByEmail("user@example.com");
-  }
-
-  @Test
-  void create_should_not_save_entity_when_user_email_already_exists() {
-    User user =
-        User.create(Id.from(USER_ID), Email.from("user@example.com"), "Jane", "Doe", CREATED_AT);
-    when(entityRepository.existsByEmail("user@example.com")).thenReturn(true);
-
-    sut.create(user);
-
-    verify(entityRepository, never()).save(org.mockito.ArgumentMatchers.any());
-  }
-
-  @Test
-  void create_should_call_entity_mapper_with_received_user_when_user_email_not_exists() {
-    User user =
-        User.create(Id.from(USER_ID), Email.from("user@example.com"), "Jane", "Doe", CREATED_AT);
-    when(entityRepository.existsByEmail("user@example.com")).thenReturn(false);
 
     sut.create(user);
 
@@ -61,13 +37,12 @@ class JpaCreateUserRepositoryTest {
   }
 
   @Test
-  void create_should_call_entity_repository_save_with_mapped_entity_when_user_email_not_exists() {
+  void create_should_call_entity_repository_save_with_mapped_entity() {
     User user =
         User.create(Id.from(USER_ID), Email.from("user@example.com"), "Jane", "Doe", CREATED_AT);
     var mappedEntity =
         com.socially.user.kernel.infrastructure.right.adapter.persistence.entity.UserEntity.create(
             Id.from(USER_ID).value(), "user@example.com", "Jane", "Doe", CREATED_AT);
-    when(entityRepository.existsByEmail("user@example.com")).thenReturn(false);
     when(entityMapper.toEntity(user)).thenReturn(mappedEntity);
     when(entityRepository.save(mappedEntity)).thenReturn(mappedEntity);
 

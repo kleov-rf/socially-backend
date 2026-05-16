@@ -16,9 +16,6 @@ public class JpaCreateUserRepository implements CreateUserRepository {
 
   @Override
   public void create(User user) {
-    if (entityRepository.existsByEmail(user.email().value())) {
-      return;
-    }
     entityRepository.save(entityMapper.toEntity(user));
   }
 }
