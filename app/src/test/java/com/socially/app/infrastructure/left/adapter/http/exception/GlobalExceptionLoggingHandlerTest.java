@@ -8,6 +8,7 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
+import com.socially.auth.me.application.exception.MeUserNotFoundException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -67,5 +68,15 @@ class GlobalExceptionLoggingHandlerTest {
 
     assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
     assertEquals("Unauthenticated request", response.getBody().message());
+  }
+
+  @Test
+  void handleMeUserNotFound_returnsNotFoundAndMessage() {
+    var response = handler.handleMeUserNotFound(new MeUserNotFoundException());
+
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    assertEquals("User not found", response.getBody().message());
+    assertEquals(1, appender.list.size());
+    assertEquals(Level.WARN, appender.list.getFirst().getLevel());
   }
 }
