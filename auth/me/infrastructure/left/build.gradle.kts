@@ -24,6 +24,7 @@ dependencies {
     implementation(project(":auth:kernel:domain"))
     implementation(project(":auth:kernel:infrastructure:left"))
     implementation(project(":auth:me:application"))
+    implementation(project(":donor:kernel:domain"))
     implementation(project(":user:kernel:domain"))
 
     implementation(libs.spring.boot.starter.webmvc)
@@ -32,6 +33,8 @@ dependencies {
     annotationProcessor(libs.lombok)
 
     testImplementation(libs.spring.boot.starter.webmvc.test)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.junit.jupiter)
     testRuntimeOnly(libs.junit.platform.launcher)
 }
 

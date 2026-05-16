@@ -23,6 +23,7 @@ dependencies {
     implementation(project(":auth:login:infrastructure:left"))
     implementation(project(":auth:callback:infrastructure:left"))
     implementation(project(":auth:me:infrastructure:left"))
+    implementation(project(":auth:me:application"))
     implementation(project(":auth:logout:infrastructure:left"))
     implementation(project(":auth:refresh:infrastructure:left"))
     implementation(project(":auth:kernel:infrastructure:left"))

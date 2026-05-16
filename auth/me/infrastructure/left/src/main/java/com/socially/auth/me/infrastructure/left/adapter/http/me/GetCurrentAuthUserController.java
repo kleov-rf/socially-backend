@@ -1,9 +1,9 @@
 package com.socially.auth.me.infrastructure.left.adapter.http.me;
 
 import com.socially.app.infrastructure.left.adapter.http.logging.LogOperation;
-import com.socially.auth.kernel.domain.UserResponseDto;
-import com.socially.auth.kernel.infrastructure.left.adapter.http.output.mapper.UserResponseDtoMapper;
-import com.socially.auth.me.application.port.left.GetCurrentAuthUserUseCase;
+import com.socially.auth.me.application.port.left.GetAuthMeUseCase;
+import com.socially.auth.me.infrastructure.left.adapter.http.me.output.AuthMeResponse;
+import com.socially.auth.me.infrastructure.left.adapter.http.me.output.mapper.AuthMeResponseMapper;
 import java.security.Principal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,13 +16,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/auth")
 @LogOperation("AUTH_ME")
 public class GetCurrentAuthUserController {
-  private final GetCurrentAuthUserUseCase useCase;
-  private final UserResponseDtoMapper userResponseDtoMapper;
+  private final GetAuthMeUseCase getAuthMeUseCase;
+  private final AuthMeResponseMapper authMeResponseMapper;
 
   @GetMapping("/me")
-  public ResponseEntity<UserResponseDto> me(Principal principal) {
-    var execute = useCase.execute(principal);
-    UserResponseDto response = userResponseDtoMapper.toResponse(execute);
+  public ResponseEntity<AuthMeResponse> me(Principal principal) {
+    var result = getAuthMeUseCase.execute(principal);
+    AuthMeResponse response = authMeResponseMapper.toResponse(result);
     return ResponseEntity.ok(response);
   }
 }
