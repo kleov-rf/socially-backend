@@ -80,7 +80,7 @@ public class CucumberSpringConfiguration {
         Base64.getUrlEncoder()
             .withoutPadding()
             .encodeToString(
-                "{\"sub\":\"auth-user-1\",\"email\":\"auth.user@example.com\",\"given_name\":\"Auth\",\"family_name\":\"User\"}"
+                "{\"iss\":\"https://test-idp.example\",\"sub\":\"auth-user-1\",\"email\":\"auth.user@example.com\",\"given_name\":\"Auth\",\"family_name\":\"User\"}"
                     .getBytes(StandardCharsets.UTF_8));
     String idToken = "header." + idTokenPayload + ".signature";
 

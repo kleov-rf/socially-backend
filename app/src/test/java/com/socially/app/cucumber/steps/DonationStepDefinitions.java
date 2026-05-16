@@ -55,6 +55,7 @@ public class DonationStepDefinitions {
   public void resetScenarioState() {
     jdbcTemplate.execute("DELETE FROM donations");
     jdbcTemplate.execute("DELETE FROM donors");
+    jdbcTemplate.execute("DELETE FROM federated_identities");
     jdbcTemplate.execute("DELETE FROM users");
     firstDonationId = null;
     secondDonationId = null;
@@ -381,6 +382,7 @@ public class DonationStepDefinitions {
         .jwt(
             builder ->
                 builder
+                    .issuer(CucumberOAuthJwt.TEST_ISSUER)
                     .subject("cucumber-donor-sub")
                     .claim("email", "donor@example.com")
                     .claim("given_name", "Donor")
@@ -392,6 +394,7 @@ public class DonationStepDefinitions {
         .jwt(
             builder ->
                 builder
+                    .issuer(CucumberOAuthJwt.TEST_ISSUER)
                     .subject("cucumber-other-user-sub")
                     .claim("email", "other@example.com")
                     .claim("given_name", "Other")

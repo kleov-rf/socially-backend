@@ -37,6 +37,8 @@ public class AuthStepDefinitions {
 
   @Before("@auth")
   public void resetScenarioState() {
+    jdbcTemplate.execute("DELETE FROM donors");
+    jdbcTemplate.execute("DELETE FROM federated_identities");
     jdbcTemplate.execute("DELETE FROM users");
     mvcResult = null;
     state = null;

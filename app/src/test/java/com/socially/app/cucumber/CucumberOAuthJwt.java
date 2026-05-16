@@ -6,6 +6,8 @@ import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 public final class CucumberOAuthJwt {
 
+  public static final String TEST_ISSUER = "https://test-idp.example";
+
   private CucumberOAuthJwt() {}
 
   public static RequestPostProcessor postProcessor() {
@@ -13,6 +15,7 @@ public final class CucumberOAuthJwt {
         .jwt(
             builder ->
                 builder
+                    .issuer(TEST_ISSUER)
                     .subject("auth-user-1")
                     .claim("email", "auth.user@example.com")
                     .claim("given_name", "Auth")
