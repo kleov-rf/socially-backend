@@ -11,7 +11,8 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
-public class JpaFindUserByFederatedIdentityRepository implements FindUserByFederatedIdentityRepository {
+public class JpaFindUserByFederatedIdentityRepository
+    implements FindUserByFederatedIdentityRepository {
 
   private final FederatedIdentityEntityRepository federatedIdentityEntityRepository;
   private final UserEntityRepository userEntityRepository;

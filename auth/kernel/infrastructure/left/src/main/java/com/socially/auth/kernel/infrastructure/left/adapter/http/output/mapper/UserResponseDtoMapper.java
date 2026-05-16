@@ -20,7 +20,9 @@ public class UserResponseDtoMapper {
 
   public UserResponseDto toResponse(AuthUser authUser) {
     return new UserResponseDto(
-        authUser.subject(), authUser.email(), joinNames(authUser.givenName(), authUser.familyName()));
+        authUser.subject(),
+        authUser.email(),
+        joinNames(authUser.givenName(), authUser.familyName()));
   }
 
   private String joinNames(String givenName, String familyName) {

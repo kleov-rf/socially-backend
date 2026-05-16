@@ -4,14 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.socially.commons.kernel.domain.valueobject.Id;
-import com.socially.user.kernel.domain.entity.User;
-import com.socially.user.kernel.domain.valueobject.Email;
 import com.socially.user.kernel.infrastructure.right.adapter.persistence.FederatedIdentityEntityRepository;
 import com.socially.user.kernel.infrastructure.right.adapter.persistence.UserEntityRepository;
 import com.socially.user.kernel.infrastructure.right.adapter.persistence.entity.FederatedIdentityEntity;
 import com.socially.user.kernel.infrastructure.right.adapter.persistence.entity.UserEntity;
-import com.socially.user.kernel.infrastructure.right.adapter.persistence.mapper.UserEntityMapper;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
@@ -30,7 +26,6 @@ class JpaUpdateUserProfileRepositoryTest {
 
   @Mock private UserEntityRepository userEntityRepository;
   @Mock private FederatedIdentityEntityRepository federatedIdentityEntityRepository;
-  @Mock private UserEntityMapper userEntityMapper;
 
   @InjectMocks private JpaUpdateUserProfileRepository repository;
 
@@ -41,7 +36,12 @@ class JpaUpdateUserProfileRepositoryTest {
         UserEntity.create(userUuid, "old@example.com", "Jane", "Doe", CREATED_AT);
     FederatedIdentityEntity federatedIdentity =
         FederatedIdentityEntity.create(
-            UUID.randomUUID(), userUuid, "https://idp.example", "sub-1", "old@example.com", CREATED_AT);
+            UUID.randomUUID(),
+            userUuid,
+            "https://idp.example",
+            "sub-1",
+            "old@example.com",
+            CREATED_AT);
     when(userEntityRepository.findById(userUuid)).thenReturn(Optional.of(userEntity));
     when(federatedIdentityEntityRepository.findByIssuerAndSubject("https://idp.example", "sub-1"))
         .thenReturn(Optional.of(federatedIdentity));
@@ -49,7 +49,8 @@ class JpaUpdateUserProfileRepositoryTest {
     when(federatedIdentityEntityRepository.save(org.mockito.ArgumentMatchers.any()))
         .thenReturn(federatedIdentity);
 
-    repository.updateProfile(USER_ID, "https://idp.example", "sub-1", "new@example.com", "Janet", "Smith");
+    repository.updateProfile(
+        USER_ID, "https://idp.example", "sub-1", "new@example.com", "Janet", "Smith");
 
     verify(userEntityRepository).findById(userUuid);
   }
@@ -61,7 +62,12 @@ class JpaUpdateUserProfileRepositoryTest {
         UserEntity.create(userUuid, "old@example.com", "Jane", "Doe", CREATED_AT);
     FederatedIdentityEntity federatedIdentity =
         FederatedIdentityEntity.create(
-            UUID.randomUUID(), userUuid, "https://idp.example", "sub-1", "old@example.com", CREATED_AT);
+            UUID.randomUUID(),
+            userUuid,
+            "https://idp.example",
+            "sub-1",
+            "old@example.com",
+            CREATED_AT);
     when(userEntityRepository.findById(userUuid)).thenReturn(Optional.of(userEntity));
     when(federatedIdentityEntityRepository.findByIssuerAndSubject("https://idp.example", "sub-1"))
         .thenReturn(Optional.of(federatedIdentity));
@@ -69,7 +75,8 @@ class JpaUpdateUserProfileRepositoryTest {
     when(federatedIdentityEntityRepository.save(org.mockito.ArgumentMatchers.any()))
         .thenReturn(federatedIdentity);
 
-    repository.updateProfile(USER_ID, "https://idp.example", "sub-1", "new@example.com", null, null);
+    repository.updateProfile(
+        USER_ID, "https://idp.example", "sub-1", "new@example.com", null, null);
 
     ArgumentCaptor<UserEntity> userCaptor = ArgumentCaptor.forClass(UserEntity.class);
     verify(userEntityRepository).save(userCaptor.capture());
@@ -83,7 +90,12 @@ class JpaUpdateUserProfileRepositoryTest {
         UserEntity.create(userUuid, "old@example.com", "Jane", "Doe", CREATED_AT);
     FederatedIdentityEntity federatedIdentity =
         FederatedIdentityEntity.create(
-            UUID.randomUUID(), userUuid, "https://idp.example", "sub-1", "old@example.com", CREATED_AT);
+            UUID.randomUUID(),
+            userUuid,
+            "https://idp.example",
+            "sub-1",
+            "old@example.com",
+            CREATED_AT);
     when(userEntityRepository.findById(userUuid)).thenReturn(Optional.of(userEntity));
     when(federatedIdentityEntityRepository.findByIssuerAndSubject("https://idp.example", "sub-1"))
         .thenReturn(Optional.of(federatedIdentity));
@@ -91,9 +103,11 @@ class JpaUpdateUserProfileRepositoryTest {
     when(federatedIdentityEntityRepository.save(org.mockito.ArgumentMatchers.any()))
         .thenReturn(federatedIdentity);
 
-    repository.updateProfile(USER_ID, "https://idp.example", "sub-1", "new@example.com", null, null);
+    repository.updateProfile(
+        USER_ID, "https://idp.example", "sub-1", "new@example.com", null, null);
 
-    verify(federatedIdentityEntityRepository).findByIssuerAndSubject("https://idp.example", "sub-1");
+    verify(federatedIdentityEntityRepository)
+        .findByIssuerAndSubject("https://idp.example", "sub-1");
   }
 
   @Test
@@ -103,7 +117,12 @@ class JpaUpdateUserProfileRepositoryTest {
         UserEntity.create(userUuid, "old@example.com", "Jane", "Doe", CREATED_AT);
     FederatedIdentityEntity federatedIdentity =
         FederatedIdentityEntity.create(
-            UUID.randomUUID(), userUuid, "https://idp.example", "sub-1", "old@example.com", CREATED_AT);
+            UUID.randomUUID(),
+            userUuid,
+            "https://idp.example",
+            "sub-1",
+            "old@example.com",
+            CREATED_AT);
     when(userEntityRepository.findById(userUuid)).thenReturn(Optional.of(userEntity));
     when(federatedIdentityEntityRepository.findByIssuerAndSubject("https://idp.example", "sub-1"))
         .thenReturn(Optional.of(federatedIdentity));
@@ -111,41 +130,12 @@ class JpaUpdateUserProfileRepositoryTest {
     when(federatedIdentityEntityRepository.save(org.mockito.ArgumentMatchers.any()))
         .thenReturn(federatedIdentity);
 
-    repository.updateProfile(USER_ID, "https://idp.example", "sub-1", "new@example.com", null, null);
+    repository.updateProfile(
+        USER_ID, "https://idp.example", "sub-1", "new@example.com", null, null);
 
     ArgumentCaptor<FederatedIdentityEntity> federatedCaptor =
         ArgumentCaptor.forClass(FederatedIdentityEntity.class);
     verify(federatedIdentityEntityRepository).save(federatedCaptor.capture());
     assertEquals("new@example.com", federatedCaptor.getValue().getEmail());
-  }
-
-  @Test
-  void findById_should_call_user_repository_find_by_id() {
-    UUID userUuid = UUID.fromString(USER_ID);
-    UserEntity userEntity =
-        UserEntity.create(userUuid, "user@example.com", "Jane", "Doe", CREATED_AT);
-    when(userEntityRepository.findById(userUuid)).thenReturn(Optional.of(userEntity));
-    when(userEntityMapper.toDomain(userEntity))
-        .thenReturn(
-            User.create(Id.from(USER_ID), Email.from("user@example.com"), "Jane", "Doe", CREATED_AT));
-
-    repository.findById(USER_ID);
-
-    verify(userEntityRepository).findById(userUuid);
-  }
-
-  @Test
-  void findById_should_return_mapped_domain_user() {
-    UUID userUuid = UUID.fromString(USER_ID);
-    UserEntity userEntity =
-        UserEntity.create(userUuid, "user@example.com", "Jane", "Doe", CREATED_AT);
-    User mappedUser =
-        User.create(Id.from(USER_ID), Email.from("user@example.com"), "Jane", "Doe", CREATED_AT);
-    when(userEntityRepository.findById(userUuid)).thenReturn(Optional.of(userEntity));
-    when(userEntityMapper.toDomain(userEntity)).thenReturn(mappedUser);
-
-    User result = repository.findById(USER_ID);
-
-    assertEquals(mappedUser, result);
   }
 }

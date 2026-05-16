@@ -41,7 +41,8 @@ class JpaFindUserByFederatedIdentityRepositoryTest {
 
     repository.findByIssuerAndSubject("https://idp.example", "sub-1");
 
-    verify(federatedIdentityEntityRepository).findByIssuerAndSubject("https://idp.example", "sub-1");
+    verify(federatedIdentityEntityRepository)
+        .findByIssuerAndSubject("https://idp.example", "sub-1");
   }
 
   @Test
@@ -59,7 +60,12 @@ class JpaFindUserByFederatedIdentityRepositoryTest {
     UUID userUuid = UUID.fromString(USER_ID);
     FederatedIdentityEntity federatedIdentity =
         FederatedIdentityEntity.create(
-            UUID.randomUUID(), userUuid, "https://idp.example", "sub-1", "user@example.com", CREATED_AT);
+            UUID.randomUUID(),
+            userUuid,
+            "https://idp.example",
+            "sub-1",
+            "user@example.com",
+            CREATED_AT);
     UserEntity userEntity =
         UserEntity.create(userUuid, "user@example.com", "Jane", "Doe", CREATED_AT);
     when(federatedIdentityEntityRepository.findByIssuerAndSubject("https://idp.example", "sub-1"))
@@ -67,7 +73,8 @@ class JpaFindUserByFederatedIdentityRepositoryTest {
     when(userEntityRepository.findById(userUuid)).thenReturn(Optional.of(userEntity));
     when(userEntityMapper.toDomain(userEntity))
         .thenReturn(
-            User.create(Id.from(USER_ID), Email.from("user@example.com"), "Jane", "Doe", CREATED_AT));
+            User.create(
+                Id.from(USER_ID), Email.from("user@example.com"), "Jane", "Doe", CREATED_AT));
 
     repository.findByIssuerAndSubject("https://idp.example", "sub-1");
 
@@ -79,7 +86,12 @@ class JpaFindUserByFederatedIdentityRepositoryTest {
     UUID userUuid = UUID.fromString(USER_ID);
     FederatedIdentityEntity federatedIdentity =
         FederatedIdentityEntity.create(
-            UUID.randomUUID(), userUuid, "https://idp.example", "sub-1", "user@example.com", CREATED_AT);
+            UUID.randomUUID(),
+            userUuid,
+            "https://idp.example",
+            "sub-1",
+            "user@example.com",
+            CREATED_AT);
     UserEntity userEntity =
         UserEntity.create(userUuid, "user@example.com", "Jane", "Doe", CREATED_AT);
     User mappedUser =

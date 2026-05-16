@@ -34,7 +34,8 @@ class AuthUserClaimsValidatorTest {
 
   @Test
   void requireIssuerAndSubject_should_throw_when_subject_is_missing() {
-    AuthUser authUser = new AuthUser("https://idp.example", null, "user@example.com", "Jane", "Doe");
+    AuthUser authUser =
+        new AuthUser("https://idp.example", null, "user@example.com", "Jane", "Doe");
 
     MissingOidcIdentityClaimsException exception =
         assertThrows(
@@ -48,13 +49,18 @@ class AuthUserClaimsValidatorTest {
   void requireIssuerAndSubject_should_throw_when_issuer_is_blank() {
     AuthUser authUser = new AuthUser("   ", "sub-1", "user@example.com", "Jane", "Doe");
 
-    assertThrows(MissingOidcIdentityClaimsException.class, () -> validator.requireIssuerAndSubject(authUser));
+    assertThrows(
+        MissingOidcIdentityClaimsException.class,
+        () -> validator.requireIssuerAndSubject(authUser));
   }
 
   @Test
   void requireIssuerAndSubject_should_throw_when_subject_is_blank() {
-    AuthUser authUser = new AuthUser("https://idp.example", "   ", "user@example.com", "Jane", "Doe");
+    AuthUser authUser =
+        new AuthUser("https://idp.example", "   ", "user@example.com", "Jane", "Doe");
 
-    assertThrows(MissingOidcIdentityClaimsException.class, () -> validator.requireIssuerAndSubject(authUser));
+    assertThrows(
+        MissingOidcIdentityClaimsException.class,
+        () -> validator.requireIssuerAndSubject(authUser));
   }
 }

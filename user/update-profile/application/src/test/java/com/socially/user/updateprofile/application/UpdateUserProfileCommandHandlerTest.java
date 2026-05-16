@@ -3,14 +3,9 @@ package com.socially.user.updateprofile.application;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-import com.socially.commons.kernel.domain.valueobject.Id;
-import com.socially.user.kernel.domain.entity.User;
-import com.socially.user.kernel.domain.valueobject.Email;
 import com.socially.user.updateprofile.application.input.UpdateUserProfileCommand;
 import com.socially.user.updateprofile.domain.port.right.UpdateUserProfileRepository;
-import java.time.Instant;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -22,7 +17,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class UpdateUserProfileCommandHandlerTest {
 
   private static final String USER_ID = "550e8400-e29b-41d4-a716-446655440000";
-  private static final Instant CREATED_AT = Instant.parse("2024-06-01T12:00:00Z");
 
   @Mock private UpdateUserProfileRepository updateUserProfileRepository;
 
@@ -33,9 +27,6 @@ class UpdateUserProfileCommandHandlerTest {
     var command =
         new UpdateUserProfileCommand(
             USER_ID, "https://idp.example", "sub-1", "user@example.com", "Jane", "Doe");
-    User updatedUser =
-        User.create(Id.from(USER_ID), Email.from("user@example.com"), "Jane", "Doe", CREATED_AT);
-    when(updateUserProfileRepository.findById(USER_ID)).thenReturn(updatedUser);
 
     handler.execute(command);
 
@@ -56,9 +47,6 @@ class UpdateUserProfileCommandHandlerTest {
     var command =
         new UpdateUserProfileCommand(
             USER_ID, "https://idp.example", "sub-1", "user@example.com", "Jane", "Doe");
-    User updatedUser =
-        User.create(Id.from(USER_ID), Email.from("user@example.com"), "Jane", "Doe", CREATED_AT);
-    when(updateUserProfileRepository.findById(USER_ID)).thenReturn(updatedUser);
 
     handler.execute(command);
 
@@ -75,26 +63,9 @@ class UpdateUserProfileCommandHandlerTest {
   }
 
   @Test
-  void execute_should_call_repository_find_by_id_with_user_id_from_command() {
-    var command =
-        new UpdateUserProfileCommand(
-            USER_ID, "https://idp.example", "sub-1", "user@example.com", "Jane", "Doe");
-    User updatedUser =
-        User.create(Id.from(USER_ID), Email.from("user@example.com"), "Jane", "Doe", CREATED_AT);
-    when(updateUserProfileRepository.findById(USER_ID)).thenReturn(updatedUser);
-
-    User result = handler.execute(command);
-
-    verify(updateUserProfileRepository).findById(USER_ID);
-    assertEquals(updatedUser, result);
-  }
-
-  @Test
   void execute_should_pass_null_profile_fields_when_command_values_are_blank() {
-    var command = new UpdateUserProfileCommand(USER_ID, "https://idp.example", "sub-1", "  ", " ", " ");
-    User updatedUser =
-        User.create(Id.from(USER_ID), Email.from("user@example.com"), "Jane", "Doe", CREATED_AT);
-    when(updateUserProfileRepository.findById(USER_ID)).thenReturn(updatedUser);
+    var command =
+        new UpdateUserProfileCommand(USER_ID, "https://idp.example", "sub-1", "  ", " ", " ");
 
     handler.execute(command);
 
@@ -111,7 +82,8 @@ class UpdateUserProfileCommandHandlerTest {
   @Test
   void execute_should_throw_exception_when_user_id_is_blank() {
     var command =
-        new UpdateUserProfileCommand("   ", "https://idp.example", "sub-1", "a@b.com", "Jane", "Doe");
+        new UpdateUserProfileCommand(
+            "   ", "https://idp.example", "sub-1", "a@b.com", "Jane", "Doe");
 
     IllegalArgumentException exception =
         assertThrows(IllegalArgumentException.class, () -> handler.execute(command));
@@ -132,7 +104,8 @@ class UpdateUserProfileCommandHandlerTest {
   @Test
   void execute_should_throw_exception_when_subject_is_blank() {
     var command =
-        new UpdateUserProfileCommand(USER_ID, "https://idp.example", "   ", "a@b.com", "Jane", "Doe");
+        new UpdateUserProfileCommand(
+            USER_ID, "https://idp.example", "   ", "a@b.com", "Jane", "Doe");
 
     IllegalArgumentException exception =
         assertThrows(IllegalArgumentException.class, () -> handler.execute(command));

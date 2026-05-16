@@ -2,6 +2,7 @@ package com.socially.auth.kernel.infrastructure.right.adapter.user;
 
 import com.socially.auth.kernel.domain.AuthUser;
 import com.socially.auth.kernel.infrastructure.right.adapter.user.mapper.AuthUserToCreateUserCommandMapper;
+import com.socially.user.create.application.input.CreateUserCommand;
 import com.socially.user.create.application.port.left.CreateUserUseCase;
 import com.socially.user.federatedidentity.link.application.input.LinkFederatedIdentityCommand;
 import com.socially.user.federatedidentity.link.application.port.left.LinkFederatedIdentityUseCase;
@@ -27,14 +28,17 @@ public final class AuthenticatedUserResolver {
   public User resolve(AuthUser authUser) {
     authUserClaimsValidator.requireIssuerAndSubject(authUser);
 
+    FindUserByFederatedIdentityQuery query =
+        new FindUserByFederatedIdentityQuery(authUser.issuer(), authUser.subject());
+
     return findUserByFederatedIdentityUseCase
-        .execute(new FindUserByFederatedIdentityQuery(authUser.issuer(), authUser.subject()))
+        .execute(query)
         .map(existing -> updateExistingUser(existing, authUser))
         .orElseGet(() -> createAndLinkUser(authUser));
   }
 
   private User updateExistingUser(User existing, AuthUser authUser) {
-    return updateUserProfileUseCase.execute(
+    updateUserProfileUseCase.execute(
         new UpdateUserProfileCommand(
             existing.id().value().toString(),
             authUser.issuer(),
@@ -42,16 +46,25 @@ public final class AuthenticatedUserResolver {
             authUser.email(),
             authUser.givenName(),
             authUser.familyName()));
+    return requireUserByFederatedIdentity(authUser);
   }
 
   private User createAndLinkUser(AuthUser authUser) {
-    User createdUser = createUserUseCase.execute(authUserToCreateUserCommandMapper.toCommand(authUser));
+    CreateUserCommand command = authUserToCreateUserCommandMapper.toCommand(authUser);
+    createUserUseCase.execute(command);
     linkFederatedIdentityUseCase.execute(
         new LinkFederatedIdentityCommand(
-            createdUser.id().value().toString(),
-            authUser.issuer(),
-            authUser.subject(),
-            authUser.email()));
-    return createdUser;
+            command.userId(), authUser.issuer(), authUser.subject(), authUser.email()));
+    return requireUserByFederatedIdentity(authUser);
+  }
+
+  private User requireUserByFederatedIdentity(AuthUser authUser) {
+    return findUserByFederatedIdentityUseCase
+        .execute(new FindUserByFederatedIdentityQuery(authUser.issuer(), authUser.subject()))
+        .orElseThrow(
+            () ->
+                new IllegalStateException(
+                    "User not found for issuer=%s subject=%s"
+                        .formatted(authUser.issuer(), authUser.subject())));
   }
 }

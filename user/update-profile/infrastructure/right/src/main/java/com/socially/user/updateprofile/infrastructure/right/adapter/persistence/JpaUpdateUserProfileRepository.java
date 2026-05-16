@@ -1,11 +1,9 @@
 package com.socially.user.updateprofile.infrastructure.right.adapter.persistence;
 
-import com.socially.user.kernel.domain.entity.User;
 import com.socially.user.kernel.infrastructure.right.adapter.persistence.FederatedIdentityEntityRepository;
 import com.socially.user.kernel.infrastructure.right.adapter.persistence.UserEntityRepository;
 import com.socially.user.kernel.infrastructure.right.adapter.persistence.entity.FederatedIdentityEntity;
 import com.socially.user.kernel.infrastructure.right.adapter.persistence.entity.UserEntity;
-import com.socially.user.kernel.infrastructure.right.adapter.persistence.mapper.UserEntityMapper;
 import com.socially.user.updateprofile.domain.port.right.UpdateUserProfileRepository;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -17,11 +15,15 @@ public class JpaUpdateUserProfileRepository implements UpdateUserProfileReposito
 
   private final UserEntityRepository userEntityRepository;
   private final FederatedIdentityEntityRepository federatedIdentityEntityRepository;
-  private final UserEntityMapper userEntityMapper;
 
   @Override
   public void updateProfile(
-      String userId, String issuer, String subject, String email, String givenName, String familyName) {
+      String userId,
+      String issuer,
+      String subject,
+      String email,
+      String givenName,
+      String familyName) {
     UUID userUuid = UUID.fromString(userId);
     UserEntity userEntity =
         userEntityRepository
@@ -55,13 +57,5 @@ public class JpaUpdateUserProfileRepository implements UpdateUserProfileReposito
             email != null ? email : federatedIdentity.getEmail(),
             federatedIdentity.getCreatedAt());
     federatedIdentityEntityRepository.save(updatedFederatedIdentity);
-  }
-
-  @Override
-  public User findById(String userId) {
-    return userEntityRepository
-        .findById(UUID.fromString(userId))
-        .map(userEntityMapper::toDomain)
-        .orElseThrow(() -> new IllegalStateException("User not found: " + userId));
   }
 }

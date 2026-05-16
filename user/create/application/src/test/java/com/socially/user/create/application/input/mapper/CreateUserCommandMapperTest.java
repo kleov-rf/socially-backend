@@ -9,13 +9,23 @@ import org.junit.jupiter.api.Test;
 
 class CreateUserCommandMapperTest {
 
+  private static final String USER_ID = "550e8400-e29b-41d4-a716-446655440000";
+  private static final Instant NOW = Instant.parse("2024-06-01T12:00:00Z");
+
   private final CreateUserCommandMapper mapper = new CreateUserCommandMapper();
 
-  private static final Instant NOW = Instant.parse("2024-06-01T12:00:00Z");
+  @Test
+  void toDomain_should_map_user_id_from_command() {
+    var command = new CreateUserCommand(USER_ID, "user@example.com", "Jane", "Doe");
+
+    User actual = mapper.toDomain(command, NOW);
+
+    assertEquals(USER_ID, actual.id().value().toString());
+  }
 
   @Test
   void toDomain_should_map_command_email() {
-    var command = new CreateUserCommand("user@example.com", "Jane", "Doe");
+    var command = new CreateUserCommand(USER_ID, "user@example.com", "Jane", "Doe");
 
     User actual = mapper.toDomain(command, NOW);
 
@@ -24,7 +34,7 @@ class CreateUserCommandMapperTest {
 
   @Test
   void toDomain_should_map_command_given_name() {
-    var command = new CreateUserCommand("user@example.com", "Jane", "Doe");
+    var command = new CreateUserCommand(USER_ID, "user@example.com", "Jane", "Doe");
 
     User actual = mapper.toDomain(command, NOW);
 
@@ -33,7 +43,7 @@ class CreateUserCommandMapperTest {
 
   @Test
   void toDomain_should_map_command_family_name() {
-    var command = new CreateUserCommand("user@example.com", "Jane", "Doe");
+    var command = new CreateUserCommand(USER_ID, "user@example.com", "Jane", "Doe");
 
     User actual = mapper.toDomain(command, NOW);
 
@@ -42,20 +52,10 @@ class CreateUserCommandMapperTest {
 
   @Test
   void toDomain_should_map_created_at_from_received_now() {
-    var command = new CreateUserCommand("user@example.com", "Jane", "Doe");
+    var command = new CreateUserCommand(USER_ID, "user@example.com", "Jane", "Doe");
 
     User actual = mapper.toDomain(command, NOW);
 
     assertEquals(NOW, actual.createdAt());
-  }
-
-  @Test
-  void toDomain_should_generate_id() {
-    var command = new CreateUserCommand("user@example.com", "Jane", "Doe");
-
-    User actual = mapper.toDomain(command, NOW);
-
-    org.junit.jupiter.api.Assertions.assertNotNull(actual.id());
-    org.junit.jupiter.api.Assertions.assertNotNull(actual.id().value());
   }
 }

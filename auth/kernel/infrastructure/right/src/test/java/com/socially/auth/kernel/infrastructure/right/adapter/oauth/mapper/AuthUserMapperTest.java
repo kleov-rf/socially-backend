@@ -78,7 +78,8 @@ class AuthUserMapperTest {
   void fromIdToken_should_return_auth_user_issuer() throws IOException {
     String idToken =
         createTokenWithPayload(
-            parseValuesIntoJson("https://idp.example", "sub-123", "email@example.com", "John", "Doe"));
+            parseValuesIntoJson(
+                "https://idp.example", "sub-123", "email@example.com", "John", "Doe"));
     JsonNode payload = stubPayloadFromTokenJson(idToken);
 
     AuthUser user = sut.fromIdToken(idToken);
@@ -91,7 +92,8 @@ class AuthUserMapperTest {
   void fromIdToken_should_return_auth_user_subject() throws IOException {
     String idToken =
         createTokenWithPayload(
-            parseValuesIntoJson("https://idp.example", "sub-123", "email@example.com", "John", "Doe"));
+            parseValuesIntoJson(
+                "https://idp.example", "sub-123", "email@example.com", "John", "Doe"));
     JsonNode payload = stubPayloadFromTokenJson(idToken);
 
     AuthUser user = sut.fromIdToken(idToken);
@@ -104,7 +106,8 @@ class AuthUserMapperTest {
   void fromIdToken_should_return_auth_user_email() throws IOException {
     String idToken =
         createTokenWithPayload(
-            parseValuesIntoJson("https://idp.example", "sub-123", "email@example.com", "John", "Doe"));
+            parseValuesIntoJson(
+                "https://idp.example", "sub-123", "email@example.com", "John", "Doe"));
     JsonNode payload = stubPayloadFromTokenJson(idToken);
 
     AuthUser user = sut.fromIdToken(idToken);
@@ -117,7 +120,8 @@ class AuthUserMapperTest {
   void fromIdToken_should_return_auth_user_given_name() throws IOException {
     String idToken =
         createTokenWithPayload(
-            parseValuesIntoJson("https://idp.example", "sub-123", "email@example.com", "John", "Doe"));
+            parseValuesIntoJson(
+                "https://idp.example", "sub-123", "email@example.com", "John", "Doe"));
     JsonNode payload = stubPayloadFromTokenJson(idToken);
 
     AuthUser user = sut.fromIdToken(idToken);
@@ -130,7 +134,8 @@ class AuthUserMapperTest {
   void fromIdToken_should_return_auth_user_family_name() throws IOException {
     String idToken =
         createTokenWithPayload(
-            parseValuesIntoJson("https://idp.example", "sub-123", "email@example.com", "John", "Doe"));
+            parseValuesIntoJson(
+                "https://idp.example", "sub-123", "email@example.com", "John", "Doe"));
     JsonNode payload = stubPayloadFromTokenJson(idToken);
 
     AuthUser user = sut.fromIdToken(idToken);

@@ -3,6 +3,7 @@ package com.socially.auth.kernel.infrastructure.right.adapter.user;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -31,10 +32,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class AuthenticatedUserResolverTest {
 
+  private static final FindUserByFederatedIdentityQuery FEDERATED_QUERY =
+      new FindUserByFederatedIdentityQuery("https://idp.example", "sub-1");
   private static final AuthUser AUTH_USER =
       new AuthUser("https://idp.example", "sub-1", "user@example.com", "Jane", "Doe");
+  private static final String CREATE_USER_ID = "660e8400-e29b-41d4-a716-446655440001";
   private static final CreateUserCommand CREATE_USER_COMMAND =
-      new CreateUserCommand("user@example.com", "Jane", "Doe");
+      new CreateUserCommand(CREATE_USER_ID, "user@example.com", "Jane", "Doe");
   private static final User EXISTING_USER =
       User.create(
           Id.from("550e8400-e29b-41d4-a716-446655440000"),
@@ -42,9 +46,9 @@ class AuthenticatedUserResolverTest {
           "Jane",
           "Doe",
           Instant.parse("2024-06-01T12:00:00Z"));
-  private static final User CREATED_USER =
+  private static final User REFETCHED_USER =
       User.create(
-          Id.from("660e8400-e29b-41d4-a716-446655440001"),
+          Id.from(CREATE_USER_ID),
           Email.from("user@example.com"),
           "Jane",
           "Doe",
@@ -61,11 +65,10 @@ class AuthenticatedUserResolverTest {
 
   @Test
   void resolve_should_call_auth_user_claims_validator_with_received_auth_user() {
-    when(findUserByFederatedIdentityUseCase.execute(
-            new FindUserByFederatedIdentityQuery("https://idp.example", "sub-1")))
-        .thenReturn(Optional.empty());
+    when(findUserByFederatedIdentityUseCase.execute(FEDERATED_QUERY))
+        .thenReturn(Optional.empty())
+        .thenReturn(Optional.of(REFETCHED_USER));
     when(authUserToCreateUserCommandMapper.toCommand(AUTH_USER)).thenReturn(CREATE_USER_COMMAND);
-    when(createUserUseCase.execute(CREATE_USER_COMMAND)).thenReturn(CREATED_USER);
 
     resolver.resolve(AUTH_USER);
 
@@ -84,23 +87,20 @@ class AuthenticatedUserResolverTest {
 
   @Test
   void resolve_should_call_find_by_federated_identity_with_auth_user_issuer_and_subject() {
-    when(findUserByFederatedIdentityUseCase.execute(
-            new FindUserByFederatedIdentityQuery("https://idp.example", "sub-1")))
-        .thenReturn(Optional.of(EXISTING_USER));
-    when(updateUserProfileUseCase.execute(
-            new UpdateUserProfileCommand(
-                EXISTING_USER.id().value().toString(),
-                "https://idp.example",
-                "sub-1",
-                "user@example.com",
-                "Jane",
-                "Doe")))
-        .thenReturn(EXISTING_USER);
+    User updatedUser =
+        User.create(
+            EXISTING_USER.id(),
+            Email.from("updated@example.com"),
+            "Janet",
+            "Doe",
+            EXISTING_USER.createdAt());
+    when(findUserByFederatedIdentityUseCase.execute(FEDERATED_QUERY))
+        .thenReturn(Optional.of(EXISTING_USER))
+        .thenReturn(Optional.of(updatedUser));
 
     resolver.resolve(AUTH_USER);
 
-    verify(findUserByFederatedIdentityUseCase)
-        .execute(new FindUserByFederatedIdentityQuery("https://idp.example", "sub-1"));
+    verify(findUserByFederatedIdentityUseCase, times(2)).execute(FEDERATED_QUERY);
   }
 
   @Test
@@ -112,18 +112,9 @@ class AuthenticatedUserResolverTest {
             "Janet",
             "Doe",
             EXISTING_USER.createdAt());
-    when(findUserByFederatedIdentityUseCase.execute(
-            new FindUserByFederatedIdentityQuery("https://idp.example", "sub-1")))
-        .thenReturn(Optional.of(EXISTING_USER));
-    when(updateUserProfileUseCase.execute(
-            new UpdateUserProfileCommand(
-                EXISTING_USER.id().value().toString(),
-                "https://idp.example",
-                "sub-1",
-                "user@example.com",
-                "Jane",
-                "Doe")))
-        .thenReturn(updatedUser);
+    when(findUserByFederatedIdentityUseCase.execute(FEDERATED_QUERY))
+        .thenReturn(Optional.of(EXISTING_USER))
+        .thenReturn(Optional.of(updatedUser));
 
     resolver.resolve(AUTH_USER);
 
@@ -139,7 +130,7 @@ class AuthenticatedUserResolverTest {
   }
 
   @Test
-  void resolve_should_return_updated_user_when_federated_identity_exists() {
+  void resolve_should_return_refetched_user_when_federated_identity_exists() {
     User updatedUser =
         User.create(
             EXISTING_USER.id(),
@@ -147,18 +138,9 @@ class AuthenticatedUserResolverTest {
             "Janet",
             "Doe",
             EXISTING_USER.createdAt());
-    when(findUserByFederatedIdentityUseCase.execute(
-            new FindUserByFederatedIdentityQuery("https://idp.example", "sub-1")))
-        .thenReturn(Optional.of(EXISTING_USER));
-    when(updateUserProfileUseCase.execute(
-            new UpdateUserProfileCommand(
-                EXISTING_USER.id().value().toString(),
-                "https://idp.example",
-                "sub-1",
-                "user@example.com",
-                "Jane",
-                "Doe")))
-        .thenReturn(updatedUser);
+    when(findUserByFederatedIdentityUseCase.execute(FEDERATED_QUERY))
+        .thenReturn(Optional.of(EXISTING_USER))
+        .thenReturn(Optional.of(updatedUser));
 
     User result = resolver.resolve(AUTH_USER);
 
@@ -167,18 +149,16 @@ class AuthenticatedUserResolverTest {
 
   @Test
   void resolve_should_not_call_create_user_when_federated_identity_exists() {
-    when(findUserByFederatedIdentityUseCase.execute(
-            new FindUserByFederatedIdentityQuery("https://idp.example", "sub-1")))
-        .thenReturn(Optional.of(EXISTING_USER));
-    when(updateUserProfileUseCase.execute(
-            new UpdateUserProfileCommand(
-                EXISTING_USER.id().value().toString(),
-                "https://idp.example",
-                "sub-1",
-                "user@example.com",
-                "Jane",
-                "Doe")))
-        .thenReturn(EXISTING_USER);
+    User updatedUser =
+        User.create(
+            EXISTING_USER.id(),
+            Email.from("updated@example.com"),
+            "Janet",
+            "Doe",
+            EXISTING_USER.createdAt());
+    when(findUserByFederatedIdentityUseCase.execute(FEDERATED_QUERY))
+        .thenReturn(Optional.of(EXISTING_USER))
+        .thenReturn(Optional.of(updatedUser));
 
     resolver.resolve(AUTH_USER);
 
@@ -187,11 +167,10 @@ class AuthenticatedUserResolverTest {
 
   @Test
   void resolve_should_call_create_user_when_federated_identity_missing() {
-    when(findUserByFederatedIdentityUseCase.execute(
-            new FindUserByFederatedIdentityQuery("https://idp.example", "sub-1")))
-        .thenReturn(Optional.empty());
+    when(findUserByFederatedIdentityUseCase.execute(FEDERATED_QUERY))
+        .thenReturn(Optional.empty())
+        .thenReturn(Optional.of(REFETCHED_USER));
     when(authUserToCreateUserCommandMapper.toCommand(AUTH_USER)).thenReturn(CREATE_USER_COMMAND);
-    when(createUserUseCase.execute(CREATE_USER_COMMAND)).thenReturn(CREATED_USER);
 
     resolver.resolve(AUTH_USER);
 
@@ -199,34 +178,29 @@ class AuthenticatedUserResolverTest {
   }
 
   @Test
-  void resolve_should_call_link_federated_identity_when_federated_identity_missing() {
-    when(findUserByFederatedIdentityUseCase.execute(
-            new FindUserByFederatedIdentityQuery("https://idp.example", "sub-1")))
-        .thenReturn(Optional.empty());
+  void resolve_should_call_link_federated_identity_with_user_id_from_create_command() {
+    when(findUserByFederatedIdentityUseCase.execute(FEDERATED_QUERY))
+        .thenReturn(Optional.empty())
+        .thenReturn(Optional.of(REFETCHED_USER));
     when(authUserToCreateUserCommandMapper.toCommand(AUTH_USER)).thenReturn(CREATE_USER_COMMAND);
-    when(createUserUseCase.execute(CREATE_USER_COMMAND)).thenReturn(CREATED_USER);
 
     resolver.resolve(AUTH_USER);
 
     verify(linkFederatedIdentityUseCase)
         .execute(
             new LinkFederatedIdentityCommand(
-                CREATED_USER.id().value().toString(),
-                "https://idp.example",
-                "sub-1",
-                "user@example.com"));
+                CREATE_USER_ID, "https://idp.example", "sub-1", "user@example.com"));
   }
 
   @Test
-  void resolve_should_return_created_user_when_federated_identity_missing() {
-    when(findUserByFederatedIdentityUseCase.execute(
-            new FindUserByFederatedIdentityQuery("https://idp.example", "sub-1")))
-        .thenReturn(Optional.empty());
+  void resolve_should_return_refetched_user_when_federated_identity_missing() {
+    when(findUserByFederatedIdentityUseCase.execute(FEDERATED_QUERY))
+        .thenReturn(Optional.empty())
+        .thenReturn(Optional.of(REFETCHED_USER));
     when(authUserToCreateUserCommandMapper.toCommand(AUTH_USER)).thenReturn(CREATE_USER_COMMAND);
-    when(createUserUseCase.execute(CREATE_USER_COMMAND)).thenReturn(CREATED_USER);
 
     User result = resolver.resolve(AUTH_USER);
 
-    assertEquals(CREATED_USER, result);
+    assertEquals(REFETCHED_USER, result);
   }
 }

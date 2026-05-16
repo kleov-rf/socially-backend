@@ -101,7 +101,8 @@ class LinkFederatedIdentityCommandHandlerTest {
 
   @Test
   void execute_should_throw_exception_when_user_id_is_blank() {
-    var command = new LinkFederatedIdentityCommand("   ", "https://idp.example", "sub-1", "a@b.com");
+    var command =
+        new LinkFederatedIdentityCommand("   ", "https://idp.example", "sub-1", "a@b.com");
 
     IllegalArgumentException exception =
         assertThrows(IllegalArgumentException.class, () -> handler.execute(command));

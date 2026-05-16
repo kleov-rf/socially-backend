@@ -21,7 +21,7 @@ public final class CreateUserCommandHandler implements CreateUserUseCase {
   private final CreateDonorUseCase createDonorUseCase;
 
   @Override
-  public User execute(CreateUserCommand command) {
+  public void execute(CreateUserCommand command) {
     User user = createUserCommandMapper.toDomain(command, clock.instant());
     userRepository.create(user);
 
@@ -31,7 +31,5 @@ public final class CreateUserCommandHandler implements CreateUserUseCase {
             user.email().value(),
             user.givenName(),
             user.familyName()));
-
-    return user;
   }
 }
