@@ -1,5 +1,7 @@
 package com.socially.user.create.application;
 
+import com.socially.donor.create.application.input.CreateDonorCommand;
+import com.socially.donor.create.application.port.left.CreateDonorUseCase;
 import com.socially.user.create.application.input.CreateUserCommand;
 import com.socially.user.create.application.input.mapper.CreateUserCommandMapper;
 import com.socially.user.create.application.port.left.CreateUserUseCase;
@@ -20,6 +22,7 @@ public final class CreateUserCommandHandler implements CreateUserUseCase {
   private final CreateUserCommandMapper createUserCommandMapper;
   private final Clock clock;
   private final CreateUserRepository userRepository;
+  private final CreateDonorUseCase createDonorUseCase;
 
   @Override
   public void execute(CreateUserCommand command) {
@@ -32,5 +35,12 @@ public final class CreateUserCommandHandler implements CreateUserUseCase {
 
     User user = createUserCommandMapper.toDomain(command, clock.instant());
     userRepository.create(user);
+
+    createDonorUseCase.execute(
+        new CreateDonorCommand(
+            user.id().value().toString(),
+            user.email().value(),
+            user.givenName(),
+            user.familyName()));
   }
 }

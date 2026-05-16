@@ -6,8 +6,6 @@ import com.socially.donation.create.application.input.mapper.CreateDonationComma
 import com.socially.donation.create.application.port.left.CreateDonationUseCase;
 import com.socially.donation.create.domain.port.right.CreateDonationRepository;
 import com.socially.donation.kernel.domain.entity.Donation;
-import com.socially.donor.create.application.input.CreateDonorCommand;
-import com.socially.donor.create.application.port.left.CreateDonorUseCase;
 import com.socially.donor.findbyuserid.application.input.FindDonorByUserIdQuery;
 import com.socially.donor.findbyuserid.application.port.left.FindDonorByUserIdUseCase;
 import com.socially.donor.kernel.domain.entity.Donor;
@@ -23,7 +21,6 @@ public final class CreateDonationCommandHandler implements CreateDonationUseCase
 
   private final GetCurrentAuthUserUseCase getCurrentAuthUserUseCase;
   private final FindDonorByUserIdUseCase findDonorByUserIdUseCase;
-  private final CreateDonorUseCase createDonorUseCase;
   private final CreateDonationRepository donationRepository;
   private final CreateDonationCommandMapper createDonationCommandMapper;
   private final Clock clock;
@@ -32,20 +29,12 @@ public final class CreateDonationCommandHandler implements CreateDonationUseCase
   public void execute(CreateDonationCommand command) {
     User user = getCurrentAuthUserUseCase.execute(command.principal());
 
-    createDonorUseCase.execute(
-        new CreateDonorCommand(
-            user.id().value().toString(),
-            user.email().value(),
-            user.givenName(),
-            user.familyName()));
-
     Donor donor =
         findDonorByUserIdUseCase
             .execute(new FindDonorByUserIdQuery(user.id().value().toString()))
             .orElseThrow(DonorNotFoundAfterCreateException::new);
 
-    String donorId = donor.id().value().toString();
-    Donation donation = createDonationCommandMapper.toDomain(command, donorId, clock.instant());
+    Donation donation = createDonationCommandMapper.toDomain(command, donor, clock.instant());
     donationRepository.create(donation);
   }
 }
