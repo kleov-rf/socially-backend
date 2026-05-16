@@ -60,8 +60,9 @@ class UserResponseDtoMapperTest {
   }
 
   @Test
-  void toResponse_should_map_auth_user_id() {
-    AuthUser authUser = new AuthUser("auth-1", "auth@example.com", null, null);
+  void toResponse_should_map_auth_user_subject() {
+    AuthUser authUser =
+        new AuthUser("https://idp.example", "auth-1", "auth@example.com", null, null);
 
     var response = sut.toResponse(authUser);
 
@@ -70,7 +71,8 @@ class UserResponseDtoMapperTest {
 
   @Test
   void toResponse_should_map_auth_user_email() {
-    AuthUser authUser = new AuthUser("auth-1", "auth@example.com", null, null);
+    AuthUser authUser =
+        new AuthUser("https://idp.example", "auth-1", "auth@example.com", null, null);
 
     var response = sut.toResponse(authUser);
 
@@ -79,7 +81,8 @@ class UserResponseDtoMapperTest {
 
   @Test
   void toResponse_should_map_auth_user_name_when_given_and_family_present() {
-    AuthUser authUser = new AuthUser("auth-1", "auth@example.com", "Auth", "User");
+    AuthUser authUser =
+        new AuthUser("https://idp.example", "auth-1", "auth@example.com", "Auth", "User");
 
     var response = sut.toResponse(authUser);
 
@@ -88,7 +91,8 @@ class UserResponseDtoMapperTest {
 
   @Test
   void toResponse_should_map_auth_user_name_when_only_given_name_present() {
-    AuthUser authUser = new AuthUser("auth-1", "auth@example.com", "Auth", null);
+    AuthUser authUser =
+        new AuthUser("https://idp.example", "auth-1", "auth@example.com", "Auth", null);
 
     var response = sut.toResponse(authUser);
 
@@ -97,7 +101,8 @@ class UserResponseDtoMapperTest {
 
   @Test
   void toResponse_should_map_auth_user_name_when_only_family_name_present() {
-    AuthUser authUser = new AuthUser("auth-1", "auth@example.com", null, "User");
+    AuthUser authUser =
+        new AuthUser("https://idp.example", "auth-1", "auth@example.com", null, "User");
 
     var response = sut.toResponse(authUser);
 
@@ -106,7 +111,8 @@ class UserResponseDtoMapperTest {
 
   @Test
   void toResponse_should_map_null_name_when_auth_user_given_and_family_are_blank() {
-    AuthUser authUser = new AuthUser("auth-1", "auth@example.com", null, null);
+    AuthUser authUser =
+        new AuthUser("https://idp.example", "auth-1", "auth@example.com", null, null);
 
     var response = sut.toResponse(authUser);
 

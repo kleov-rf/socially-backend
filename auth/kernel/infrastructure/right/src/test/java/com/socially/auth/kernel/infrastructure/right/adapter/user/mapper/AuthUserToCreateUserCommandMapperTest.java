@@ -11,7 +11,8 @@ class AuthUserToCreateUserCommandMapperTest {
 
   @Test
   void toCommand_should_map_email() {
-    AuthUser authUser = new AuthUser("auth-sub-1", "john@example.com", "John", "Doe");
+    AuthUser authUser =
+        new AuthUser("https://idp.example", "auth-sub-1", "john@example.com", "John", "Doe");
 
     var command = sut.toCommand(authUser);
 
@@ -20,7 +21,8 @@ class AuthUserToCreateUserCommandMapperTest {
 
   @Test
   void toCommand_should_map_given_name() {
-    AuthUser authUser = new AuthUser("auth-sub-1", "john@example.com", "John", "Doe");
+    AuthUser authUser =
+        new AuthUser("https://idp.example", "auth-sub-1", "john@example.com", "John", "Doe");
 
     var command = sut.toCommand(authUser);
 
@@ -29,7 +31,8 @@ class AuthUserToCreateUserCommandMapperTest {
 
   @Test
   void toCommand_should_map_family_name() {
-    AuthUser authUser = new AuthUser("auth-sub-1", "john@example.com", "John", "Doe");
+    AuthUser authUser =
+        new AuthUser("https://idp.example", "auth-sub-1", "john@example.com", "John", "Doe");
 
     var command = sut.toCommand(authUser);
 

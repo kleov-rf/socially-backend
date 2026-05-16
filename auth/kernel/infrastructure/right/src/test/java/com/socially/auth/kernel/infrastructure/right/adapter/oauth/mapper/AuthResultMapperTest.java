@@ -24,7 +24,8 @@ class AuthResultMapperTest {
   void toAuthResult_should_call_mapper_with_received_id_token() {
     OAuthTokenResponse tokenResponse =
         new OAuthTokenResponse("access-token-1", "id-token-1", "refresh-1", "Bearer", 3600L);
-    AuthUser user = new AuthUser("user-id-1", "user@example.com", "John", "Doe");
+    AuthUser user =
+        new AuthUser("https://idp.example", "user-id-1", "user@example.com", "John", "Doe");
     when(authUserMapper.fromIdToken("id-token-1")).thenReturn(user);
 
     sut.toAuthResult(tokenResponse);
@@ -36,7 +37,8 @@ class AuthResultMapperTest {
   void toAuthResult_should_return_result_with_received_access_token() {
     OAuthTokenResponse tokenResponse =
         new OAuthTokenResponse("access-token-1", "id-token-1", "refresh-1", "Bearer", 3600L);
-    when(authUserMapper.fromIdToken("id-token-1")).thenReturn(new AuthUser(null, null, null, null));
+    when(authUserMapper.fromIdToken("id-token-1"))
+        .thenReturn(new AuthUser(null, null, null, null, null));
 
     AuthResult result = sut.toAuthResult(tokenResponse);
 
@@ -47,7 +49,8 @@ class AuthResultMapperTest {
   void toAuthResult_should_return_result_with_received_token_type() {
     OAuthTokenResponse tokenResponse =
         new OAuthTokenResponse("access-token-1", "id-token-1", "refresh-1", "JWT", 3600L);
-    when(authUserMapper.fromIdToken("id-token-1")).thenReturn(new AuthUser(null, null, null, null));
+    when(authUserMapper.fromIdToken("id-token-1"))
+        .thenReturn(new AuthUser(null, null, null, null, null));
 
     AuthResult result = sut.toAuthResult(tokenResponse);
 
@@ -58,7 +61,8 @@ class AuthResultMapperTest {
   void toAuthResult_should_return_result_with_received_expires_in() {
     OAuthTokenResponse tokenResponse =
         new OAuthTokenResponse("access-token-1", "id-token-1", "refresh-1", "Bearer", 7200L);
-    when(authUserMapper.fromIdToken("id-token-1")).thenReturn(new AuthUser(null, null, null, null));
+    when(authUserMapper.fromIdToken("id-token-1"))
+        .thenReturn(new AuthUser(null, null, null, null, null));
 
     AuthResult result = sut.toAuthResult(tokenResponse);
 
@@ -69,7 +73,8 @@ class AuthResultMapperTest {
   void toAuthResult_should_return_result_with_mapped_user() {
     OAuthTokenResponse tokenResponse =
         new OAuthTokenResponse("access-token-1", "id-token-1", "refresh-1", "Bearer", 3600L);
-    AuthUser user = new AuthUser("user-id-1", "user@example.com", "John", "Doe");
+    AuthUser user =
+        new AuthUser("https://idp.example", "user-id-1", "user@example.com", "John", "Doe");
     when(authUserMapper.fromIdToken("id-token-1")).thenReturn(user);
 
     AuthResult result = sut.toAuthResult(tokenResponse);

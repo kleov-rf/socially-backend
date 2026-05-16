@@ -44,7 +44,8 @@ class AuthUserMapperTest {
       throws IOException {
     AuthUser user = sut.fromIdToken(idToken);
 
-    assertNull(user.id());
+    assertNull(user.issuer());
+    assertNull(user.subject());
     assertNull(user.email());
     assertNull(user.givenName());
     assertNull(user.familyName());
@@ -58,10 +59,11 @@ class AuthUserMapperTest {
 
   @Test
   void fromIdToken_should_call_object_mapper_to_read_payload_tree() throws Exception {
-    String payload = "{\"sub\":\"id-1\"}";
+    String payload = "{\"iss\":\"https://idp.example\",\"sub\":\"id-1\"}";
     String token = createTokenWithPayload(payload);
     JsonNode tree = OBJECT_MAPPER.readTree(payload);
     when(mapper.readTree(any(byte[].class))).thenReturn(tree);
+    when(jsonPayloadClaims.text(same(tree), eq("iss"))).thenReturn("https://idp.example");
     when(jsonPayloadClaims.text(same(tree), eq("sub"))).thenReturn("id-1");
     when(authUserEmailMapper.resolveEmail(same(tree))).thenReturn(null);
     when(jsonPayloadClaims.text(same(tree), eq("given_name"))).thenReturn(null);
@@ -73,21 +75,36 @@ class AuthUserMapperTest {
   }
 
   @Test
-  void fromIdToken_should_return_auth_user_id() throws IOException {
+  void fromIdToken_should_return_auth_user_issuer() throws IOException {
     String idToken =
-        createTokenWithPayload(parseValuesIntoJson("sub-123", "email@example.com", "John", "Doe"));
+        createTokenWithPayload(
+            parseValuesIntoJson("https://idp.example", "sub-123", "email@example.com", "John", "Doe"));
     JsonNode payload = stubPayloadFromTokenJson(idToken);
 
     AuthUser user = sut.fromIdToken(idToken);
 
-    assertEquals("sub-123", user.id());
+    assertEquals("https://idp.example", user.issuer());
+    verify(jsonPayloadClaims).text(same(payload), eq("iss"));
+  }
+
+  @Test
+  void fromIdToken_should_return_auth_user_subject() throws IOException {
+    String idToken =
+        createTokenWithPayload(
+            parseValuesIntoJson("https://idp.example", "sub-123", "email@example.com", "John", "Doe"));
+    JsonNode payload = stubPayloadFromTokenJson(idToken);
+
+    AuthUser user = sut.fromIdToken(idToken);
+
+    assertEquals("sub-123", user.subject());
     verify(jsonPayloadClaims).text(same(payload), eq("sub"));
   }
 
   @Test
   void fromIdToken_should_return_auth_user_email() throws IOException {
     String idToken =
-        createTokenWithPayload(parseValuesIntoJson("sub-123", "email@example.com", "John", "Doe"));
+        createTokenWithPayload(
+            parseValuesIntoJson("https://idp.example", "sub-123", "email@example.com", "John", "Doe"));
     JsonNode payload = stubPayloadFromTokenJson(idToken);
 
     AuthUser user = sut.fromIdToken(idToken);
@@ -99,7 +116,8 @@ class AuthUserMapperTest {
   @Test
   void fromIdToken_should_return_auth_user_given_name() throws IOException {
     String idToken =
-        createTokenWithPayload(parseValuesIntoJson("sub-123", "email@example.com", "John", "Doe"));
+        createTokenWithPayload(
+            parseValuesIntoJson("https://idp.example", "sub-123", "email@example.com", "John", "Doe"));
     JsonNode payload = stubPayloadFromTokenJson(idToken);
 
     AuthUser user = sut.fromIdToken(idToken);
@@ -111,7 +129,8 @@ class AuthUserMapperTest {
   @Test
   void fromIdToken_should_return_auth_user_family_name() throws IOException {
     String idToken =
-        createTokenWithPayload(parseValuesIntoJson("sub-123", "email@example.com", "John", "Doe"));
+        createTokenWithPayload(
+            parseValuesIntoJson("https://idp.example", "sub-123", "email@example.com", "John", "Doe"));
     JsonNode payload = stubPayloadFromTokenJson(idToken);
 
     AuthUser user = sut.fromIdToken(idToken);
@@ -133,6 +152,7 @@ class AuthUserMapperTest {
     String payloadJson = new String(Base64.getUrlDecoder().decode(idToken.split("\\.")[1]));
     JsonNode payload = OBJECT_MAPPER.readTree(payloadJson);
     when(mapper.readTree(any(byte[].class))).thenReturn(payload);
+    when(jsonPayloadClaims.text(same(payload), eq("iss"))).thenReturn("https://idp.example");
     when(jsonPayloadClaims.text(same(payload), eq("sub"))).thenReturn("sub-123");
     when(authUserEmailMapper.resolveEmail(same(payload))).thenReturn("email@example.com");
     when(jsonPayloadClaims.text(same(payload), eq("given_name"))).thenReturn("John");
@@ -141,9 +161,10 @@ class AuthUserMapperTest {
   }
 
   private static String parseValuesIntoJson(
-      String sub, String email, String givenName, String familyName) {
+      String issuer, String sub, String email, String givenName, String familyName) {
     StringBuilder json =
-        new StringBuilder("{\"sub\":\"%s\",\"email\":\"%s\"".formatted(sub, email));
+        new StringBuilder(
+            "{\"iss\":\"%s\",\"sub\":\"%s\",\"email\":\"%s\"".formatted(issuer, sub, email));
     if (givenName != null) {
       json.append(",\"given_name\":\"%s\"".formatted(givenName));
     }

@@ -71,7 +71,8 @@ class AuthCallbackResponseMapperTest {
 
   @Test
   void toResponse_should_call_user_response_mapper_with_received_user() {
-    AuthUser authUser = new AuthUser("user-123", "test@example.com", "Test", "User");
+    AuthUser authUser =
+        new AuthUser("https://idp.example", "user-123", "test@example.com", "Test", "User");
     AuthResult result = new AuthResult(null, null, null, authUser);
     when(userResponseDtoMapper.toResponse(sampleUser())).thenReturn(sampleUserResponseDto());
 

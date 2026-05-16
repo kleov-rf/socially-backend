@@ -18,7 +18,7 @@ public final class AuthUserMapper {
 
   public AuthUser fromIdToken(String idToken) {
     if (!StringUtils.hasText(idToken)) {
-      return new AuthUser(null, null, null, null);
+      return new AuthUser(null, null, null, null, null);
     }
 
     String[] tokenParts = idToken.split("\\.");
@@ -31,6 +31,7 @@ public final class AuthUserMapper {
       JsonNode payload = objectMapper.readTree(decodedPayload);
 
       return new AuthUser(
+          blankToNull(jsonPayloadClaims.text(payload, "iss")),
           blankToNull(jsonPayloadClaims.text(payload, "sub")),
           authUserEmailMapper.resolveEmail(payload),
           blankToNull(jsonPayloadClaims.text(payload, "given_name")),

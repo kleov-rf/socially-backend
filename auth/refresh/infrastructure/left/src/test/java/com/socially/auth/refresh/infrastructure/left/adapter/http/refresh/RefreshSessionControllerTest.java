@@ -41,7 +41,8 @@ class RefreshSessionControllerTest {
   @InjectMocks private RefreshSessionController sut;
 
   private static final AuthResult AUTH_RESULT =
-      new AuthResult("at", "Bearer", 120L, new AuthUser("u1", "e@x.com", "N", null));
+      new AuthResult(
+          "at", "Bearer", 120L, new AuthUser("https://idp.example", "u1", "e@x.com", "N", null));
   private static final User USER =
       User.create(
           Id.from("550e8400-e29b-41d4-a716-446655440000"),
