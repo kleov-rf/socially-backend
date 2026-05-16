@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -24,6 +23,7 @@ import com.socially.donor.create.application.port.left.CreateDonorUseCase;
 import com.socially.donor.findbyuserid.application.input.FindDonorByUserIdQuery;
 import com.socially.donor.findbyuserid.application.port.left.FindDonorByUserIdUseCase;
 import com.socially.donor.kernel.domain.entity.Donor;
+import com.socially.donor.kernel.domain.exception.DonorNotFoundAfterCreateException;
 import com.socially.user.kernel.domain.entity.User;
 import com.socially.user.kernel.domain.valueobject.Email;
 import java.security.Principal;
@@ -58,21 +58,25 @@ class CreateDonationCommandHandlerTest {
 
   private CreateDonationCommand command;
   private User user;
+  private Donor donorAfterCreate;
 
   @BeforeEach
   void setUp() {
     command = new CreateDonationCommand(DONATION_ID, "Test Title", "Test Description", PRINCIPAL);
     user = User.create(Id.from(USER_ID), Email.from("user@example.com"), "Jane", "Doe", CREATED_AT);
+    donorAfterCreate =
+        Donor.create(
+            Id.from(DONOR_ID), Id.from(USER_ID), "user@example.com", "Jane", "Doe", CREATED_AT);
     lenient()
         .when(findDonorByUserIdUseCase.execute(new FindDonorByUserIdQuery(USER_ID)))
-        .thenReturn(Optional.empty());
+        .thenReturn(Optional.of(donorAfterCreate));
   }
 
   @Test
   void execute_should_resolve_user_with_command_principal() {
     when(getCurrentAuthUserUseCase.execute(PRINCIPAL)).thenReturn(user);
     when(clock.instant()).thenReturn(CREATED_AT);
-    when(createDonationCommandMapper.toDomain(eq(command), any(), eq(CREATED_AT)))
+    when(createDonationCommandMapper.toDomain(eq(command), eq(DONOR_ID), eq(CREATED_AT)))
         .thenReturn(
             Donation.create(
                 Id.from(DONATION_ID),
@@ -92,7 +96,7 @@ class CreateDonationCommandHandlerTest {
   void execute_should_call_create_donor_with_resolved_user_data() {
     when(getCurrentAuthUserUseCase.execute(PRINCIPAL)).thenReturn(user);
     when(clock.instant()).thenReturn(CREATED_AT);
-    when(createDonationCommandMapper.toDomain(eq(command), any(), eq(CREATED_AT)))
+    when(createDonationCommandMapper.toDomain(eq(command), eq(DONOR_ID), eq(CREATED_AT)))
         .thenReturn(
             Donation.create(
                 Id.from(DONATION_ID),
@@ -116,78 +120,7 @@ class CreateDonationCommandHandlerTest {
   }
 
   @Test
-  void execute_should_call_mapper_with_generated_donor_id_and_clock_instant() {
-    when(getCurrentAuthUserUseCase.execute(PRINCIPAL)).thenReturn(user);
-    when(clock.instant()).thenReturn(CREATED_AT);
-    when(createDonationCommandMapper.toDomain(eq(command), any(), eq(CREATED_AT)))
-        .thenReturn(
-            Donation.create(
-                Id.from(DONATION_ID),
-                Id.from(DONOR_ID),
-                Title.from("Test Title"),
-                Description.from("Test Description"),
-                CREATED_AT,
-                CREATED_AT));
-
-    handler.execute(command);
-
-    ArgumentCaptor<String> donorIdCaptor = ArgumentCaptor.forClass(String.class);
-    verify(createDonationCommandMapper)
-        .toDomain(eq(command), donorIdCaptor.capture(), eq(CREATED_AT));
-    UUID.fromString(donorIdCaptor.getValue());
-  }
-
-  @Test
-  void execute_should_call_repository_create_with_mapped_donation() {
-    Donation mappedDonation =
-        Donation.create(
-            Id.from(DONATION_ID),
-            Id.from(DONOR_ID),
-            Title.from("Test Title"),
-            Description.from("Test Description"),
-            CREATED_AT,
-            CREATED_AT);
-    when(getCurrentAuthUserUseCase.execute(PRINCIPAL)).thenReturn(user);
-    when(clock.instant()).thenReturn(CREATED_AT);
-    when(createDonationCommandMapper.toDomain(eq(command), any(), eq(CREATED_AT)))
-        .thenReturn(mappedDonation);
-
-    handler.execute(command);
-
-    verify(donationRepository).create(mappedDonation);
-  }
-
-  @Test
-  void execute_should_not_call_create_donor_when_existing_donor_found() {
-    Donor existingDonor =
-        Donor.create(
-            Id.from(DONOR_ID), Id.from(USER_ID), "user@example.com", "Jane", "Doe", CREATED_AT);
-    when(findDonorByUserIdUseCase.execute(new FindDonorByUserIdQuery(USER_ID)))
-        .thenReturn(Optional.of(existingDonor));
-    when(getCurrentAuthUserUseCase.execute(PRINCIPAL)).thenReturn(user);
-    when(clock.instant()).thenReturn(CREATED_AT);
-    when(createDonationCommandMapper.toDomain(eq(command), eq(DONOR_ID), eq(CREATED_AT)))
-        .thenReturn(
-            Donation.create(
-                Id.from(DONATION_ID),
-                Id.from(DONOR_ID),
-                Title.from("Test Title"),
-                Description.from("Test Description"),
-                CREATED_AT,
-                CREATED_AT));
-
-    handler.execute(command);
-
-    verify(createDonorUseCase, never()).execute(any());
-  }
-
-  @Test
-  void execute_should_call_mapper_with_existing_donor_id_when_existing_donor_found() {
-    Donor existingDonor =
-        Donor.create(
-            Id.from(DONOR_ID), Id.from(USER_ID), "user@example.com", "Jane", "Doe", CREATED_AT);
-    when(findDonorByUserIdUseCase.execute(new FindDonorByUserIdQuery(USER_ID)))
-        .thenReturn(Optional.of(existingDonor));
+  void execute_should_call_mapper_with_donor_id_from_find_result() {
     when(getCurrentAuthUserUseCase.execute(PRINCIPAL)).thenReturn(user);
     when(clock.instant()).thenReturn(CREATED_AT);
     when(createDonationCommandMapper.toDomain(eq(command), eq(DONOR_ID), eq(CREATED_AT)))
@@ -203,6 +136,81 @@ class CreateDonationCommandHandlerTest {
     handler.execute(command);
 
     verify(createDonationCommandMapper).toDomain(eq(command), eq(DONOR_ID), eq(CREATED_AT));
+  }
+
+  @Test
+  void execute_should_call_repository_create_with_mapped_donation() {
+    Donation mappedDonation =
+        Donation.create(
+            Id.from(DONATION_ID),
+            Id.from(DONOR_ID),
+            Title.from("Test Title"),
+            Description.from("Test Description"),
+            CREATED_AT,
+            CREATED_AT);
+    when(getCurrentAuthUserUseCase.execute(PRINCIPAL)).thenReturn(user);
+    when(clock.instant()).thenReturn(CREATED_AT);
+    when(createDonationCommandMapper.toDomain(eq(command), eq(DONOR_ID), eq(CREATED_AT)))
+        .thenReturn(mappedDonation);
+
+    handler.execute(command);
+
+    verify(donationRepository).create(mappedDonation);
+  }
+
+  @Test
+  void execute_should_call_create_donor_even_when_donor_already_exists() {
+    when(findDonorByUserIdUseCase.execute(new FindDonorByUserIdQuery(USER_ID)))
+        .thenReturn(Optional.of(donorAfterCreate));
+    when(getCurrentAuthUserUseCase.execute(PRINCIPAL)).thenReturn(user);
+    when(clock.instant()).thenReturn(CREATED_AT);
+    when(createDonationCommandMapper.toDomain(eq(command), eq(DONOR_ID), eq(CREATED_AT)))
+        .thenReturn(
+            Donation.create(
+                Id.from(DONATION_ID),
+                Id.from(DONOR_ID),
+                Title.from("Test Title"),
+                Description.from("Test Description"),
+                CREATED_AT,
+                CREATED_AT));
+
+    handler.execute(command);
+
+    verify(createDonorUseCase).execute(any(CreateDonorCommand.class));
+  }
+
+  @Test
+  void execute_should_call_mapper_with_existing_donor_id_when_existing_donor_found() {
+    when(findDonorByUserIdUseCase.execute(new FindDonorByUserIdQuery(USER_ID)))
+        .thenReturn(Optional.of(donorAfterCreate));
+    when(getCurrentAuthUserUseCase.execute(PRINCIPAL)).thenReturn(user);
+    when(clock.instant()).thenReturn(CREATED_AT);
+    when(createDonationCommandMapper.toDomain(eq(command), eq(DONOR_ID), eq(CREATED_AT)))
+        .thenReturn(
+            Donation.create(
+                Id.from(DONATION_ID),
+                Id.from(DONOR_ID),
+                Title.from("Test Title"),
+                Description.from("Test Description"),
+                CREATED_AT,
+                CREATED_AT));
+
+    handler.execute(command);
+
+    verify(createDonationCommandMapper).toDomain(eq(command), eq(DONOR_ID), eq(CREATED_AT));
+  }
+
+  @Test
+  void execute_should_throw_when_donor_not_found_after_create() {
+    when(getCurrentAuthUserUseCase.execute(PRINCIPAL)).thenReturn(user);
+    when(findDonorByUserIdUseCase.execute(new FindDonorByUserIdQuery(USER_ID)))
+        .thenReturn(Optional.empty());
+
+    DonorNotFoundAfterCreateException exception =
+        assertThrows(DonorNotFoundAfterCreateException.class, () -> handler.execute(command));
+
+    assertEquals("Donor not found after create", exception.getMessage());
+    verifyNoInteractions(createDonationCommandMapper, donationRepository);
   }
 
   @Test
