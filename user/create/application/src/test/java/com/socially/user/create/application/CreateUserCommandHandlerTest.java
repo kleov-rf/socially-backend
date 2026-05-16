@@ -2,7 +2,6 @@ package com.socially.user.create.application;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -13,13 +12,10 @@ import com.socially.donor.create.application.port.left.CreateDonorUseCase;
 import com.socially.user.create.application.input.CreateUserCommand;
 import com.socially.user.create.application.input.mapper.CreateUserCommandMapper;
 import com.socially.user.create.domain.port.right.CreateUserRepository;
-import com.socially.user.findbyemail.application.input.FindUserByEmailQuery;
-import com.socially.user.findbyemail.application.port.left.FindUserByEmailUseCase;
 import com.socially.user.kernel.domain.entity.User;
 import com.socially.user.kernel.domain.valueobject.Email;
 import java.time.Clock;
 import java.time.Instant;
-import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -35,74 +31,16 @@ class CreateUserCommandHandlerTest {
 
   @Mock private CreateUserRepository userRepository;
   @Mock private CreateUserCommandMapper createUserCommandMapper;
-  @Mock private FindUserByEmailUseCase findUserByEmailUseCase;
   @Mock private Clock clock;
   @Mock private CreateDonorUseCase createDonorUseCase;
 
   @InjectMocks private CreateUserCommandHandler handler;
 
   @Test
-  void execute_should_call_find_user_by_email_with_command_email() {
-    var command = new CreateUserCommand("user@example.com", "Jane", "Doe");
-    User mappedUser =
-        User.create(Id.from(USER_ID), Email.from("user@example.com"), "Jane", "Doe", CREATED_AT);
-    when(findUserByEmailUseCase.execute(new FindUserByEmailQuery(command.email())))
-        .thenReturn(Optional.empty());
-    when(clock.instant()).thenReturn(CREATED_AT);
-    when(createUserCommandMapper.toDomain(command, CREATED_AT)).thenReturn(mappedUser);
-
-    handler.execute(command);
-
-    verify(findUserByEmailUseCase).execute(new FindUserByEmailQuery(command.email()));
-  }
-
-  @Test
-  void execute_should_not_call_repository_create_when_user_already_exists() {
-    var command = new CreateUserCommand("user@example.com", "Jane", "Doe");
-    User existingUser =
-        User.create(Id.from(USER_ID), Email.from("user@example.com"), "Jane", "Doe", CREATED_AT);
-    when(findUserByEmailUseCase.execute(new FindUserByEmailQuery(command.email())))
-        .thenReturn(Optional.of(existingUser));
-
-    handler.execute(command);
-
-    verify(userRepository, never()).create(org.mockito.ArgumentMatchers.any());
-  }
-
-  @Test
-  void execute_should_not_call_create_donor_when_user_already_exists() {
-    var command = new CreateUserCommand("user@example.com", "Jane", "Doe");
-    User existingUser =
-        User.create(Id.from(USER_ID), Email.from("user@example.com"), "Jane", "Doe", CREATED_AT);
-    when(findUserByEmailUseCase.execute(new FindUserByEmailQuery(command.email())))
-        .thenReturn(Optional.of(existingUser));
-
-    handler.execute(command);
-
-    verify(createDonorUseCase, never()).execute(org.mockito.ArgumentMatchers.any());
-  }
-
-  @Test
-  void execute_should_not_call_command_mapper_when_user_already_exists() {
-    var command = new CreateUserCommand("user@example.com", "Jane", "Doe");
-    User existingUser =
-        User.create(Id.from(USER_ID), Email.from("user@example.com"), "Jane", "Doe", CREATED_AT);
-    when(findUserByEmailUseCase.execute(new FindUserByEmailQuery(command.email())))
-        .thenReturn(Optional.of(existingUser));
-
-    handler.execute(command);
-
-    verify(createUserCommandMapper, never())
-        .toDomain(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
-  }
-
-  @Test
   void execute_should_call_mapper_with_received_command() {
     var command = new CreateUserCommand("user@example.com", "Jane", "Doe");
     User mappedUser =
         User.create(Id.from(USER_ID), Email.from("user@example.com"), "Jane", "Doe", CREATED_AT);
-    when(findUserByEmailUseCase.execute(new FindUserByEmailQuery(command.email())))
-        .thenReturn(Optional.empty());
     when(clock.instant()).thenReturn(CREATED_AT);
     when(createUserCommandMapper.toDomain(command, CREATED_AT)).thenReturn(mappedUser);
 
@@ -116,8 +54,6 @@ class CreateUserCommandHandlerTest {
     var command = new CreateUserCommand("user@example.com", "Jane", "Doe");
     User mappedUser =
         User.create(Id.from(USER_ID), Email.from("user@example.com"), "Jane", "Doe", CREATED_AT);
-    when(findUserByEmailUseCase.execute(new FindUserByEmailQuery(command.email())))
-        .thenReturn(Optional.empty());
     when(clock.instant()).thenReturn(CREATED_AT);
     when(createUserCommandMapper.toDomain(command, CREATED_AT)).thenReturn(mappedUser);
 
@@ -131,8 +67,6 @@ class CreateUserCommandHandlerTest {
     var command = new CreateUserCommand("user@example.com", "Jane", "Doe");
     User mappedUser =
         User.create(Id.from(USER_ID), Email.from("user@example.com"), "Jane", "Doe", CREATED_AT);
-    when(findUserByEmailUseCase.execute(new FindUserByEmailQuery(command.email())))
-        .thenReturn(Optional.empty());
     when(clock.instant()).thenReturn(CREATED_AT);
     when(createUserCommandMapper.toDomain(command, CREATED_AT)).thenReturn(mappedUser);
 
@@ -143,12 +77,23 @@ class CreateUserCommandHandlerTest {
   }
 
   @Test
-  void execute_should_call_create_donor_after_repository_create_when_user_is_new() {
+  void execute_should_return_created_user() {
     var command = new CreateUserCommand("user@example.com", "Jane", "Doe");
     User mappedUser =
         User.create(Id.from(USER_ID), Email.from("user@example.com"), "Jane", "Doe", CREATED_AT);
-    when(findUserByEmailUseCase.execute(new FindUserByEmailQuery(command.email())))
-        .thenReturn(Optional.empty());
+    when(clock.instant()).thenReturn(CREATED_AT);
+    when(createUserCommandMapper.toDomain(command, CREATED_AT)).thenReturn(mappedUser);
+
+    User result = handler.execute(command);
+
+    assertEquals(mappedUser, result);
+  }
+
+  @Test
+  void execute_should_call_create_donor_after_repository_create() {
+    var command = new CreateUserCommand("user@example.com", "Jane", "Doe");
+    User mappedUser =
+        User.create(Id.from(USER_ID), Email.from("user@example.com"), "Jane", "Doe", CREATED_AT);
     when(clock.instant()).thenReturn(CREATED_AT);
     when(createUserCommandMapper.toDomain(command, CREATED_AT)).thenReturn(mappedUser);
 
@@ -162,12 +107,10 @@ class CreateUserCommandHandlerTest {
   }
 
   @Test
-  void execute_should_call_create_donor_with_mapped_user_id_email_and_names_when_user_is_new() {
+  void execute_should_call_create_donor_with_mapped_user_id_email_and_names() {
     var command = new CreateUserCommand("user@example.com", "Jane", "Doe");
     User mappedUser =
         User.create(Id.from(USER_ID), Email.from("user@example.com"), "Jane", "Doe", CREATED_AT);
-    when(findUserByEmailUseCase.execute(new FindUserByEmailQuery(command.email())))
-        .thenReturn(Optional.empty());
     when(clock.instant()).thenReturn(CREATED_AT);
     when(createUserCommandMapper.toDomain(command, CREATED_AT)).thenReturn(mappedUser);
 

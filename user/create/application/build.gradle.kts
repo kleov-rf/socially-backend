@@ -25,7 +25,6 @@ dependencyManagement {
 dependencies {
     implementation(project(":donor:create:application"))
     implementation(project(":user:create:domain"))
-    implementation(project(":user:find-by-email:application"))
 
     implementation(libs.spring.context)
 
