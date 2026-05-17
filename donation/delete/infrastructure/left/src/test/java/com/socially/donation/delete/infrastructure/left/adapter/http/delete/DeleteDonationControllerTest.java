@@ -6,10 +6,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
-import com.socially.donation.delete.application.DonationForbiddenException;
-import com.socially.donation.delete.application.DonationNotFoundException;
 import com.socially.donation.delete.application.input.DeleteDonationCommand;
 import com.socially.donation.delete.application.port.left.DeleteDonationUseCase;
+import com.socially.donation.kernel.domain.exception.DonationForbiddenException;
+import com.socially.donation.kernel.domain.exception.DonationNotFoundException;
 import java.security.Principal;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

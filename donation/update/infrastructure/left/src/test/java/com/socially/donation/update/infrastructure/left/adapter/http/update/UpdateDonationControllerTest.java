@@ -6,7 +6,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.socially.donation.update.application.DonationNotFoundException;
+import com.socially.donation.kernel.domain.exception.DonationNotFoundException;
 import com.socially.donation.update.application.input.UpdateDonationCommand;
 import com.socially.donation.update.application.port.left.UpdateDonationUseCase;
 import com.socially.donation.update.infrastructure.left.adapter.http.update.input.UpdateDonationRequest;

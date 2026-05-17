@@ -67,6 +67,6 @@ org.springframework:spring-beans:7.0.7=compileClasspath,runtimeClasspath,testCom
 org.springframework:spring-context:7.0.7=compileClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
 org.springframework:spring-core:7.0.7=compileClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
 org.springframework:spring-expression:7.0.7=compileClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
-org.springframework:spring-web:7.0.7=compileClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
+org.springframework:spring-web:7.0.7=runtimeClasspath,testCompileClasspath,testRuntimeClasspath
 org.yaml:snakeyaml:2.5=runtimeClasspath,testCompileClasspath,testRuntimeClasspath
 empty=testAnnotationProcessor

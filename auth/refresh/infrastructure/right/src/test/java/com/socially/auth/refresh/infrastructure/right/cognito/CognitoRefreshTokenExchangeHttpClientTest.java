@@ -15,9 +15,9 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 import com.socially.auth.kernel.domain.OAuthTokenResponse;
+import com.socially.auth.kernel.domain.exception.AuthUnauthorizedException;
+import com.socially.auth.kernel.domain.exception.AuthUpstreamFailureException;
 import com.socially.auth.kernel.domain.properties.AuthProperties;
-import com.socially.auth.refresh.application.exception.RefreshTokenExchangeFailedException;
-import com.socially.auth.refresh.application.exception.RefreshTokenRejectedException;
 import com.socially.auth.refresh.infrastructure.right.cognito.mapper.RefreshTokenExchangeFormMapper;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
@@ -176,9 +176,9 @@ class CognitoRefreshTokenExchangeHttpClientTest {
 
     server.expect(requestTo("https://hosted.example/oauth2/token")).andRespond(withServerError());
 
-    RefreshTokenExchangeFailedException exception =
+    AuthUpstreamFailureException exception =
         assertThrows(
-            RefreshTokenExchangeFailedException.class, () -> sut.exchangeRefreshToken("refresh-1"));
+            AuthUpstreamFailureException.class, () -> sut.exchangeRefreshToken("refresh-1"));
 
     assertEquals("Failed to refresh OAuth tokens", exception.getMessage());
   }
@@ -190,9 +190,8 @@ class CognitoRefreshTokenExchangeHttpClientTest {
 
     server.expect(requestTo("https://hosted.example/oauth2/token")).andRespond(withBadRequest());
 
-    RefreshTokenRejectedException exception =
-        assertThrows(
-            RefreshTokenRejectedException.class, () -> sut.exchangeRefreshToken("refresh-1"));
+    AuthUnauthorizedException exception =
+        assertThrows(AuthUnauthorizedException.class, () -> sut.exchangeRefreshToken("refresh-1"));
 
     assertEquals("Refresh token rejected", exception.getMessage());
   }

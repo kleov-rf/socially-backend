@@ -1,7 +1,7 @@
 package com.socially.auth.kernel.application;
 
 import com.socially.auth.kernel.application.port.left.GetAuthenticatedUserUseCase;
-import com.socially.auth.kernel.domain.exception.UnauthenticatedRequestException;
+import com.socially.auth.kernel.domain.exception.AuthUnauthorizedException;
 import com.socially.auth.kernel.infrastructure.right.adapter.oauth.mapper.AuthUserFromJwtMapper;
 import com.socially.auth.kernel.infrastructure.right.adapter.user.AuthenticatedUserResolver;
 import com.socially.user.kernel.domain.entity.User;
@@ -22,6 +22,6 @@ public class GetAuthenticatedUserQueryHandler implements GetAuthenticatedUserUse
       return authenticatedUserResolver.resolveExisting(
           authUserFromJwtMapper.fromJwt(jwtAuthenticationToken.getToken()));
     }
-    throw new UnauthenticatedRequestException();
+    throw new AuthUnauthorizedException("Unauthenticated request");
   }
 }

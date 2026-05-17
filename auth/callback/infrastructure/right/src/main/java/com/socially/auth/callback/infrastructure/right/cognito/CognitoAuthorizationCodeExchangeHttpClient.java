@@ -1,9 +1,9 @@
 package com.socially.auth.callback.infrastructure.right.cognito;
 
-import com.socially.auth.callback.application.exception.AuthorizationCodeExchangeFailedException;
 import com.socially.auth.callback.domain.port.right.AuthorizationCodeExchangeOAuthClient;
 import com.socially.auth.callback.infrastructure.right.cognito.mapper.AuthorizationCodeExchangeFormMapper;
 import com.socially.auth.kernel.domain.OAuthTokenResponse;
+import com.socially.auth.kernel.domain.exception.AuthUpstreamFailureException;
 import com.socially.auth.kernel.domain.properties.AuthProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -34,7 +34,7 @@ public class CognitoAuthorizationCodeExchangeHttpClient
           .retrieve()
           .body(OAuthTokenResponse.class);
     } catch (Exception exception) {
-      throw new AuthorizationCodeExchangeFailedException(
+      throw new AuthUpstreamFailureException(
           "Failed to exchange OAuth authorization code", exception);
     }
   }

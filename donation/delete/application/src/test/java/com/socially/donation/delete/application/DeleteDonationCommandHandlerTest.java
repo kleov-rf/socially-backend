@@ -9,12 +9,14 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.socially.auth.kernel.application.port.left.GetAuthenticatedUserUseCase;
-import com.socially.auth.kernel.domain.exception.UnauthenticatedRequestException;
+import com.socially.auth.kernel.domain.exception.AuthUnauthorizedException;
 import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donation.delete.application.input.DeleteDonationCommand;
 import com.socially.donation.delete.domain.port.right.DeleteDonationRepository;
 import com.socially.donation.getbyid.domain.port.right.FindDonationByIdRepository;
 import com.socially.donation.kernel.domain.entity.Donation;
+import com.socially.donation.kernel.domain.exception.DonationForbiddenException;
+import com.socially.donation.kernel.domain.exception.DonationNotFoundException;
 import com.socially.donation.kernel.domain.valueobject.Description;
 import com.socially.donation.kernel.domain.valueobject.Title;
 import com.socially.donor.findbyuserid.application.input.FindDonorByUserIdQuery;
@@ -120,9 +122,11 @@ class DeleteDonationCommandHandlerTest {
     when(findDonationByIdRepository.findById(Id.from(DONATION_ID)))
         .thenReturn(Optional.of(donation));
     when(getAuthenticatedUserUseCase.execute(PRINCIPAL))
-        .thenThrow(new UnauthenticatedRequestException());
+        .thenThrow(new AuthUnauthorizedException("Unauthenticated request"));
 
-    assertThrows(UnauthenticatedRequestException.class, () -> handler.execute(command));
+    AuthUnauthorizedException exception =
+        assertThrows(AuthUnauthorizedException.class, () -> handler.execute(command));
+    assertEquals("Unauthenticated request", exception.getMessage());
     verify(donationRepository, never()).deleteById(any());
   }
 

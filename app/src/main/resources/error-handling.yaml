@@ -1,22 +1,13 @@
 error:
   handling:
     codes:
-      com.socially.donation.delete.application.DonationNotFoundException: DONATION_NOT_FOUND
-      com.socially.donation.update.application.DonationNotFoundException: DONATION_NOT_FOUND
-      com.socially.donation.delete.application.DonationForbiddenException: DONATION_FORBIDDEN
-      com.socially.auth.kernel.domain.exception.UnauthenticatedRequestException: UNAUTHENTICATED
-      com.socially.auth.kernel.domain.exception.AuthenticatedUserNotFoundException: AUTHENTICATED_USER_NOT_FOUND
-      com.socially.auth.kernel.domain.exception.MissingOidcIdentityClaimsException: MISSING_OIDC_IDENTITY_CLAIMS
-      com.socially.auth.kernel.domain.exception.UserNotFoundAfterCreateException: USER_NOT_FOUND_AFTER_CREATE
-      com.socially.donor.kernel.domain.exception.DonorNotFoundAfterCreateException: DONOR_NOT_FOUND_AFTER_CREATE
-      com.socially.auth.callback.application.exception.InvalidOAuthStateException: INVALID_OAUTH_STATE
-      com.socially.auth.callback.application.exception.MissingTemporaryOAuthCookiesException: MISSING_OAUTH_COOKIES
-      com.socially.auth.callback.application.exception.AuthorizationCodeExchangeFailedException: AUTHORIZATION_CODE_EXCHANGE_FAILED
-      com.socially.auth.refresh.application.exception.MissingRefreshSessionException: MISSING_REFRESH_SESSION
-      com.socially.auth.refresh.application.exception.RefreshTokenRejectedException: REFRESH_TOKEN_REJECTED
-      com.socially.auth.refresh.application.exception.InvalidRefreshedIdTokenException: INVALID_REFRESHED_ID_TOKEN
-      com.socially.auth.refresh.application.exception.RefreshTokenExchangeFailedException: REFRESH_TOKEN_EXCHANGE_FAILED
-      com.socially.auth.logout.application.exception.BackendCredentialsConfigurationException: BACKEND_CREDENTIALS_CONFIGURATION_ERROR
+      com.socially.donation.kernel.domain.exception.DonationNotFoundException: DONATION_NOT_FOUND
+      com.socially.donation.kernel.domain.exception.DonationForbiddenException: DONATION_FORBIDDEN
+      com.socially.auth.kernel.domain.exception.AuthBadRequestException: AUTH_BAD_REQUEST
+      com.socially.auth.kernel.domain.exception.AuthUnauthorizedException: AUTH_UNAUTHORIZED
+      com.socially.auth.kernel.domain.exception.AuthUpstreamFailureException: AUTH_UPSTREAM_FAILURE
+      com.socially.auth.kernel.domain.exception.AuthInternalErrorException: AUTH_INTERNAL_ERROR
+      com.socially.donor.kernel.domain.exception.DonorInternalErrorException: DONOR_INTERNAL_ERROR
       java.lang.IllegalArgumentException: BAD_REQUEST
       org.springframework.security.core.AuthenticationException: UNAUTHENTICATED
       org.springframework.security.access.AccessDeniedException: FORBIDDEN

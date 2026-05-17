@@ -7,9 +7,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.socially.donation.delete.application.DonationForbiddenException;
-import com.socially.donation.delete.application.DonationNotFoundException;
 import com.socially.donation.delete.application.port.left.DeleteDonationUseCase;
+import com.socially.donation.kernel.domain.exception.DonationForbiddenException;
+import com.socially.donation.kernel.domain.exception.DonationNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -29,8 +29,8 @@ import org.springframework.test.web.servlet.MockMvc;
 @Import(DeleteDonationApiErrorHandlingMvcTest.SecurityTestConfig.class)
 @TestPropertySource(
     properties = {
-      "error.handling.codes.com.socially.donation.delete.application.DonationNotFoundException=DONATION_NOT_FOUND",
-      "error.handling.codes.com.socially.donation.delete.application.DonationForbiddenException=DONATION_FORBIDDEN"
+      "error.handling.codes.com.socially.donation.kernel.domain.exception.DonationNotFoundException=DONATION_NOT_FOUND",
+      "error.handling.codes.com.socially.donation.kernel.domain.exception.DonationForbiddenException=DONATION_FORBIDDEN"
     })
 class DeleteDonationApiErrorHandlingMvcTest {
 

@@ -1,12 +1,11 @@
 package com.socially.auth.callback.application;
 
-import com.socially.auth.callback.application.exception.InvalidOAuthStateException;
-import com.socially.auth.callback.application.exception.MissingTemporaryOAuthCookiesException;
 import com.socially.auth.callback.application.mapper.CallbackCookieInstructionsMapper;
 import com.socially.auth.callback.application.output.CompleteOAuthCallbackOutcome;
 import com.socially.auth.callback.application.port.left.CompleteOAuthCallbackUseCase;
 import com.socially.auth.callback.domain.port.right.AuthorizationCodeExchangeOAuthClient;
 import com.socially.auth.kernel.domain.OAuthTokenResponse;
+import com.socially.auth.kernel.domain.exception.AuthBadRequestException;
 import com.socially.auth.kernel.domain.properties.AuthProperties;
 import com.socially.auth.kernel.infrastructure.right.adapter.oauth.mapper.AuthResultMapper;
 import com.socially.auth.kernel.infrastructure.right.adapter.user.AuthenticatedUserResolver;
@@ -31,11 +30,11 @@ public class CompleteOAuthCallbackCommandHandler implements CompleteOAuthCallbac
     String expectedState = requestCookies.get(authProperties.stateCookieName());
     String codeVerifier = requestCookies.get(authProperties.pkceCookieName());
     if (!StringUtils.hasText(expectedState) || !StringUtils.hasText(codeVerifier)) {
-      throw new MissingTemporaryOAuthCookiesException();
+      throw new AuthBadRequestException("Missing temporary OAuth cookies");
     }
 
     if (!expectedState.equals(state)) {
-      throw new InvalidOAuthStateException();
+      throw new AuthBadRequestException("Invalid OAuth state parameter");
     }
 
     OAuthTokenResponse tokenResponse =

@@ -3,11 +3,10 @@ package com.socially.auth.refresh.application;
 import com.socially.auth.kernel.domain.AuthResult;
 import com.socially.auth.kernel.domain.CookieInstruction;
 import com.socially.auth.kernel.domain.OAuthTokenResponse;
+import com.socially.auth.kernel.domain.exception.AuthUnauthorizedException;
 import com.socially.auth.kernel.domain.properties.AuthProperties;
 import com.socially.auth.kernel.infrastructure.right.adapter.oauth.mapper.AuthResultMapper;
 import com.socially.auth.kernel.infrastructure.right.adapter.user.AuthenticatedUserResolver;
-import com.socially.auth.refresh.application.exception.InvalidRefreshedIdTokenException;
-import com.socially.auth.refresh.application.exception.MissingRefreshSessionException;
 import com.socially.auth.refresh.application.mapper.RefreshCookieInstructionsMapper;
 import com.socially.auth.refresh.application.output.RefreshSessionCommandResult;
 import com.socially.auth.refresh.application.port.left.RefreshSessionUseCase;
@@ -31,7 +30,7 @@ public class RefreshSessionCommandHandler implements RefreshSessionUseCase {
   public RefreshSessionCommandResult execute(Map<String, String> requestCookies) {
     String refreshToken = requestCookies.get(authProperties.refreshCookieName());
     if (!StringUtils.hasText(refreshToken)) {
-      throw new MissingRefreshSessionException();
+      throw new AuthUnauthorizedException("Missing refresh session");
     }
 
     OAuthTokenResponse tokenResponse =
@@ -48,7 +47,7 @@ public class RefreshSessionCommandHandler implements RefreshSessionUseCase {
     try {
       return authResultMapper.toAuthResult(tokenResponse);
     } catch (IllegalArgumentException exception) {
-      throw new InvalidRefreshedIdTokenException(exception.getMessage(), exception);
+      throw new AuthUnauthorizedException(exception.getMessage(), exception);
     }
   }
 }

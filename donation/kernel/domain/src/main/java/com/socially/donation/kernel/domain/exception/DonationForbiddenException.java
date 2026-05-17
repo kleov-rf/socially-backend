@@ -1,4 +1,4 @@
-package com.socially.donation.delete.application;
+package com.socially.donation.kernel.domain.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;

@@ -12,9 +12,9 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
-import com.socially.auth.callback.application.exception.AuthorizationCodeExchangeFailedException;
 import com.socially.auth.callback.infrastructure.right.cognito.mapper.AuthorizationCodeExchangeFormMapper;
 import com.socially.auth.kernel.domain.OAuthTokenResponse;
+import com.socially.auth.kernel.domain.exception.AuthUpstreamFailureException;
 import com.socially.auth.kernel.domain.properties.AuthProperties;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
@@ -178,10 +178,9 @@ class CognitoAuthorizationCodeExchangeHttpClientTest {
 
     server.expect(requestTo("https://oauth.example/oauth2/token")).andRespond(withServerError());
 
-    AuthorizationCodeExchangeFailedException exception =
+    AuthUpstreamFailureException exception =
         assertThrows(
-            AuthorizationCodeExchangeFailedException.class,
-            () -> sut.exchangeAuthorizationCode("c", "v"));
+            AuthUpstreamFailureException.class, () -> sut.exchangeAuthorizationCode("c", "v"));
 
     assertEquals("Failed to exchange OAuth authorization code", exception.getMessage());
   }

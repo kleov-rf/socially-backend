@@ -17,9 +17,9 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.socially.auth.kernel.domain.exception.AuthInternalErrorException;
 import com.socially.auth.kernel.domain.properties.AuthProperties;
 import com.socially.auth.kernel.domain.properties.CredentialsProperties;
-import com.socially.auth.logout.application.exception.BackendCredentialsConfigurationException;
 import com.socially.auth.logout.infrastructure.right.cognito.mapper.RefreshTokenRevocationFormMapper;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -240,10 +240,8 @@ class CognitoRefreshTokenRevocationHttpClientTest {
             Optional.of(new CredentialsProperties.Backend(BACKEND_CLIENT_ID, "{invalid-json")));
     doThrow(new RuntimeException("invalid json")).when(objectMapper).readTree(anyString());
 
-    BackendCredentialsConfigurationException exception =
-        assertThrows(
-            BackendCredentialsConfigurationException.class,
-            () -> sut.revokeRefreshToken("refresh-1"));
+    AuthInternalErrorException exception =
+        assertThrows(AuthInternalErrorException.class, () -> sut.revokeRefreshToken("refresh-1"));
 
     assertEquals("Invalid backend OAuth client secret JSON configuration", exception.getMessage());
   }

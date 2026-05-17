@@ -9,8 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.socially.auth.kernel.domain.AuthUser;
-import com.socially.auth.kernel.domain.exception.AuthenticatedUserNotFoundException;
-import com.socially.auth.kernel.domain.exception.UnauthenticatedRequestException;
+import com.socially.auth.kernel.domain.exception.AuthUnauthorizedException;
 import com.socially.auth.kernel.infrastructure.right.adapter.oauth.mapper.AuthUserFromJwtMapper;
 import com.socially.auth.kernel.infrastructure.right.adapter.user.AuthenticatedUserResolver;
 import com.socially.commons.kernel.domain.valueobject.Id;
@@ -82,11 +81,11 @@ class GetAuthenticatedUserQueryHandlerTest {
     Jwt jwt = jwtWithClaims(baseClaims());
     when(authUserFromJwtMapper.fromJwt(any(Jwt.class))).thenReturn(EXPECTED_AUTH_USER);
     when(authenticatedUserResolver.resolveExisting(EXPECTED_AUTH_USER))
-        .thenThrow(new AuthenticatedUserNotFoundException());
+        .thenThrow(new AuthUnauthorizedException("User not found"));
 
-    AuthenticatedUserNotFoundException exception =
+    AuthUnauthorizedException exception =
         assertThrows(
-            AuthenticatedUserNotFoundException.class,
+            AuthUnauthorizedException.class,
             () -> handler.execute(new JwtAuthenticationToken(jwt)));
 
     assertEquals("User not found", exception.getMessage());
@@ -94,9 +93,8 @@ class GetAuthenticatedUserQueryHandlerTest {
 
   @Test
   void execute_should_throw_exception_if_received_principal_is_not_auth_token() {
-    UnauthenticatedRequestException exception =
-        assertThrows(
-            UnauthenticatedRequestException.class, () -> handler.execute(() -> "anonymous"));
+    AuthUnauthorizedException exception =
+        assertThrows(AuthUnauthorizedException.class, () -> handler.execute(() -> "anonymous"));
 
     assertEquals("Unauthenticated request", exception.getMessage());
   }

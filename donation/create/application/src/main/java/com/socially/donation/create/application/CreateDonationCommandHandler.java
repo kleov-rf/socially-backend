@@ -9,7 +9,7 @@ import com.socially.donation.kernel.domain.entity.Donation;
 import com.socially.donor.findbyuserid.application.input.FindDonorByUserIdQuery;
 import com.socially.donor.findbyuserid.application.port.left.FindDonorByUserIdUseCase;
 import com.socially.donor.kernel.domain.entity.Donor;
-import com.socially.donor.kernel.domain.exception.DonorNotFoundAfterCreateException;
+import com.socially.donor.kernel.domain.exception.DonorInternalErrorException;
 import com.socially.user.kernel.domain.entity.User;
 import java.time.Clock;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +32,7 @@ public final class CreateDonationCommandHandler implements CreateDonationUseCase
     Donor donor =
         findDonorByUserIdUseCase
             .execute(new FindDonorByUserIdQuery(user.id().value().toString()))
-            .orElseThrow(DonorNotFoundAfterCreateException::new);
+            .orElseThrow(() -> new DonorInternalErrorException("Donor not found after create"));
 
     Donation donation = createDonationCommandMapper.toDomain(command, donor, clock.instant());
     donationRepository.create(donation);

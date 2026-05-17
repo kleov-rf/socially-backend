@@ -7,6 +7,8 @@ import com.socially.donation.delete.application.port.left.DeleteDonationUseCase;
 import com.socially.donation.delete.domain.port.right.DeleteDonationRepository;
 import com.socially.donation.getbyid.domain.port.right.FindDonationByIdRepository;
 import com.socially.donation.kernel.domain.entity.Donation;
+import com.socially.donation.kernel.domain.exception.DonationForbiddenException;
+import com.socially.donation.kernel.domain.exception.DonationNotFoundException;
 import com.socially.donor.findbyuserid.application.input.FindDonorByUserIdQuery;
 import com.socially.donor.findbyuserid.application.port.left.FindDonorByUserIdUseCase;
 import com.socially.donor.kernel.domain.entity.Donor;

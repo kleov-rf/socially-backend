@@ -27,7 +27,6 @@ dependencies {
     implementation(project(":donation:get-by-id:domain"))
 
     implementation(libs.spring.context)
-    compileOnly(libs.spring.web)
     compileOnly(libs.jakarta.validation.api)
 
     compileOnly(libs.lombok)

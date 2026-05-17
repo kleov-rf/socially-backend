@@ -9,12 +9,10 @@ import com.socially.auth.kernel.domain.AuthResult;
 import com.socially.auth.kernel.domain.AuthUser;
 import com.socially.auth.kernel.domain.CookieInstruction;
 import com.socially.auth.kernel.domain.OAuthTokenResponse;
-import com.socially.auth.kernel.domain.exception.AuthenticatedUserNotFoundException;
+import com.socially.auth.kernel.domain.exception.AuthUnauthorizedException;
 import com.socially.auth.kernel.domain.properties.AuthProperties;
 import com.socially.auth.kernel.infrastructure.right.adapter.oauth.mapper.AuthResultMapper;
 import com.socially.auth.kernel.infrastructure.right.adapter.user.AuthenticatedUserResolver;
-import com.socially.auth.refresh.application.exception.InvalidRefreshedIdTokenException;
-import com.socially.auth.refresh.application.exception.MissingRefreshSessionException;
 import com.socially.auth.refresh.application.mapper.RefreshCookieInstructionsMapper;
 import com.socially.auth.refresh.domain.port.right.RefreshTokenExchangeOAuthClient;
 import com.socially.commons.kernel.domain.valueobject.Id;
@@ -59,8 +57,8 @@ class RefreshSessionCommandHandlerTest {
   void execute_should_return_exception_when_received_refresh_token_is_not_present() {
     when(authProperties.refreshCookieName()).thenReturn("socially_refresh_token");
 
-    MissingRefreshSessionException exception =
-        assertThrows(MissingRefreshSessionException.class, () -> handler.execute(Map.of()));
+    AuthUnauthorizedException exception =
+        assertThrows(AuthUnauthorizedException.class, () -> handler.execute(Map.of()));
 
     assertEquals("Missing refresh session", exception.getMessage());
   }
@@ -110,11 +108,11 @@ class RefreshSessionCommandHandlerTest {
         .thenReturn(COOKIE_INSTRUCTION);
     when(authResultMapper.toAuthResult(TOKEN_RESPONSE)).thenReturn(AUTH_RESULT);
     when(authenticatedUserResolver.resolveExisting(AUTH_USER))
-        .thenThrow(new AuthenticatedUserNotFoundException());
+        .thenThrow(new AuthUnauthorizedException("User not found"));
 
-    AuthenticatedUserNotFoundException exception =
+    AuthUnauthorizedException exception =
         assertThrows(
-            AuthenticatedUserNotFoundException.class,
+            AuthUnauthorizedException.class,
             () -> handler.execute(Map.of("socially_refresh_token", "refresh-2")));
 
     assertEquals("User not found", exception.getMessage());
@@ -141,9 +139,9 @@ class RefreshSessionCommandHandlerTest {
     when(authResultMapper.toAuthResult(TOKEN_RESPONSE))
         .thenThrow(new IllegalArgumentException("invalid id token"));
 
-    InvalidRefreshedIdTokenException exception =
+    AuthUnauthorizedException exception =
         assertThrows(
-            InvalidRefreshedIdTokenException.class,
+            AuthUnauthorizedException.class,
             () -> handler.execute(Map.of("socially_refresh_token", "refresh-2")));
 
     assertEquals("invalid id token", exception.getMessage());

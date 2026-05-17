@@ -1,9 +1,9 @@
 package com.socially.auth.refresh.infrastructure.right.cognito;
 
 import com.socially.auth.kernel.domain.OAuthTokenResponse;
+import com.socially.auth.kernel.domain.exception.AuthUnauthorizedException;
+import com.socially.auth.kernel.domain.exception.AuthUpstreamFailureException;
 import com.socially.auth.kernel.domain.properties.AuthProperties;
-import com.socially.auth.refresh.application.exception.RefreshTokenExchangeFailedException;
-import com.socially.auth.refresh.application.exception.RefreshTokenRejectedException;
 import com.socially.auth.refresh.domain.port.right.RefreshTokenExchangeOAuthClient;
 import com.socially.auth.refresh.infrastructure.right.cognito.mapper.RefreshTokenExchangeFormMapper;
 import lombok.RequiredArgsConstructor;
@@ -36,11 +36,11 @@ public class CognitoRefreshTokenExchangeHttpClient implements RefreshTokenExchan
           .body(OAuthTokenResponse.class);
     } catch (RestClientResponseException exception) {
       if (exception.getStatusCode().value() == 400) {
-        throw new RefreshTokenRejectedException(exception);
+        throw new AuthUnauthorizedException("Refresh token rejected", exception);
       }
-      throw new RefreshTokenExchangeFailedException("Failed to refresh OAuth tokens", exception);
+      throw new AuthUpstreamFailureException("Failed to refresh OAuth tokens", exception);
     } catch (Exception exception) {
-      throw new RefreshTokenExchangeFailedException("Failed to refresh OAuth tokens", exception);
+      throw new AuthUpstreamFailureException("Failed to refresh OAuth tokens", exception);
     }
   }
 

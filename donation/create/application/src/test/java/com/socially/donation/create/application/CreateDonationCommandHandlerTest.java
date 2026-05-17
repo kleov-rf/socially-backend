@@ -9,7 +9,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.socially.auth.kernel.application.port.left.GetAuthenticatedUserUseCase;
-import com.socially.auth.kernel.domain.exception.UnauthenticatedRequestException;
+import com.socially.auth.kernel.domain.exception.AuthUnauthorizedException;
 import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donation.create.application.input.CreateDonationCommand;
 import com.socially.donation.create.application.input.mapper.CreateDonationCommandMapper;
@@ -20,7 +20,7 @@ import com.socially.donation.kernel.domain.valueobject.Title;
 import com.socially.donor.findbyuserid.application.input.FindDonorByUserIdQuery;
 import com.socially.donor.findbyuserid.application.port.left.FindDonorByUserIdUseCase;
 import com.socially.donor.kernel.domain.entity.Donor;
-import com.socially.donor.kernel.domain.exception.DonorNotFoundAfterCreateException;
+import com.socially.donor.kernel.domain.exception.DonorInternalErrorException;
 import com.socially.user.kernel.domain.entity.User;
 import com.socially.user.kernel.domain.valueobject.Email;
 import java.security.Principal;
@@ -157,8 +157,8 @@ class CreateDonationCommandHandlerTest {
     when(findDonorByUserIdUseCase.execute(new FindDonorByUserIdQuery(USER_ID)))
         .thenReturn(Optional.empty());
 
-    DonorNotFoundAfterCreateException exception =
-        assertThrows(DonorNotFoundAfterCreateException.class, () -> handler.execute(command));
+    DonorInternalErrorException exception =
+        assertThrows(DonorInternalErrorException.class, () -> handler.execute(command));
 
     assertEquals("Donor not found after create", exception.getMessage());
     verifyNoInteractions(createDonationCommandMapper, donationRepository);
@@ -167,9 +167,11 @@ class CreateDonationCommandHandlerTest {
   @Test
   void execute_should_throw_and_stop_when_user_is_unauthenticated() {
     when(getAuthenticatedUserUseCase.execute(PRINCIPAL))
-        .thenThrow(new UnauthenticatedRequestException());
+        .thenThrow(new AuthUnauthorizedException("Unauthenticated request"));
 
-    assertThrows(UnauthenticatedRequestException.class, () -> handler.execute(command));
+    AuthUnauthorizedException exception =
+        assertThrows(AuthUnauthorizedException.class, () -> handler.execute(command));
+    assertEquals("Unauthenticated request", exception.getMessage());
     verifyNoInteractions(findDonorByUserIdUseCase, createDonationCommandMapper, donationRepository);
   }
 }

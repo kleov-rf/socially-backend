@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.socially.auth.kernel.domain.AuthUser;
-import com.socially.auth.kernel.domain.exception.MissingOidcIdentityClaimsException;
+import com.socially.auth.kernel.domain.exception.AuthBadRequestException;
 import org.junit.jupiter.api.Test;
 
 class AuthUserClaimsValidatorTest {
@@ -24,10 +24,9 @@ class AuthUserClaimsValidatorTest {
   void requireIssuerAndSubject_should_throw_when_issuer_is_missing() {
     AuthUser authUser = new AuthUser(null, "sub-1", "user@example.com", "Jane", "Doe");
 
-    MissingOidcIdentityClaimsException exception =
+    AuthBadRequestException exception =
         assertThrows(
-            MissingOidcIdentityClaimsException.class,
-            () -> validator.requireIssuerAndSubject(authUser));
+            AuthBadRequestException.class, () -> validator.requireIssuerAndSubject(authUser));
 
     assertEquals("OIDC issuer and subject claims are required", exception.getMessage());
   }
@@ -37,10 +36,9 @@ class AuthUserClaimsValidatorTest {
     AuthUser authUser =
         new AuthUser("https://idp.example", null, "user@example.com", "Jane", "Doe");
 
-    MissingOidcIdentityClaimsException exception =
+    AuthBadRequestException exception =
         assertThrows(
-            MissingOidcIdentityClaimsException.class,
-            () -> validator.requireIssuerAndSubject(authUser));
+            AuthBadRequestException.class, () -> validator.requireIssuerAndSubject(authUser));
 
     assertEquals("OIDC issuer and subject claims are required", exception.getMessage());
   }
@@ -49,9 +47,7 @@ class AuthUserClaimsValidatorTest {
   void requireIssuerAndSubject_should_throw_when_issuer_is_blank() {
     AuthUser authUser = new AuthUser("   ", "sub-1", "user@example.com", "Jane", "Doe");
 
-    assertThrows(
-        MissingOidcIdentityClaimsException.class,
-        () -> validator.requireIssuerAndSubject(authUser));
+    assertThrows(AuthBadRequestException.class, () -> validator.requireIssuerAndSubject(authUser));
   }
 
   @Test
@@ -59,8 +55,6 @@ class AuthUserClaimsValidatorTest {
     AuthUser authUser =
         new AuthUser("https://idp.example", "   ", "user@example.com", "Jane", "Doe");
 
-    assertThrows(
-        MissingOidcIdentityClaimsException.class,
-        () -> validator.requireIssuerAndSubject(authUser));
+    assertThrows(AuthBadRequestException.class, () -> validator.requireIssuerAndSubject(authUser));
   }
 }

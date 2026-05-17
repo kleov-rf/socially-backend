@@ -8,8 +8,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.socially.auth.kernel.domain.AuthUser;
-import com.socially.auth.kernel.domain.exception.AuthenticatedUserNotFoundException;
-import com.socially.auth.kernel.domain.exception.MissingOidcIdentityClaimsException;
+import com.socially.auth.kernel.domain.exception.AuthBadRequestException;
+import com.socially.auth.kernel.domain.exception.AuthUnauthorizedException;
 import com.socially.auth.kernel.infrastructure.right.adapter.user.mapper.AuthUserToCreateUserCommandMapper;
 import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.user.create.application.input.CreateUserCommand;
@@ -79,11 +79,14 @@ class AuthenticatedUserResolverTest {
   @Test
   void resolve_should_throw_when_auth_user_claims_validator_throws() {
     AuthUser invalidUser = new AuthUser(null, "sub-1", "user@example.com", "Jane", "Doe");
-    org.mockito.Mockito.doThrow(new MissingOidcIdentityClaimsException())
+    org.mockito.Mockito.doThrow(
+            new AuthBadRequestException("OIDC issuer and subject claims are required"))
         .when(authUserClaimsValidator)
         .requireIssuerAndSubject(invalidUser);
 
-    assertThrows(MissingOidcIdentityClaimsException.class, () -> resolver.resolve(invalidUser));
+    AuthBadRequestException exception =
+        assertThrows(AuthBadRequestException.class, () -> resolver.resolve(invalidUser));
+    assertEquals("OIDC issuer and subject claims are required", exception.getMessage());
   }
 
   @Test
@@ -209,9 +212,8 @@ class AuthenticatedUserResolverTest {
   void resolveExisting_should_throw_authenticated_user_not_found_when_federated_identity_missing() {
     when(findUserByFederatedIdentityUseCase.execute(FEDERATED_QUERY)).thenReturn(Optional.empty());
 
-    AuthenticatedUserNotFoundException exception =
-        assertThrows(
-            AuthenticatedUserNotFoundException.class, () -> resolver.resolveExisting(AUTH_USER));
+    AuthUnauthorizedException exception =
+        assertThrows(AuthUnauthorizedException.class, () -> resolver.resolveExisting(AUTH_USER));
 
     assertEquals("User not found", exception.getMessage());
   }

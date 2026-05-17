@@ -25,6 +25,7 @@ dependencyManagement {
 dependencies {
     api(project(":commons:kernel:domain"))
 
+    compileOnly(libs.spring.web)
     compileOnly(libs.lombok)
     annotationProcessor(libs.lombok)
 

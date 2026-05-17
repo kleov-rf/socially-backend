@@ -5,14 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.socially.auth.callback.application.exception.InvalidOAuthStateException;
-import com.socially.auth.callback.application.exception.MissingTemporaryOAuthCookiesException;
 import com.socially.auth.callback.application.mapper.CallbackCookieInstructionsMapper;
 import com.socially.auth.callback.domain.port.right.AuthorizationCodeExchangeOAuthClient;
 import com.socially.auth.kernel.domain.AuthResult;
 import com.socially.auth.kernel.domain.AuthUser;
 import com.socially.auth.kernel.domain.CookieInstruction;
 import com.socially.auth.kernel.domain.OAuthTokenResponse;
+import com.socially.auth.kernel.domain.exception.AuthBadRequestException;
 import com.socially.auth.kernel.domain.properties.AuthProperties;
 import com.socially.auth.kernel.infrastructure.right.adapter.oauth.mapper.AuthResultMapper;
 import com.socially.auth.kernel.infrastructure.right.adapter.user.AuthenticatedUserResolver;
@@ -66,9 +65,9 @@ class CompleteOAuthCallbackCommandHandlerTest {
     when(authProperties.stateCookieName()).thenReturn(STATE_COOKIE_NAME);
     when(authProperties.pkceCookieName()).thenReturn(PKCE_COOKIE_NAME);
 
-    MissingTemporaryOAuthCookiesException exception =
+    AuthBadRequestException exception =
         assertThrows(
-            MissingTemporaryOAuthCookiesException.class,
+            AuthBadRequestException.class,
             () -> sut.execute(CODE, STATE, Map.of(PKCE_COOKIE_NAME, CODE_VERIFIER)));
 
     assertEquals("Missing temporary OAuth cookies", exception.getMessage());
@@ -79,9 +78,9 @@ class CompleteOAuthCallbackCommandHandlerTest {
     when(authProperties.stateCookieName()).thenReturn(STATE_COOKIE_NAME);
     when(authProperties.pkceCookieName()).thenReturn(PKCE_COOKIE_NAME);
 
-    MissingTemporaryOAuthCookiesException exception =
+    AuthBadRequestException exception =
         assertThrows(
-            MissingTemporaryOAuthCookiesException.class,
+            AuthBadRequestException.class,
             () -> sut.execute(CODE, STATE, Map.of(STATE_COOKIE_NAME, STATE)));
 
     assertEquals("Missing temporary OAuth cookies", exception.getMessage());
@@ -92,9 +91,9 @@ class CompleteOAuthCallbackCommandHandlerTest {
     when(authProperties.stateCookieName()).thenReturn(STATE_COOKIE_NAME);
     when(authProperties.pkceCookieName()).thenReturn(PKCE_COOKIE_NAME);
 
-    InvalidOAuthStateException exception =
+    AuthBadRequestException exception =
         assertThrows(
-            InvalidOAuthStateException.class,
+            AuthBadRequestException.class,
             () ->
                 sut.execute(
                     CODE,

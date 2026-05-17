@@ -2,9 +2,9 @@ package com.socially.auth.logout.infrastructure.right.cognito;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.socially.auth.kernel.domain.exception.AuthInternalErrorException;
 import com.socially.auth.kernel.domain.properties.AuthProperties;
 import com.socially.auth.kernel.domain.properties.CredentialsProperties;
-import com.socially.auth.logout.application.exception.BackendCredentialsConfigurationException;
 import com.socially.auth.logout.domain.port.right.RefreshTokenRevocationOAuthClient;
 import com.socially.auth.logout.infrastructure.right.cognito.mapper.RefreshTokenRevocationFormMapper;
 import java.nio.charset.StandardCharsets;
@@ -75,7 +75,7 @@ public class CognitoRefreshTokenRevocationHttpClient implements RefreshTokenRevo
       }
       return clientSecretNode.asText();
     } catch (Exception exception) {
-      throw new BackendCredentialsConfigurationException(
+      throw new AuthInternalErrorException(
           "Invalid backend OAuth client secret JSON configuration", exception);
     }
   }
