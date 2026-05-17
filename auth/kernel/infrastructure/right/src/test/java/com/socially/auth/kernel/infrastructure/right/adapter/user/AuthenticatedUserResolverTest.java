@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.socially.auth.kernel.domain.AuthUser;
+import com.socially.auth.kernel.domain.exception.AuthenticatedUserNotFoundException;
 import com.socially.auth.kernel.domain.exception.MissingOidcIdentityClaimsException;
 import com.socially.auth.kernel.infrastructure.right.adapter.user.mapper.AuthUserToCreateUserCommandMapper;
 import com.socially.commons.kernel.domain.valueobject.Id;
@@ -202,5 +203,79 @@ class AuthenticatedUserResolverTest {
     User result = resolver.resolve(AUTH_USER);
 
     assertEquals(REFETCHED_USER, result);
+  }
+
+  @Test
+  void resolveExisting_should_throw_authenticated_user_not_found_when_federated_identity_missing() {
+    when(findUserByFederatedIdentityUseCase.execute(FEDERATED_QUERY)).thenReturn(Optional.empty());
+
+    AuthenticatedUserNotFoundException exception =
+        assertThrows(
+            AuthenticatedUserNotFoundException.class, () -> resolver.resolveExisting(AUTH_USER));
+
+    assertEquals("User not found", exception.getMessage());
+  }
+
+  @Test
+  void resolveExisting_should_call_update_user_profile_when_federated_identity_exists() {
+    User updatedUser =
+        User.create(
+            EXISTING_USER.id(),
+            Email.from("updated@example.com"),
+            "Janet",
+            "Doe",
+            EXISTING_USER.createdAt());
+    when(findUserByFederatedIdentityUseCase.execute(FEDERATED_QUERY))
+        .thenReturn(Optional.of(EXISTING_USER))
+        .thenReturn(Optional.of(updatedUser));
+
+    resolver.resolveExisting(AUTH_USER);
+
+    verify(updateUserProfileUseCase)
+        .execute(
+            new UpdateUserProfileCommand(
+                EXISTING_USER.id().value().toString(),
+                "https://idp.example",
+                "sub-1",
+                "user@example.com",
+                "Jane",
+                "Doe"));
+  }
+
+  @Test
+  void resolveExisting_should_never_call_create_user() {
+    User updatedUser =
+        User.create(
+            EXISTING_USER.id(),
+            Email.from("updated@example.com"),
+            "Janet",
+            "Doe",
+            EXISTING_USER.createdAt());
+    when(findUserByFederatedIdentityUseCase.execute(FEDERATED_QUERY))
+        .thenReturn(Optional.of(EXISTING_USER))
+        .thenReturn(Optional.of(updatedUser));
+
+    resolver.resolveExisting(AUTH_USER);
+
+    verify(createUserUseCase, never()).execute(org.mockito.ArgumentMatchers.any());
+    verify(linkFederatedIdentityUseCase, never()).execute(org.mockito.ArgumentMatchers.any());
+  }
+
+  @Test
+  void resolveExisting_should_return_refetched_user_after_profile_update() {
+    User updatedUser =
+        User.create(
+            EXISTING_USER.id(),
+            Email.from("updated@example.com"),
+            "Janet",
+            "Doe",
+            EXISTING_USER.createdAt());
+    when(findUserByFederatedIdentityUseCase.execute(FEDERATED_QUERY))
+        .thenReturn(Optional.of(EXISTING_USER))
+        .thenReturn(Optional.of(updatedUser));
+
+    User result = resolver.resolveExisting(AUTH_USER);
+
+    assertEquals(updatedUser, result);
   }
 }

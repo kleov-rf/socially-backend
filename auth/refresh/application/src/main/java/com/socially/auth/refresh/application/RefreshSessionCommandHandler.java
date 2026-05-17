@@ -40,7 +40,7 @@ public class RefreshSessionCommandHandler implements RefreshSessionUseCase {
     CookieInstruction cookieInstruction =
         refreshCookieInstructionsMapper.toCookieInstruction(tokenResponse);
     var authResult = decodeAuthResult(tokenResponse);
-    User user = authenticatedUserResolver.resolve(authResult.user());
+    User user = authenticatedUserResolver.resolveExisting(authResult.user());
     return new RefreshSessionCommandResult(authResult, user, cookieInstruction);
   }
 

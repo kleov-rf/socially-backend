@@ -1,6 +1,7 @@
 package com.socially.auth.kernel.infrastructure.right.adapter.user;
 
 import com.socially.auth.kernel.domain.AuthUser;
+import com.socially.auth.kernel.domain.exception.AuthenticatedUserNotFoundException;
 import com.socially.auth.kernel.infrastructure.right.adapter.user.mapper.AuthUserToCreateUserCommandMapper;
 import com.socially.user.create.application.input.CreateUserCommand;
 import com.socially.user.create.application.port.left.CreateUserUseCase;
@@ -35,6 +36,18 @@ public final class AuthenticatedUserResolver {
         .execute(query)
         .map(existing -> updateExistingUser(existing, authUser))
         .orElseGet(() -> createAndLinkUser(authUser));
+  }
+
+  public User resolveExisting(AuthUser authUser) {
+    authUserClaimsValidator.requireIssuerAndSubject(authUser);
+
+    FindUserByFederatedIdentityQuery query =
+        new FindUserByFederatedIdentityQuery(authUser.issuer(), authUser.subject());
+
+    return findUserByFederatedIdentityUseCase
+        .execute(query)
+        .map(existing -> updateExistingUser(existing, authUser))
+        .orElseThrow(AuthenticatedUserNotFoundException::new);
   }
 
   private User updateExistingUser(User existing, AuthUser authUser) {

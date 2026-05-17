@@ -1,5 +1,6 @@
 package com.socially.app.infrastructure.left.adapter.http.exception;
 
+import com.socially.auth.kernel.domain.exception.AuthenticatedUserNotFoundException;
 import com.socially.auth.me.application.exception.MeUserNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -27,6 +28,14 @@ public class GlobalExceptionLoggingHandler {
       MeUserNotFoundException exception) {
     log.warn("Handled user not found error: {}", exception.getMessage());
     return ResponseEntity.status(HttpStatus.NOT_FOUND)
+        .body(new GlobalErrorResponse(exception.getMessage()));
+  }
+
+  @ExceptionHandler(AuthenticatedUserNotFoundException.class)
+  public ResponseEntity<GlobalErrorResponse> handleAuthenticatedUserNotFound(
+      AuthenticatedUserNotFoundException exception) {
+    log.warn("Handled authenticated user not found error: {}", exception.getMessage());
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
         .body(new GlobalErrorResponse(exception.getMessage()));
   }
 

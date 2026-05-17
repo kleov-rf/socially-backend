@@ -26,6 +26,7 @@ dependencies {
     implementation(project(":auth:me:application"))
     implementation(project(":auth:logout:infrastructure:left"))
     implementation(project(":auth:refresh:infrastructure:left"))
+    implementation(project(":auth:kernel:domain"))
     implementation(project(":auth:kernel:infrastructure:left"))
     implementation(project(":donation:create:infrastructure:left"))
     implementation(project(":donor:create:infrastructure:right"))

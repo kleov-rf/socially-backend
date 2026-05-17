@@ -9,6 +9,7 @@ import com.socially.auth.kernel.domain.AuthResult;
 import com.socially.auth.kernel.domain.AuthUser;
 import com.socially.auth.kernel.domain.CookieInstruction;
 import com.socially.auth.kernel.domain.OAuthTokenResponse;
+import com.socially.auth.kernel.domain.exception.AuthenticatedUserNotFoundException;
 import com.socially.auth.kernel.domain.properties.AuthProperties;
 import com.socially.auth.kernel.infrastructure.right.adapter.oauth.mapper.AuthResultMapper;
 import com.socially.auth.kernel.infrastructure.right.adapter.user.AuthenticatedUserResolver;
@@ -97,7 +98,26 @@ class RefreshSessionCommandHandlerTest {
 
     handler.execute(Map.of("socially_refresh_token", "refresh-2"));
 
-    verify(authenticatedUserResolver).resolve(AUTH_USER);
+    verify(authenticatedUserResolver).resolveExisting(AUTH_USER);
+  }
+
+  @Test
+  void execute_should_throw_authenticated_user_not_found_when_resolver_reports_missing_user() {
+    when(authProperties.refreshCookieName()).thenReturn("socially_refresh_token");
+    when(refreshTokenExchangeOAuthClient.exchangeRefreshToken("refresh-2"))
+        .thenReturn(TOKEN_RESPONSE);
+    when(refreshCookieInstructionsMapper.toCookieInstruction(TOKEN_RESPONSE))
+        .thenReturn(COOKIE_INSTRUCTION);
+    when(authResultMapper.toAuthResult(TOKEN_RESPONSE)).thenReturn(AUTH_RESULT);
+    when(authenticatedUserResolver.resolveExisting(AUTH_USER))
+        .thenThrow(new AuthenticatedUserNotFoundException());
+
+    AuthenticatedUserNotFoundException exception =
+        assertThrows(
+            AuthenticatedUserNotFoundException.class,
+            () -> handler.execute(Map.of("socially_refresh_token", "refresh-2")));
+
+    assertEquals("User not found", exception.getMessage());
   }
 
   @Test
@@ -136,6 +156,6 @@ class RefreshSessionCommandHandlerTest {
     when(refreshCookieInstructionsMapper.toCookieInstruction(TOKEN_RESPONSE))
         .thenReturn(COOKIE_INSTRUCTION);
     when(authResultMapper.toAuthResult(TOKEN_RESPONSE)).thenReturn(AUTH_RESULT);
-    when(authenticatedUserResolver.resolve(AUTH_USER)).thenReturn(RESOLVED_USER);
+    when(authenticatedUserResolver.resolveExisting(AUTH_USER)).thenReturn(RESOLVED_USER);
   }
 }
