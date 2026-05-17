@@ -164,6 +164,36 @@ public class DonationStepDefinitions {
         mockMvc
             .perform(
                 patch("/api/donations/" + id)
+                    .with(cucumberDonorJwt())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(requestBody)))
+            .andReturn();
+  }
+
+  @When("I partially update the donation by id without authentication")
+  public void iPartiallyUpdateTheDonationByIdWithoutAuthentication() throws Exception {
+    ObjectNode requestBody = objectMapper.createObjectNode();
+    requestBody.put("title", "Unauthorized update");
+
+    mvcResult =
+        mockMvc
+            .perform(
+                patch("/api/donations/" + id)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(requestBody)))
+            .andReturn();
+  }
+
+  @When("I partially update the donation by id as another user")
+  public void iPartiallyUpdateTheDonationByIdAsAnotherUser() throws Exception {
+    ObjectNode requestBody = objectMapper.createObjectNode();
+    requestBody.put("title", "Forbidden update");
+
+    mvcResult =
+        mockMvc
+            .perform(
+                patch("/api/donations/" + id)
+                    .with(cucumberOtherUserJwt())
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(requestBody)))
             .andReturn();

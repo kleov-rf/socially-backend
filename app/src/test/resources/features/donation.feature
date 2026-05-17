@@ -23,6 +23,20 @@ Feature: Donation management
     When I delete the donation by id as another user
     Then the response status should be 403
 
+  Scenario: Updating a donation without authentication is rejected
+    Given I have a donation with random id, title "No Auth Update" and description "Should not be updated"
+    When I create the donation
+    Then the response status should be 201
+    When I partially update the donation by id without authentication
+    Then the response status should be 401
+
+  Scenario: Updating another user's donation is rejected
+    Given I have a donation with random id, title "Protected Update Donation" and description "Only owner can update"
+    When I create the donation
+    Then the response status should be 201
+    When I partially update the donation by id as another user
+    Then the response status should be 403
+
   Scenario: Create a donation and retrieve it by ID
     Given I have a donation with random id, title "Winter Clothes Drive" and description "Collecting warm clothes for homeless shelters"
     When I create the donation
