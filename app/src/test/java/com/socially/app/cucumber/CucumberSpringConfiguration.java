@@ -1,5 +1,6 @@
 package com.socially.app.cucumber;
 
+import static org.mockito.Mockito.mock;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 
 import com.sun.net.httpserver.HttpExchange;
@@ -14,6 +15,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -43,7 +46,9 @@ public class CucumberSpringConfiguration {
 
   @DynamicPropertySource
   static void configureDatasource(DynamicPropertyRegistry registry) {
-    registry.add("spring.security.oauth2.resourceserver.jwt.issuer-uri", () -> "");
+    registry.add(
+        "spring.security.oauth2.resourceserver.jwt.issuer-uri", () -> CucumberOAuthJwt.TEST_ISSUER);
+    registry.add("auth.oauth.use-ministack", () -> "false");
     registry.add("spring.datasource.url", postgres::getJdbcUrl);
     registry.add("spring.datasource.username", postgres::getUsername);
     registry.add("spring.datasource.password", postgres::getPassword);
@@ -117,6 +122,12 @@ public class CucumberSpringConfiguration {
 
   @TestConfiguration
   static class TestConfig {
+
+    @Bean
+    @Primary
+    JwtDecoder cucumberJwtDecoder() {
+      return mock(JwtDecoder.class);
+    }
 
     @Bean
     public MockMvc mockMvc(WebApplicationContext webApplicationContext) {

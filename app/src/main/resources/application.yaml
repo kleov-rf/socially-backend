@@ -1,4 +1,6 @@
 spring:
+  config:
+    import: optional:classpath:error-handling.yaml
   application:
     name: socially-backend
   datasource:

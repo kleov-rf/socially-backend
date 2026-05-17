@@ -1,7 +1,6 @@
 package com.socially.donation.update.infrastructure.left.adapter.http.update;
 
 import com.socially.app.infrastructure.left.adapter.http.logging.LogOperation;
-import com.socially.donation.update.application.DonationNotFoundException;
 import com.socially.donation.update.application.port.left.UpdateDonationUseCase;
 import com.socially.donation.update.infrastructure.left.adapter.http.update.input.UpdateDonationRequest;
 import com.socially.donation.update.infrastructure.left.adapter.http.update.input.mapper.UpdateDonationRequestMapper;
@@ -26,11 +25,7 @@ public class UpdateDonationController {
   public ResponseEntity<Void> patch(
       @PathVariable String id, @RequestBody UpdateDonationRequest request) {
     var command = updateDonationRequestMapper.toCommand(id, request);
-    try {
-      updateDonationUseCase.execute(command);
-      return ResponseEntity.noContent().build();
-    } catch (DonationNotFoundException exception) {
-      return ResponseEntity.notFound().build();
-    }
+    updateDonationUseCase.execute(command);
+    return ResponseEntity.noContent().build();
   }
 }

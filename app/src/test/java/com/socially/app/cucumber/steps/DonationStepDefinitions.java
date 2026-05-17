@@ -18,6 +18,7 @@ import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,18 +52,41 @@ public class DonationStepDefinitions {
   private String lastOrder;
   private String lastQuery;
 
-  @Before("@donation")
-  public void resetScenarioState() {
-    jdbcTemplate.execute("DELETE FROM donations");
-    jdbcTemplate.execute("DELETE FROM donors");
-    jdbcTemplate.execute("DELETE FROM federated_identities");
-    jdbcTemplate.execute("DELETE FROM users");
+  private static final String CUCUMBER_DONOR_USER_ID = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeee0001";
+  private static final String CUCUMBER_DONOR_ID = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeee0002";
+  private static final String CUCUMBER_OTHER_USER_ID = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeee0003";
+  private static final String CUCUMBER_OTHER_DONOR_ID = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeee0004";
+  private static final String CUCUMBER_FEDERATED_IDENTITY_ID_PREFIX =
+      "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeee001";
+
+  @Before("@donation and not @auth")
+  public void resetDonationScenarioState() {
+    resetDonationData();
+    seedCucumberDonorUsers();
     firstDonationId = null;
     secondDonationId = null;
     lastCursor = null;
     lastPageSize = null;
     lastOrder = null;
     lastQuery = null;
+  }
+
+  @Before("@donation and @auth")
+  public void resetAuthDonationScenarioState() {
+    jdbcTemplate.execute("DELETE FROM donations");
+    firstDonationId = null;
+    secondDonationId = null;
+    lastCursor = null;
+    lastPageSize = null;
+    lastOrder = null;
+    lastQuery = null;
+  }
+
+  private void resetDonationData() {
+    jdbcTemplate.execute("DELETE FROM donations");
+    jdbcTemplate.execute("DELETE FROM donors");
+    jdbcTemplate.execute("DELETE FROM federated_identities");
+    jdbcTemplate.execute("DELETE FROM users");
   }
 
   @Given("I have a donation with random id, title {string} and description {string}")
@@ -375,6 +399,77 @@ public class DonationStepDefinitions {
     Instant lastUpdatedAt = Instant.parse(jsonNode.get("lastUpdatedAt").asText());
 
     assertThat(lastUpdatedAt).isAfter(createdAt);
+  }
+
+  private void seedCucumberDonorUsers() {
+    String issuer = CucumberOAuthJwt.TEST_ISSUER;
+    Timestamp createdAt = Timestamp.from(Instant.parse("2024-01-01T00:00:00Z"));
+
+    jdbcTemplate.update(
+        """
+        INSERT INTO users (id, email, given_name, family_name, created_at)
+        VALUES (?, ?, ?, ?, ?)
+        """,
+        UUID.fromString(CUCUMBER_DONOR_USER_ID),
+        "donor@example.com",
+        "Donor",
+        "User",
+        createdAt);
+    jdbcTemplate.update(
+        """
+        INSERT INTO federated_identities (id, user_id, issuer, subject, email, created_at)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """,
+        UUID.fromString(CUCUMBER_FEDERATED_IDENTITY_ID_PREFIX + "1"),
+        UUID.fromString(CUCUMBER_DONOR_USER_ID),
+        issuer,
+        "cucumber-donor-sub",
+        "donor@example.com",
+        createdAt);
+    jdbcTemplate.update(
+        """
+        INSERT INTO donors (id, user_id, email, given_name, family_name, created_at)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """,
+        UUID.fromString(CUCUMBER_DONOR_ID),
+        UUID.fromString(CUCUMBER_DONOR_USER_ID),
+        "donor@example.com",
+        "Donor",
+        "User",
+        createdAt);
+
+    jdbcTemplate.update(
+        """
+        INSERT INTO users (id, email, given_name, family_name, created_at)
+        VALUES (?, ?, ?, ?, ?)
+        """,
+        UUID.fromString(CUCUMBER_OTHER_USER_ID),
+        "other@example.com",
+        "Other",
+        "User",
+        createdAt);
+    jdbcTemplate.update(
+        """
+        INSERT INTO federated_identities (id, user_id, issuer, subject, email, created_at)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """,
+        UUID.fromString(CUCUMBER_FEDERATED_IDENTITY_ID_PREFIX + "2"),
+        UUID.fromString(CUCUMBER_OTHER_USER_ID),
+        issuer,
+        "cucumber-other-user-sub",
+        "other@example.com",
+        createdAt);
+    jdbcTemplate.update(
+        """
+        INSERT INTO donors (id, user_id, email, given_name, family_name, created_at)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """,
+        UUID.fromString(CUCUMBER_OTHER_DONOR_ID),
+        UUID.fromString(CUCUMBER_OTHER_USER_ID),
+        "other@example.com",
+        "Other",
+        "User",
+        createdAt);
   }
 
   private static RequestPostProcessor cucumberDonorJwt() {

@@ -32,6 +32,7 @@ dependencies {
     implementation(project(":user:kernel:domain"))
 
     implementation(libs.spring.context)
+    compileOnly(libs.spring.web)
     compileOnly(libs.jakarta.validation.api)
 
     compileOnly(libs.lombok)

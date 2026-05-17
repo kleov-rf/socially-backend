@@ -1,6 +1,7 @@
 package com.socially.donation.delete.infrastructure.left.adapter.http.delete;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
@@ -53,24 +54,22 @@ class DeleteDonationControllerTest {
   }
 
   @Test
-  void delete_should_return_not_found_when_handler_throws_donation_not_found() {
+  void delete_should_propagate_donation_not_found_exception() {
     doThrow(new DonationNotFoundException(DONATION_ID))
         .when(deleteDonationUseCase)
         .execute(any(DeleteDonationCommand.class));
 
-    var response = controller.delete(DONATION_ID, principal);
-
-    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    assertThatThrownBy(() -> controller.delete(DONATION_ID, principal))
+        .isInstanceOf(DonationNotFoundException.class);
   }
 
   @Test
-  void delete_should_return_forbidden_when_handler_throws_donation_forbidden() {
+  void delete_should_propagate_donation_forbidden_exception() {
     doThrow(new DonationForbiddenException(DONATION_ID))
         .when(deleteDonationUseCase)
         .execute(any(DeleteDonationCommand.class));
 
-    var response = controller.delete(DONATION_ID, principal);
-
-    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    assertThatThrownBy(() -> controller.delete(DONATION_ID, principal))
+        .isInstanceOf(DonationForbiddenException.class);
   }
 }

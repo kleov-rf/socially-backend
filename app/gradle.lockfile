@@ -40,6 +40,7 @@ io.cucumber:messages:27.2.0=testCompileClasspath,testRuntimeClasspath
 io.cucumber:query:13.6.0=testCompileClasspath,testRuntimeClasspath
 io.cucumber:tag-expressions:6.1.2=testCompileClasspath,testRuntimeClasspath
 io.cucumber:testng-xml-formatter:0.3.1=testCompileClasspath,testRuntimeClasspath
+io.github.wimdeblauwe:error-handling-spring-boot-starter:5.1.0=compileClasspath,productionRuntimeClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
 io.micrometer:micrometer-commons:1.16.5=compileClasspath,productionRuntimeClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
 io.micrometer:micrometer-core:1.16.5=compileClasspath,productionRuntimeClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
 io.micrometer:micrometer-jakarta9:1.16.5=compileClasspath,productionRuntimeClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath

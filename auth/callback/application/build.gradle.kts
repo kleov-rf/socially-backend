@@ -29,6 +29,7 @@ dependencies {
     implementation(project(":user:kernel:domain"))
 
     implementation(libs.spring.context)
+    compileOnly(libs.spring.web)
 
     compileOnly(libs.lombok)
     annotationProcessor(libs.lombok)

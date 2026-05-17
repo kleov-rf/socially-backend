@@ -27,6 +27,7 @@ dependencies {
     implementation(project(":auth:logout:domain"))
 
     implementation(libs.spring.context)
+    compileOnly(libs.spring.web)
 
     compileOnly(libs.lombok)
     annotationProcessor(libs.lombok)

@@ -1,6 +1,7 @@
 package com.socially.donation.update.infrastructure.left.adapter.http.update;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -63,7 +64,7 @@ class UpdateDonationControllerTest {
   }
 
   @Test
-  void patch_should_return_not_found_if_donation_not_found() {
+  void patch_should_propagate_donation_not_found_exception() {
     var request = new UpdateDonationRequest("Updated Title", "Updated Description");
     var mappedCommand =
         new UpdateDonationCommand(DONATION_ID, "Updated Title", "Updated Description");
@@ -72,8 +73,7 @@ class UpdateDonationControllerTest {
         .when(updateDonationUseCase)
         .execute(mappedCommand);
 
-    var response = controller.patch(DONATION_ID, request);
-
-    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    assertThatThrownBy(() -> controller.patch(DONATION_ID, request))
+        .isInstanceOf(DonationNotFoundException.class);
   }
 }

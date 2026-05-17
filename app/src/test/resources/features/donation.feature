@@ -7,14 +7,14 @@ Feature: Donation management
   Scenario: Creating a donation without authentication is rejected
     Given I have a donation with random id, title "No Auth" and description "Should not be created"
     When I create the donation without authentication
-    Then the response status should be 403
+    Then the response status should be 401
 
   Scenario: Deleting a donation without authentication is rejected
     Given I have a donation with random id, title "No Auth Delete" and description "Should not be deleted"
     When I create the donation
     Then the response status should be 201
     When I delete the donation by id without authentication
-    Then the response status should be 403
+    Then the response status should be 401
 
   Scenario: Deleting another user's donation is rejected
     Given I have a donation with random id, title "Protected Donation" and description "Only owner can delete"

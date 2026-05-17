@@ -31,6 +31,9 @@ dependencies {
     annotationProcessor(libs.lombok)
 
     testImplementation(libs.spring.boot.starter.webmvc.test)
+    testImplementation(libs.spring.boot.starter.security)
+    testImplementation(libs.spring.security.test)
+    testImplementation(libs.error.handling.spring.boot.starter)
     testRuntimeOnly(libs.junit.platform.launcher)
 }
 

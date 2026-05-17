@@ -27,6 +27,7 @@ dependencies {
     api(libs.spring.boot.starter)
     api(libs.spring.boot.starter.oauth2.resource.server)
 
+    compileOnly(libs.spring.web)
     compileOnly(libs.lombok)
     annotationProcessor(libs.lombok)
 

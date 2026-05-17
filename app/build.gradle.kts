@@ -48,6 +48,7 @@ dependencies {
     implementation(libs.spring.boot.starter.flyway)
     implementation(libs.flyway.database.postgresql)
     implementation(libs.logstash.logback.encoder)
+    implementation(libs.error.handling.spring.boot.starter)
 
     compileOnly(libs.lombok)
     annotationProcessor(libs.lombok)
