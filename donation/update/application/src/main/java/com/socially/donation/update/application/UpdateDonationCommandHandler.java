@@ -2,6 +2,7 @@ package com.socially.donation.update.application;
 
 import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donation.getbyid.domain.port.right.FindDonationByIdRepository;
+import com.socially.donation.kernel.application.port.left.AssertDonationOwnedByPrincipalUseCase;
 import com.socially.donation.kernel.domain.entity.Donation;
 import com.socially.donation.kernel.domain.exception.DonationNotFoundException;
 import com.socially.donation.kernel.domain.valueobject.Description;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 public final class UpdateDonationCommandHandler implements UpdateDonationUseCase {
 
   private final FindDonationByIdRepository findDonationByIdRepository;
+  private final AssertDonationOwnedByPrincipalUseCase assertDonationOwnedByPrincipalUseCase;
   private final UpdateDonationRepository updateDonationRepository;
   private final Clock clock;
 
@@ -30,6 +32,8 @@ public final class UpdateDonationCommandHandler implements UpdateDonationUseCase
         findDonationByIdRepository
             .findById(donationId)
             .orElseThrow(() -> new DonationNotFoundException(command.id()));
+
+    assertDonationOwnedByPrincipalUseCase.execute(donation, command.principal());
 
     Instant now = null;
     if (Objects.nonNull(command.title())) {

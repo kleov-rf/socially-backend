@@ -4,6 +4,7 @@ import com.socially.app.infrastructure.left.adapter.http.logging.LogOperation;
 import com.socially.donation.update.application.port.left.UpdateDonationUseCase;
 import com.socially.donation.update.infrastructure.left.adapter.http.update.input.UpdateDonationRequest;
 import com.socially.donation.update.infrastructure.left.adapter.http.update.input.mapper.UpdateDonationRequestMapper;
+import java.security.Principal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -23,8 +24,8 @@ public class UpdateDonationController {
 
   @PatchMapping("/{id}")
   public ResponseEntity<Void> patch(
-      @PathVariable String id, @RequestBody UpdateDonationRequest request) {
-    var command = updateDonationRequestMapper.toCommand(id, request);
+      @PathVariable String id, @RequestBody UpdateDonationRequest request, Principal principal) {
+    var command = updateDonationRequestMapper.toCommand(id, request, principal);
     updateDonationUseCase.execute(command);
     return ResponseEntity.noContent().build();
   }

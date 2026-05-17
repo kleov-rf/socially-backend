@@ -3,16 +3,25 @@ package com.socially.donation.update.application;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donation.getbyid.domain.port.right.FindDonationByIdRepository;
+import com.socially.donation.kernel.application.port.left.AssertDonationOwnedByPrincipalUseCase;
 import com.socially.donation.kernel.domain.entity.Donation;
+import com.socially.donation.kernel.domain.exception.DonationForbiddenException;
 import com.socially.donation.kernel.domain.exception.DonationNotFoundException;
 import com.socially.donation.kernel.domain.valueobject.Description;
 import com.socially.donation.kernel.domain.valueobject.Title;
 import com.socially.donation.update.application.input.UpdateDonationCommand;
 import com.socially.donation.update.domain.port.right.UpdateDonationRepository;
+import java.security.Principal;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.Optional;
@@ -30,8 +39,11 @@ class UpdateDonationCommandHandlerTest {
   private static final Instant CREATED_AT = Instant.parse("2024-06-01T12:00:00Z");
   private static final Instant LAST_UPDATED_AT = Instant.parse("2024-06-15T08:00:00Z");
   private static final Instant PATCH_AT = Instant.parse("2025-01-15T10:00:00Z");
+  private static final Principal PRINCIPAL = () -> "user@example.com";
 
   @Mock private FindDonationByIdRepository findDonationByIdRepository;
+
+  @Mock private AssertDonationOwnedByPrincipalUseCase assertDonationOwnedByPrincipalUseCase;
 
   @Mock private UpdateDonationRepository updateDonationRepository;
 
@@ -41,7 +53,8 @@ class UpdateDonationCommandHandlerTest {
 
   @Test
   void execute_should_call_repository_find_by_id_with_correct_id() {
-    var command = new UpdateDonationCommand(DONATION_ID, "Updated Title", "Updated Description");
+    var command =
+        new UpdateDonationCommand(DONATION_ID, "Updated Title", "Updated Description", PRINCIPAL);
     Donation existingDonation =
         Donation.create(
             Id.from(DONATION_ID),
@@ -62,7 +75,8 @@ class UpdateDonationCommandHandlerTest {
 
   @Test
   void execute_should_throw_if_donation_not_found() {
-    var command = new UpdateDonationCommand(DONATION_ID, "Updated Title", "Updated Description");
+    var command =
+        new UpdateDonationCommand(DONATION_ID, "Updated Title", "Updated Description", PRINCIPAL);
     when(findDonationByIdRepository.findById(Id.from(DONATION_ID))).thenReturn(Optional.empty());
 
     DonationNotFoundException exception =
@@ -72,18 +86,67 @@ class UpdateDonationCommandHandlerTest {
   }
 
   @Test
-  void execute_should_not_call_update_if_donation_not_found() {
-    var command = new UpdateDonationCommand(DONATION_ID, "Updated Title", "Updated Description");
-    when(findDonationByIdRepository.findById(Id.from(DONATION_ID))).thenReturn(Optional.empty());
+  void execute_should_call_assert_donation_owned_by_principal_with_donation_and_principal() {
+    var command =
+        new UpdateDonationCommand(DONATION_ID, "Updated Title", "Updated Description", PRINCIPAL);
+    Donation existingDonation =
+        Donation.create(
+            Id.from(DONATION_ID),
+            Id.from(DONOR_ID),
+            Title.from("Old Title"),
+            Description.from("Old Description"),
+            CREATED_AT,
+            LAST_UPDATED_AT);
 
-    assertThrows(DonationNotFoundException.class, () -> handler.execute(command));
+    when(findDonationByIdRepository.findById(Id.from(DONATION_ID)))
+        .thenReturn(Optional.of(existingDonation));
+    when(clock.instant()).thenReturn(PATCH_AT);
+
+    handler.execute(command);
+
+    verify(assertDonationOwnedByPrincipalUseCase).execute(existingDonation, PRINCIPAL);
+  }
+
+  @Test
+  void execute_should_not_call_update_when_ownership_assertion_fails() {
+    var command =
+        new UpdateDonationCommand(DONATION_ID, "Updated Title", "Updated Description", PRINCIPAL);
+    Donation existingDonation =
+        Donation.create(
+            Id.from(DONATION_ID),
+            Id.from(DONOR_ID),
+            Title.from("Old Title"),
+            Description.from("Old Description"),
+            CREATED_AT,
+            LAST_UPDATED_AT);
+
+    when(findDonationByIdRepository.findById(Id.from(DONATION_ID)))
+        .thenReturn(Optional.of(existingDonation));
+    doThrow(new DonationForbiddenException(DONATION_ID))
+        .when(assertDonationOwnedByPrincipalUseCase)
+        .execute(existingDonation, PRINCIPAL);
+
+    assertThrows(DonationForbiddenException.class, () -> handler.execute(command));
 
     verify(updateDonationRepository, never()).update(any(Donation.class));
   }
 
   @Test
+  void execute_should_not_call_update_if_donation_not_found() {
+    var command =
+        new UpdateDonationCommand(DONATION_ID, "Updated Title", "Updated Description", PRINCIPAL);
+    when(findDonationByIdRepository.findById(Id.from(DONATION_ID))).thenReturn(Optional.empty());
+
+    assertThrows(DonationNotFoundException.class, () -> handler.execute(command));
+
+    verify(updateDonationRepository, never()).update(any(Donation.class));
+    verifyNoInteractions(assertDonationOwnedByPrincipalUseCase);
+  }
+
+  @Test
   void execute_should_call_repository_update_with_updated_donation_with_same_id() {
-    var command = new UpdateDonationCommand(DONATION_ID, "Updated Title", "Updated Description");
+    var command =
+        new UpdateDonationCommand(DONATION_ID, "Updated Title", "Updated Description", PRINCIPAL);
     Donation existingDonation =
         Donation.create(
             Id.from(DONATION_ID),
@@ -105,7 +168,7 @@ class UpdateDonationCommandHandlerTest {
 
   @Test
   void execute_should_call_repository_update_with_updated_donation_when_title_has_been_updated() {
-    var command = new UpdateDonationCommand(DONATION_ID, "Updated Title", null);
+    var command = new UpdateDonationCommand(DONATION_ID, "Updated Title", null, PRINCIPAL);
     Donation existingDonation =
         Donation.create(
             Id.from(DONATION_ID),
@@ -132,7 +195,7 @@ class UpdateDonationCommandHandlerTest {
   @Test
   void
       execute_should_call_repository_update_with_updated_donation_when_description_has_been_updated() {
-    var command = new UpdateDonationCommand(DONATION_ID, null, "Updated Description");
+    var command = new UpdateDonationCommand(DONATION_ID, null, "Updated Description", PRINCIPAL);
     Donation existingDonation =
         Donation.create(
             Id.from(DONATION_ID),
@@ -159,7 +222,8 @@ class UpdateDonationCommandHandlerTest {
   @Test
   void
       execute_should_call_repository_update_with_updated_donation_when_title_and_description_have_been_updated() {
-    var command = new UpdateDonationCommand(DONATION_ID, "Updated Title", "Updated Description");
+    var command =
+        new UpdateDonationCommand(DONATION_ID, "Updated Title", "Updated Description", PRINCIPAL);
     Donation existingDonation =
         Donation.create(
             Id.from(DONATION_ID),
@@ -187,7 +251,7 @@ class UpdateDonationCommandHandlerTest {
 
   @Test
   void execute_should_not_call_clock_when_no_fields_are_provided() {
-    var command = new UpdateDonationCommand(DONATION_ID, null, null);
+    var command = new UpdateDonationCommand(DONATION_ID, null, null, PRINCIPAL);
     Donation existingDonation =
         Donation.create(
             Id.from(DONATION_ID),

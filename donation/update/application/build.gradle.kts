@@ -23,6 +23,7 @@ dependencyManagement {
 }
 
 dependencies {
+    implementation(project(":donation:kernel:application"))
     implementation(project(":donation:update:domain"))
     implementation(project(":donation:get-by-id:domain"))
 
