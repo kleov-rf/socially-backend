@@ -1,3 +1,5 @@
+import io.spring.gradle.dependencymanagement.dsl.DependencyManagementExtension
+
 plugins {
     java
     alias(libs.plugins.spring.boot) apply false
@@ -79,6 +81,21 @@ subprojects {
             html.required.set(true)
             csv.required.set(false)
         }
+    }
+
+    val configureTomcatEmbedOverrides: () -> Unit = {
+        val tomcat = rootProject.libs.versions.tomcat.embed.get()
+        extensions.configure<DependencyManagementExtension> {
+            dependencies {
+                dependency("org.apache.tomcat.embed:tomcat-embed-core:$tomcat")
+                dependency("org.apache.tomcat.embed:tomcat-embed-websocket:$tomcat")
+                dependency("org.apache.tomcat.embed:tomcat-embed-el:$tomcat")
+            }
+        }
+    }
+
+    plugins.withId("io.spring.dependency-management") {
+        configureTomcatEmbedOverrides()
     }
 }
 
