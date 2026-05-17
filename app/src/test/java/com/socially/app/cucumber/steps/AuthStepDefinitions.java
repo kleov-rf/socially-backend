@@ -94,7 +94,7 @@ public class AuthStepDefinitions {
   @When("I request the current user profile")
   public void iRequestTheCurrentUserProfile() throws Exception {
     mvcResult =
-        mockMvc.perform(get("/api/auth/me").with(CucumberOAuthJwt.postProcessor())).andReturn();
+        mockMvc.perform(get("/api/users/me").with(CucumberOAuthJwt.postProcessor())).andReturn();
   }
 
   @Then("the auth response status should be {int}")
