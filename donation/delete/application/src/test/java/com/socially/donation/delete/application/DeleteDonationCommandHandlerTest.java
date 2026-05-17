@@ -9,7 +9,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.socially.auth.me.application.exception.UnauthenticatedRequestException;
-import com.socially.auth.me.application.port.left.GetCurrentAuthUserUseCase;
+import com.socially.auth.me.application.port.left.GetAuthenticatedUserUseCase;
 import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donation.delete.application.input.DeleteDonationCommand;
 import com.socially.donation.delete.domain.port.right.DeleteDonationRepository;
@@ -43,7 +43,7 @@ class DeleteDonationCommandHandlerTest {
   private static final Principal PRINCIPAL = () -> "user@example.com";
 
   @Mock private FindDonationByIdRepository findDonationByIdRepository;
-  @Mock private GetCurrentAuthUserUseCase getCurrentAuthUserUseCase;
+  @Mock private GetAuthenticatedUserUseCase getAuthenticatedUserUseCase;
   @Mock private FindDonorByUserIdUseCase findDonorByUserIdUseCase;
   @Mock private DeleteDonationRepository donationRepository;
   @InjectMocks private DeleteDonationCommandHandler handler;
@@ -74,7 +74,7 @@ class DeleteDonationCommandHandlerTest {
   void execute_should_load_donation_by_command_id() {
     when(findDonationByIdRepository.findById(Id.from(DONATION_ID)))
         .thenReturn(Optional.of(donation));
-    when(getCurrentAuthUserUseCase.execute(PRINCIPAL)).thenReturn(user);
+    when(getAuthenticatedUserUseCase.execute(PRINCIPAL)).thenReturn(user);
     when(findDonorByUserIdUseCase.execute(new FindDonorByUserIdQuery(USER_ID)))
         .thenReturn(Optional.of(donor));
 
@@ -106,20 +106,20 @@ class DeleteDonationCommandHandlerTest {
   void execute_should_resolve_user_with_command_principal() {
     when(findDonationByIdRepository.findById(Id.from(DONATION_ID)))
         .thenReturn(Optional.of(donation));
-    when(getCurrentAuthUserUseCase.execute(PRINCIPAL)).thenReturn(user);
+    when(getAuthenticatedUserUseCase.execute(PRINCIPAL)).thenReturn(user);
     when(findDonorByUserIdUseCase.execute(new FindDonorByUserIdQuery(USER_ID)))
         .thenReturn(Optional.of(donor));
 
     handler.execute(command);
 
-    verify(getCurrentAuthUserUseCase).execute(PRINCIPAL);
+    verify(getAuthenticatedUserUseCase).execute(PRINCIPAL);
   }
 
   @Test
   void execute_should_throw_unauthenticated_when_user_resolution_fails() {
     when(findDonationByIdRepository.findById(Id.from(DONATION_ID)))
         .thenReturn(Optional.of(donation));
-    when(getCurrentAuthUserUseCase.execute(PRINCIPAL))
+    when(getAuthenticatedUserUseCase.execute(PRINCIPAL))
         .thenThrow(new UnauthenticatedRequestException());
 
     assertThrows(UnauthenticatedRequestException.class, () -> handler.execute(command));
@@ -130,7 +130,7 @@ class DeleteDonationCommandHandlerTest {
   void execute_should_throw_donation_forbidden_when_user_has_no_donor() {
     when(findDonationByIdRepository.findById(Id.from(DONATION_ID)))
         .thenReturn(Optional.of(donation));
-    when(getCurrentAuthUserUseCase.execute(PRINCIPAL)).thenReturn(user);
+    when(getAuthenticatedUserUseCase.execute(PRINCIPAL)).thenReturn(user);
     when(findDonorByUserIdUseCase.execute(new FindDonorByUserIdQuery(USER_ID)))
         .thenReturn(Optional.empty());
 
@@ -144,7 +144,7 @@ class DeleteDonationCommandHandlerTest {
   void execute_should_not_call_delete_by_id_when_user_has_no_donor() {
     when(findDonationByIdRepository.findById(Id.from(DONATION_ID)))
         .thenReturn(Optional.of(donation));
-    when(getCurrentAuthUserUseCase.execute(PRINCIPAL)).thenReturn(user);
+    when(getAuthenticatedUserUseCase.execute(PRINCIPAL)).thenReturn(user);
     when(findDonorByUserIdUseCase.execute(new FindDonorByUserIdQuery(USER_ID)))
         .thenReturn(Optional.empty());
 
@@ -165,7 +165,7 @@ class DeleteDonationCommandHandlerTest {
             CREATED_AT);
     when(findDonationByIdRepository.findById(Id.from(DONATION_ID)))
         .thenReturn(Optional.of(donation));
-    when(getCurrentAuthUserUseCase.execute(PRINCIPAL)).thenReturn(user);
+    when(getAuthenticatedUserUseCase.execute(PRINCIPAL)).thenReturn(user);
     when(findDonorByUserIdUseCase.execute(new FindDonorByUserIdQuery(USER_ID)))
         .thenReturn(Optional.of(otherDonor));
 
@@ -184,7 +184,7 @@ class DeleteDonationCommandHandlerTest {
             CREATED_AT);
     when(findDonationByIdRepository.findById(Id.from(DONATION_ID)))
         .thenReturn(Optional.of(donation));
-    when(getCurrentAuthUserUseCase.execute(PRINCIPAL)).thenReturn(user);
+    when(getAuthenticatedUserUseCase.execute(PRINCIPAL)).thenReturn(user);
     when(findDonorByUserIdUseCase.execute(new FindDonorByUserIdQuery(USER_ID)))
         .thenReturn(Optional.of(otherDonor));
 
@@ -197,7 +197,7 @@ class DeleteDonationCommandHandlerTest {
   void execute_should_call_delete_by_id_when_donor_matches() {
     when(findDonationByIdRepository.findById(Id.from(DONATION_ID)))
         .thenReturn(Optional.of(donation));
-    when(getCurrentAuthUserUseCase.execute(PRINCIPAL)).thenReturn(user);
+    when(getAuthenticatedUserUseCase.execute(PRINCIPAL)).thenReturn(user);
     when(findDonorByUserIdUseCase.execute(new FindDonorByUserIdQuery(USER_ID)))
         .thenReturn(Optional.of(donor));
 

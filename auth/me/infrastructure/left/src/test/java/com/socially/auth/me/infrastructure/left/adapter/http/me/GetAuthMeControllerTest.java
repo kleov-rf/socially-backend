@@ -27,14 +27,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 @ExtendWith(MockitoExtension.class)
-class GetCurrentAuthUserControllerTest {
+class GetAuthMeControllerTest {
 
   private static final Instant CREATED_AT = Instant.parse("2024-06-01T12:00:00Z");
 
   @Mock private GetAuthMeUseCase useCase;
   @Mock private AuthMeResponseMapper authMeResponseMapper;
 
-  @InjectMocks private GetCurrentAuthUserController sut;
+  @InjectMocks private GetAuthMeController sut;
 
   @Test
   void me_should_call_use_case_with_received_principal() {

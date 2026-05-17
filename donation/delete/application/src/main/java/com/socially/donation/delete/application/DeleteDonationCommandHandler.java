@@ -1,6 +1,6 @@
 package com.socially.donation.delete.application;
 
-import com.socially.auth.me.application.port.left.GetCurrentAuthUserUseCase;
+import com.socially.auth.me.application.port.left.GetAuthenticatedUserUseCase;
 import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donation.delete.application.input.DeleteDonationCommand;
 import com.socially.donation.delete.application.port.left.DeleteDonationUseCase;
@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 public final class DeleteDonationCommandHandler implements DeleteDonationUseCase {
 
   private final FindDonationByIdRepository findDonationByIdRepository;
-  private final GetCurrentAuthUserUseCase getCurrentAuthUserUseCase;
+  private final GetAuthenticatedUserUseCase getAuthenticatedUserUseCase;
   private final FindDonorByUserIdUseCase findDonorByUserIdUseCase;
   private final DeleteDonationRepository donationRepository;
 
@@ -32,7 +32,7 @@ public final class DeleteDonationCommandHandler implements DeleteDonationUseCase
             .findById(donationId)
             .orElseThrow(() -> new DonationNotFoundException(command.id()));
 
-    User user = getCurrentAuthUserUseCase.execute(command.principal());
+    User user = getAuthenticatedUserUseCase.execute(command.principal());
     Optional<Donor> donor =
         findDonorByUserIdUseCase.execute(new FindDonorByUserIdQuery(user.id().value().toString()));
 

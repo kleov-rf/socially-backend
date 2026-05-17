@@ -1,6 +1,6 @@
 package com.socially.donation.create.application;
 
-import com.socially.auth.me.application.port.left.GetCurrentAuthUserUseCase;
+import com.socially.auth.me.application.port.left.GetAuthenticatedUserUseCase;
 import com.socially.donation.create.application.input.CreateDonationCommand;
 import com.socially.donation.create.application.input.mapper.CreateDonationCommandMapper;
 import com.socially.donation.create.application.port.left.CreateDonationUseCase;
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public final class CreateDonationCommandHandler implements CreateDonationUseCase {
 
-  private final GetCurrentAuthUserUseCase getCurrentAuthUserUseCase;
+  private final GetAuthenticatedUserUseCase getAuthenticatedUserUseCase;
   private final FindDonorByUserIdUseCase findDonorByUserIdUseCase;
   private final CreateDonationRepository donationRepository;
   private final CreateDonationCommandMapper createDonationCommandMapper;
@@ -27,7 +27,7 @@ public final class CreateDonationCommandHandler implements CreateDonationUseCase
 
   @Override
   public void execute(CreateDonationCommand command) {
-    User user = getCurrentAuthUserUseCase.execute(command.principal());
+    User user = getAuthenticatedUserUseCase.execute(command.principal());
 
     Donor donor =
         findDonorByUserIdUseCase

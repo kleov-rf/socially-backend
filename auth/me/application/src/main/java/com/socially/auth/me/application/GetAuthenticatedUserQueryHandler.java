@@ -3,7 +3,7 @@ package com.socially.auth.me.application;
 import com.socially.auth.kernel.infrastructure.right.adapter.oauth.mapper.AuthUserFromJwtMapper;
 import com.socially.auth.kernel.infrastructure.right.adapter.user.AuthenticatedUserResolver;
 import com.socially.auth.me.application.exception.UnauthenticatedRequestException;
-import com.socially.auth.me.application.port.left.GetCurrentAuthUserUseCase;
+import com.socially.auth.me.application.port.left.GetAuthenticatedUserUseCase;
 import com.socially.user.kernel.domain.entity.User;
 import java.security.Principal;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
 @Service
-public class GetCurrentAuthUserQueryHandler implements GetCurrentAuthUserUseCase {
+public class GetAuthenticatedUserQueryHandler implements GetAuthenticatedUserUseCase {
   private final AuthenticatedUserResolver authenticatedUserResolver;
   private final AuthUserFromJwtMapper authUserFromJwtMapper;
 

@@ -28,7 +28,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 @ExtendWith(MockitoExtension.class)
-class GetCurrentAuthUserQueryHandlerTest {
+class GetAuthenticatedUserQueryHandlerTest {
 
   private static final Instant ISSUED_AT = Instant.parse("2024-01-01T00:00:00Z");
   private static final Instant EXPIRES_AT = Instant.parse("2024-01-01T01:00:00Z");
@@ -39,7 +39,7 @@ class GetCurrentAuthUserQueryHandlerTest {
   @Mock private AuthenticatedUserResolver authenticatedUserResolver;
   @Mock private AuthUserFromJwtMapper authUserFromJwtMapper;
 
-  @InjectMocks private GetCurrentAuthUserQueryHandler handler;
+  @InjectMocks private GetAuthenticatedUserQueryHandler handler;
 
   @Test
   void execute_should_call_auth_user_from_jwt_mapper_with_current_jwt() {

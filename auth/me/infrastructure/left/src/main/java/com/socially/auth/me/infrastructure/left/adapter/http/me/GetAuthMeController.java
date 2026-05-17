@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/auth")
 @LogOperation("AUTH_ME")
-public class GetCurrentAuthUserController {
+public class GetAuthMeController {
   private final GetAuthMeUseCase getAuthMeUseCase;
   private final AuthMeResponseMapper authMeResponseMapper;
 

@@ -9,7 +9,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.socially.auth.me.application.exception.UnauthenticatedRequestException;
-import com.socially.auth.me.application.port.left.GetCurrentAuthUserUseCase;
+import com.socially.auth.me.application.port.left.GetAuthenticatedUserUseCase;
 import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donation.create.application.input.CreateDonationCommand;
 import com.socially.donation.create.application.input.mapper.CreateDonationCommandMapper;
@@ -50,7 +50,7 @@ class CreateDonationCommandHandlerTest {
           CREATED_AT);
   private static final Principal PRINCIPAL = () -> "user@example.com";
 
-  @Mock private GetCurrentAuthUserUseCase getCurrentAuthUserUseCase;
+  @Mock private GetAuthenticatedUserUseCase getAuthenticatedUserUseCase;
   @Mock private FindDonorByUserIdUseCase findDonorByUserIdUseCase;
   @Mock private CreateDonationRepository donationRepository;
   @Mock private CreateDonationCommandMapper createDonationCommandMapper;
@@ -73,7 +73,7 @@ class CreateDonationCommandHandlerTest {
 
   @Test
   void execute_should_resolve_user_with_command_principal() {
-    when(getCurrentAuthUserUseCase.execute(PRINCIPAL)).thenReturn(user);
+    when(getAuthenticatedUserUseCase.execute(PRINCIPAL)).thenReturn(user);
     when(clock.instant()).thenReturn(CREATED_AT);
     when(createDonationCommandMapper.toDomain(eq(command), eq(DONOR), eq(CREATED_AT)))
         .thenReturn(
@@ -87,13 +87,13 @@ class CreateDonationCommandHandlerTest {
 
     handler.execute(command);
 
-    verify(getCurrentAuthUserUseCase).execute(PRINCIPAL);
+    verify(getAuthenticatedUserUseCase).execute(PRINCIPAL);
     verify(findDonorByUserIdUseCase).execute(new FindDonorByUserIdQuery(USER_ID));
   }
 
   @Test
   void execute_should_call_mapper_with_donor_id_from_find_result() {
-    when(getCurrentAuthUserUseCase.execute(PRINCIPAL)).thenReturn(user);
+    when(getAuthenticatedUserUseCase.execute(PRINCIPAL)).thenReturn(user);
     when(clock.instant()).thenReturn(CREATED_AT);
     when(createDonationCommandMapper.toDomain(eq(command), eq(DONOR), eq(CREATED_AT)))
         .thenReturn(
@@ -120,7 +120,7 @@ class CreateDonationCommandHandlerTest {
             Description.from("Test Description"),
             CREATED_AT,
             CREATED_AT);
-    when(getCurrentAuthUserUseCase.execute(PRINCIPAL)).thenReturn(user);
+    when(getAuthenticatedUserUseCase.execute(PRINCIPAL)).thenReturn(user);
     when(clock.instant()).thenReturn(CREATED_AT);
     when(createDonationCommandMapper.toDomain(eq(command), eq(DONOR), eq(CREATED_AT)))
         .thenReturn(mappedDonation);
@@ -134,7 +134,7 @@ class CreateDonationCommandHandlerTest {
   void execute_should_call_mapper_with_existing_donor_id_when_existing_donor_found() {
     when(findDonorByUserIdUseCase.execute(new FindDonorByUserIdQuery(USER_ID)))
         .thenReturn(Optional.of(donorAfterCreate));
-    when(getCurrentAuthUserUseCase.execute(PRINCIPAL)).thenReturn(user);
+    when(getAuthenticatedUserUseCase.execute(PRINCIPAL)).thenReturn(user);
     when(clock.instant()).thenReturn(CREATED_AT);
     when(createDonationCommandMapper.toDomain(eq(command), eq(DONOR), eq(CREATED_AT)))
         .thenReturn(
@@ -153,7 +153,7 @@ class CreateDonationCommandHandlerTest {
 
   @Test
   void execute_should_throw_when_donor_not_found_after_create() {
-    when(getCurrentAuthUserUseCase.execute(PRINCIPAL)).thenReturn(user);
+    when(getAuthenticatedUserUseCase.execute(PRINCIPAL)).thenReturn(user);
     when(findDonorByUserIdUseCase.execute(new FindDonorByUserIdQuery(USER_ID)))
         .thenReturn(Optional.empty());
 
@@ -166,7 +166,7 @@ class CreateDonationCommandHandlerTest {
 
   @Test
   void execute_should_throw_and_stop_when_user_is_unauthenticated() {
-    when(getCurrentAuthUserUseCase.execute(PRINCIPAL))
+    when(getAuthenticatedUserUseCase.execute(PRINCIPAL))
         .thenThrow(new UnauthenticatedRequestException());
 
     assertThrows(UnauthenticatedRequestException.class, () -> handler.execute(command));

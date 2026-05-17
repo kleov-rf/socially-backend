@@ -8,7 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.socially.auth.me.application.output.AuthMeQueryResult;
-import com.socially.auth.me.application.port.left.GetCurrentAuthUserUseCase;
+import com.socially.auth.me.application.port.left.GetAuthenticatedUserUseCase;
 import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donor.findbyuserid.application.input.FindDonorByUserIdQuery;
 import com.socially.donor.findbyuserid.application.port.left.FindDonorByUserIdUseCase;
@@ -29,30 +29,30 @@ class GetAuthMeQueryHandlerTest {
 
   private static final Instant CREATED_AT = Instant.parse("2024-06-01T12:00:00Z");
 
-  @Mock private GetCurrentAuthUserUseCase getCurrentAuthUserUseCase;
+  @Mock private GetAuthenticatedUserUseCase getAuthenticatedUserUseCase;
   @Mock private FindDonorByUserIdUseCase findDonorByUserIdUseCase;
 
   @InjectMocks private GetAuthMeQueryHandler handler;
 
   @Test
-  void execute_should_call_get_current_auth_user_use_case_with_received_principal() {
+  void execute_should_call_get_authenticated_user_use_case_with_received_principal() {
     Principal principal = () -> "ignored";
     User user = sampleUser();
-    when(getCurrentAuthUserUseCase.execute(same(principal))).thenReturn(user);
+    when(getAuthenticatedUserUseCase.execute(same(principal))).thenReturn(user);
     when(findDonorByUserIdUseCase.execute(
             new FindDonorByUserIdQuery("550e8400-e29b-41d4-a716-446655440000")))
         .thenReturn(Optional.empty());
 
     handler.execute(principal);
 
-    verify(getCurrentAuthUserUseCase).execute(same(principal));
+    verify(getAuthenticatedUserUseCase).execute(same(principal));
   }
 
   @Test
   void execute_should_call_find_donor_by_user_id_with_user_id_string() {
     Principal principal = () -> "ignored";
     User user = sampleUser();
-    when(getCurrentAuthUserUseCase.execute(principal)).thenReturn(user);
+    when(getAuthenticatedUserUseCase.execute(principal)).thenReturn(user);
     when(findDonorByUserIdUseCase.execute(
             new FindDonorByUserIdQuery("550e8400-e29b-41d4-a716-446655440000")))
         .thenReturn(Optional.empty());
@@ -67,7 +67,7 @@ class GetAuthMeQueryHandlerTest {
   void execute_should_return_empty_donor_when_no_donor_profile() {
     Principal principal = () -> "ignored";
     User user = sampleUser();
-    when(getCurrentAuthUserUseCase.execute(principal)).thenReturn(user);
+    when(getAuthenticatedUserUseCase.execute(principal)).thenReturn(user);
     when(findDonorByUserIdUseCase.execute(
             new FindDonorByUserIdQuery("550e8400-e29b-41d4-a716-446655440000")))
         .thenReturn(Optional.empty());
@@ -83,7 +83,7 @@ class GetAuthMeQueryHandlerTest {
     Principal principal = () -> "ignored";
     User user = sampleUser();
     Donor donor = sampleDonor();
-    when(getCurrentAuthUserUseCase.execute(principal)).thenReturn(user);
+    when(getAuthenticatedUserUseCase.execute(principal)).thenReturn(user);
     when(findDonorByUserIdUseCase.execute(
             eq(new FindDonorByUserIdQuery("550e8400-e29b-41d4-a716-446655440000"))))
         .thenReturn(Optional.of(donor));
