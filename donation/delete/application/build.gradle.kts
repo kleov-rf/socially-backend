@@ -23,9 +23,7 @@ dependencyManagement {
 }
 
 dependencies {
-    implementation(project(":auth:kernel:application"))
-    implementation(project(":donor:find-by-user-id:application"))
-    implementation(project(":donor:kernel:domain"))
+    implementation(project(":donation:kernel:application"))
     implementation(project(":donation:delete:domain"))
     implementation(project(":donation:get-by-id:domain"))
     implementation(project(":donation:kernel:domain"))
