@@ -19,7 +19,7 @@ public class GetCurrentAuthUserQueryHandler implements GetCurrentAuthUserUseCase
   @Override
   public User execute(Principal principal) {
     if (principal instanceof JwtAuthenticationToken jwtAuthenticationToken) {
-      return authenticatedUserResolver.resolve(
+      return authenticatedUserResolver.resolveExisting(
           authUserFromJwtMapper.fromJwt(jwtAuthenticationToken.getToken()));
     }
     throw new UnauthenticatedRequestException();

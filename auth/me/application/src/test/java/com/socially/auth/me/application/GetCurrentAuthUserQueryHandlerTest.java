@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.socially.auth.kernel.domain.AuthUser;
+import com.socially.auth.kernel.domain.exception.AuthenticatedUserNotFoundException;
 import com.socially.auth.kernel.infrastructure.right.adapter.oauth.mapper.AuthUserFromJwtMapper;
 import com.socially.auth.kernel.infrastructure.right.adapter.user.AuthenticatedUserResolver;
 import com.socially.auth.me.application.exception.UnauthenticatedRequestException;
@@ -45,7 +46,7 @@ class GetCurrentAuthUserQueryHandlerTest {
     Jwt jwt = jwtWithClaims(baseClaims());
     User foundUser = foundUser();
     when(authUserFromJwtMapper.fromJwt(same(jwt))).thenReturn(EXPECTED_AUTH_USER);
-    when(authenticatedUserResolver.resolve(EXPECTED_AUTH_USER)).thenReturn(foundUser);
+    when(authenticatedUserResolver.resolveExisting(EXPECTED_AUTH_USER)).thenReturn(foundUser);
 
     handler.execute(new JwtAuthenticationToken(jwt));
 
@@ -57,11 +58,11 @@ class GetCurrentAuthUserQueryHandlerTest {
     Jwt jwt = jwtWithClaims(baseClaims());
     User foundUser = foundUser();
     when(authUserFromJwtMapper.fromJwt(any(Jwt.class))).thenReturn(EXPECTED_AUTH_USER);
-    when(authenticatedUserResolver.resolve(eq(EXPECTED_AUTH_USER))).thenReturn(foundUser);
+    when(authenticatedUserResolver.resolveExisting(eq(EXPECTED_AUTH_USER))).thenReturn(foundUser);
 
     handler.execute(new JwtAuthenticationToken(jwt));
 
-    verify(authenticatedUserResolver).resolve(EXPECTED_AUTH_USER);
+    verify(authenticatedUserResolver).resolveExisting(EXPECTED_AUTH_USER);
   }
 
   @Test
@@ -69,11 +70,26 @@ class GetCurrentAuthUserQueryHandlerTest {
     Jwt jwt = jwtWithClaims(baseClaims());
     User foundUser = foundUser();
     when(authUserFromJwtMapper.fromJwt(any(Jwt.class))).thenReturn(EXPECTED_AUTH_USER);
-    when(authenticatedUserResolver.resolve(EXPECTED_AUTH_USER)).thenReturn(foundUser);
+    when(authenticatedUserResolver.resolveExisting(EXPECTED_AUTH_USER)).thenReturn(foundUser);
 
     User result = handler.execute(new JwtAuthenticationToken(jwt));
 
     assertEquals(foundUser, result);
+  }
+
+  @Test
+  void execute_should_throw_authenticated_user_not_found_when_resolver_reports_missing_user() {
+    Jwt jwt = jwtWithClaims(baseClaims());
+    when(authUserFromJwtMapper.fromJwt(any(Jwt.class))).thenReturn(EXPECTED_AUTH_USER);
+    when(authenticatedUserResolver.resolveExisting(EXPECTED_AUTH_USER))
+        .thenThrow(new AuthenticatedUserNotFoundException());
+
+    AuthenticatedUserNotFoundException exception =
+        assertThrows(
+            AuthenticatedUserNotFoundException.class,
+            () -> handler.execute(new JwtAuthenticationToken(jwt)));
+
+    assertEquals("User not found", exception.getMessage());
   }
 
   @Test
