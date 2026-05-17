@@ -9,12 +9,12 @@ Feature: Authentication flows
     And the login response should include OAuth state and PKCE cookies
     When I complete the Google callback with authorization code "phase1-code"
     Then the auth response status should be 200
-    And the auth response should include token and user payload
+    And the auth response should include token payload
     And the auth response should set refresh token cookie
     And the users table should contain 1 records
     When I refresh the auth session
     Then the auth response status should be 200
-    And the auth response should include token and user payload
+    And the auth response should include token payload
     And the auth response should set refresh token cookie
     And the users table should contain 1 records
 
@@ -24,7 +24,7 @@ Feature: Authentication flows
     And the login response should include OAuth state and PKCE cookies
     When I complete the Google callback with authorization code "phase1-code"
     Then the auth response status should be 200
-    And the auth response should include token and user payload
+    And the auth response should include token payload
     And the auth response should set refresh token cookie
     And the users table should contain 1 records
     Given I have a donation with random id, title "OAuth donation drive" and description "Auth me after donate"

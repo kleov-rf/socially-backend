@@ -13,7 +13,6 @@ import com.socially.auth.callback.infrastructure.left.adapter.http.callback.outp
 import com.socially.auth.kernel.domain.AuthResult;
 import com.socially.auth.kernel.domain.AuthUser;
 import com.socially.auth.kernel.domain.CookieInstruction;
-import com.socially.auth.kernel.domain.UserResponseDto;
 import com.socially.auth.kernel.infrastructure.left.adapter.http.input.mapper.RequestCookiesMapper;
 import com.socially.auth.kernel.infrastructure.left.adapter.http.output.mapper.AuthSetCookieHeaderMapper;
 import com.socially.commons.kernel.domain.valueobject.Id;
@@ -23,6 +22,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -61,18 +61,13 @@ class CallbackGoogleControllerTest {
           Instant.parse("2024-06-01T12:00:00Z"));
 
   private static final AuthCallbackResponse RESPONSE =
-      new AuthCallbackResponse(
-          "access-token",
-          "Bearer",
-          3600L,
-          new UserResponseDto(
-              "550e8400-e29b-41d4-a716-446655440000", "user@example.com", "John Doe"));
+      new AuthCallbackResponse("access-token", "Bearer", 3600L);
   private static final List<CookieInstruction> COOKIE_INSTRUCTIONS =
       List.of(
           new CookieInstruction("socially_oauth_state", "", 0L),
           new CookieInstruction("socially_oauth_pkce", "", 0L));
 
-  @org.junit.jupiter.api.BeforeEach
+  @BeforeEach
   void setUp() {
     when(requestCookiesMapper.toCookieMap(request))
         .thenReturn(
@@ -88,7 +83,7 @@ class CallbackGoogleControllerTest {
     when(authSetCookieHeaderMapper.toSetCookieHeader(COOKIE_INSTRUCTIONS.get(1)))
         .thenReturn("cookie-2");
 
-    when(authCallbackResponseMapper.toResponse(AUTH_RESULT, USER)).thenReturn(RESPONSE);
+    when(authCallbackResponseMapper.toResponse(AUTH_RESULT)).thenReturn(RESPONSE);
   }
 
   @Test
@@ -137,7 +132,7 @@ class CallbackGoogleControllerTest {
   void callbackGoogle_should_call_response_mapper_with_retrieved_auth_result() {
     sut.callbackGoogle(REQUEST_PARAMS, request);
 
-    verify(authCallbackResponseMapper).toResponse(AUTH_RESULT, USER);
+    verify(authCallbackResponseMapper).toResponse(AUTH_RESULT);
   }
 
   @Test

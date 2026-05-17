@@ -51,7 +51,7 @@ class GetUserMeControllerTest {
     when(userMeResponseMapper.toResponse(result))
         .thenReturn(
             new UserMeResponse(
-                new UserMeUserDto("550e8400-e29b-41d4-a716-446655440000", "e@x.com"),
+                new UserMeUserDto("550e8400-e29b-41d4-a716-446655440000", "e@x.com", null),
                 new UserMeProfilesDto(null, null)));
 
     sut.me(principal);
@@ -73,7 +73,7 @@ class GetUserMeControllerTest {
     when(useCase.execute(principal)).thenReturn(result);
     UserMeResponse mapped =
         new UserMeResponse(
-            new UserMeUserDto("550e8400-e29b-41d4-a716-446655440001", "a@b.com"),
+            new UserMeUserDto("550e8400-e29b-41d4-a716-446655440001", "a@b.com", null),
             new UserMeProfilesDto(null, null));
     when(userMeResponseMapper.toResponse(same(result))).thenReturn(mapped);
 
@@ -97,7 +97,7 @@ class GetUserMeControllerTest {
     when(userMeResponseMapper.toResponse(result))
         .thenReturn(
             new UserMeResponse(
-                new UserMeUserDto("550e8400-e29b-41d4-a716-446655440002", "e@x.com"),
+                new UserMeUserDto("550e8400-e29b-41d4-a716-446655440002", "e@x.com", null),
                 new UserMeProfilesDto(null, null)));
 
     ResponseEntity<UserMeResponse> response = sut.me(principal);
@@ -118,7 +118,8 @@ class GetUserMeControllerTest {
     UserMeQueryResult result = new UserMeQueryResult(user, Optional.empty());
     UserMeResponse mapped =
         new UserMeResponse(
-            new UserMeUserDto("550e8400-e29b-41d4-a716-446655440003", "user@example.com"),
+            new UserMeUserDto(
+                "550e8400-e29b-41d4-a716-446655440003", "user@example.com", "Jane Doe"),
             new UserMeProfilesDto(
                 new UserMeDonorProfileDto(
                     "660e8400-e29b-41d4-a716-446655440099", "user@example.com", "Jane", "Doe"),

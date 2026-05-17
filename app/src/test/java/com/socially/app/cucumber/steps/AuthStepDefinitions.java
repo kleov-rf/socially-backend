@@ -102,16 +102,13 @@ public class AuthStepDefinitions {
     assertThat(mvcResult.getResponse().getStatus()).isEqualTo(status);
   }
 
-  @And("the auth response should include token and user payload")
-  public void theAuthResponseShouldIncludeTokenAndUserPayload() throws Exception {
+  @And("the auth response should include token payload")
+  public void theAuthResponseShouldIncludeTokenPayload() throws Exception {
     JsonNode root = objectMapper.readTree(mvcResult.getResponse().getContentAsString());
     assertThat(root.path("accessToken").asText()).isEqualTo("phase1-access-token");
     assertThat(root.path("tokenType").asText()).isEqualTo("Bearer");
     assertThat(root.path("expiresIn").asLong()).isEqualTo(3600L);
-    assertThat(root.path("user").path("id").asText())
-        .matches("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
-    assertThat(root.path("user").path("email").asText()).isEqualTo("auth.user@example.com");
-    assertThat(root.path("user").path("name").asText()).isEqualTo("Auth User");
+    assertThat(root.path("user").isMissingNode()).isTrue();
   }
 
   @And("the auth response should set refresh token cookie")
@@ -130,6 +127,7 @@ public class AuthStepDefinitions {
   public void theAuthProfileResponseShouldIncludeDonorForTheOauthUser() throws Exception {
     JsonNode root = objectMapper.readTree(mvcResult.getResponse().getContentAsString());
     assertThat(root.path("user").path("email").asText()).isEqualTo("auth.user@example.com");
+    assertThat(root.path("user").path("name").asText()).isEqualTo("Auth User");
     assertThat(root.path("user").path("id").asText())
         .matches("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
 

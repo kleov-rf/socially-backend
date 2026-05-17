@@ -49,6 +49,34 @@ class UserMeResponseMapperTest {
   }
 
   @Test
+  void toResponse_should_map_user_name() {
+    User user =
+        User.create(
+            Id.from("550e8400-e29b-41d4-a716-446655440000"),
+            Email.from("a@b.com"),
+            "Jane",
+            "Doe",
+            CREATED_AT);
+    UserMeResponse response = sut.toResponse(new UserMeQueryResult(user, Optional.empty()));
+
+    assertEquals("Jane Doe", response.user().name());
+  }
+
+  @Test
+  void toResponse_should_set_user_name_to_null_when_no_names() {
+    User user =
+        User.create(
+            Id.from("550e8400-e29b-41d4-a716-446655440000"),
+            Email.from("a@b.com"),
+            null,
+            null,
+            CREATED_AT);
+    UserMeResponse response = sut.toResponse(new UserMeQueryResult(user, Optional.empty()));
+
+    assertNull(response.user().name());
+  }
+
+  @Test
   void toResponse_should_set_profiles_organization_to_null() {
     User user =
         User.create(

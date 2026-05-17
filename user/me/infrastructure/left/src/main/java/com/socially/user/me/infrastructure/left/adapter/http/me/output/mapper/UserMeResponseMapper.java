@@ -7,14 +7,21 @@ import com.socially.user.me.infrastructure.left.adapter.http.me.output.UserMeDon
 import com.socially.user.me.infrastructure.left.adapter.http.me.output.UserMeProfilesDto;
 import com.socially.user.me.infrastructure.left.adapter.http.me.output.UserMeResponse;
 import com.socially.user.me.infrastructure.left.adapter.http.me.output.UserMeUserDto;
+import java.util.ArrayList;
+import java.util.List;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 @Component
 public class UserMeResponseMapper {
 
   public UserMeResponse toResponse(UserMeQueryResult result) {
     User user = result.user();
-    UserMeUserDto userDto = new UserMeUserDto(user.id().value().toString(), user.email().value());
+    UserMeUserDto userDto =
+        new UserMeUserDto(
+            user.id().value().toString(),
+            user.email().value(),
+            joinNames(user.givenName(), user.familyName()));
     UserMeDonorProfileDto donorDto = result.donor().map(this::toDonorProfileDto).orElse(null);
     UserMeProfilesDto profiles = new UserMeProfilesDto(donorDto, null);
     return new UserMeResponse(userDto, profiles);
@@ -23,5 +30,19 @@ public class UserMeResponseMapper {
   private UserMeDonorProfileDto toDonorProfileDto(Donor donor) {
     return new UserMeDonorProfileDto(
         donor.id().value().toString(), donor.email(), donor.givenName(), donor.familyName());
+  }
+
+  private String joinNames(String givenName, String familyName) {
+    List<String> values = new ArrayList<>();
+    if (StringUtils.hasText(givenName)) {
+      values.add(givenName);
+    }
+    if (StringUtils.hasText(familyName)) {
+      values.add(familyName);
+    }
+    if (values.isEmpty()) {
+      return null;
+    }
+    return String.join(" ", values);
   }
 }

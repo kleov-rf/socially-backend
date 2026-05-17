@@ -42,7 +42,6 @@ public class CallbackGoogleController {
     outcome.cookieInstructions().stream()
         .map(authSetCookieHeaderMapper::toSetCookieHeader)
         .forEach(headerValue -> responseBuilder.header(HttpHeaders.SET_COOKIE, headerValue));
-    return responseBuilder.body(
-        authCallbackResponseMapper.toResponse(outcome.authResult(), outcome.user()));
+    return responseBuilder.body(authCallbackResponseMapper.toResponse(outcome.authResult()));
   }
 }

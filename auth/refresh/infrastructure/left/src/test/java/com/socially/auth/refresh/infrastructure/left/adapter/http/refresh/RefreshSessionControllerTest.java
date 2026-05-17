@@ -7,7 +7,6 @@ import static org.mockito.Mockito.when;
 import com.socially.auth.kernel.domain.AuthResult;
 import com.socially.auth.kernel.domain.AuthUser;
 import com.socially.auth.kernel.domain.CookieInstruction;
-import com.socially.auth.kernel.domain.UserResponseDto;
 import com.socially.auth.kernel.infrastructure.left.adapter.http.input.mapper.RequestCookiesMapper;
 import com.socially.auth.kernel.infrastructure.left.adapter.http.output.mapper.AuthSetCookieHeaderMapper;
 import com.socially.auth.refresh.application.output.RefreshSessionCommandResult;
@@ -51,11 +50,7 @@ class RefreshSessionControllerTest {
           null,
           Instant.parse("2024-06-01T12:00:00Z"));
   private static final RefreshSessionResponse SESSION_RESPONSE =
-      new RefreshSessionResponse(
-          "at",
-          "Bearer",
-          120L,
-          new UserResponseDto("550e8400-e29b-41d4-a716-446655440000", "e@x.com", "N"));
+      new RefreshSessionResponse("at", "Bearer", 120L);
   private static final CookieInstruction COOKIE_INSTRUCTION =
       new CookieInstruction("socially_refresh_token", "rt-new", 86_400L);
 
@@ -64,7 +59,7 @@ class RefreshSessionControllerTest {
     when(requestCookiesMapper.toCookieMap(request)).thenReturn(Map.of());
     when(useCase.execute(Map.of()))
         .thenReturn(new RefreshSessionCommandResult(AUTH_RESULT, USER, null));
-    when(refreshSessionResponseMapper.toResponse(AUTH_RESULT, USER)).thenReturn(SESSION_RESPONSE);
+    when(refreshSessionResponseMapper.toResponse(AUTH_RESULT)).thenReturn(SESSION_RESPONSE);
 
     sut.refreshSession(request);
 
@@ -77,7 +72,7 @@ class RefreshSessionControllerTest {
     when(requestCookiesMapper.toCookieMap(request)).thenReturn(cookies);
     when(useCase.execute(cookies))
         .thenReturn(new RefreshSessionCommandResult(AUTH_RESULT, USER, null));
-    when(refreshSessionResponseMapper.toResponse(AUTH_RESULT, USER)).thenReturn(SESSION_RESPONSE);
+    when(refreshSessionResponseMapper.toResponse(AUTH_RESULT)).thenReturn(SESSION_RESPONSE);
 
     sut.refreshSession(request);
 
@@ -89,7 +84,7 @@ class RefreshSessionControllerTest {
     when(requestCookiesMapper.toCookieMap(request)).thenReturn(Map.of());
     when(useCase.execute(Map.of()))
         .thenReturn(new RefreshSessionCommandResult(AUTH_RESULT, USER, null));
-    when(refreshSessionResponseMapper.toResponse(AUTH_RESULT, USER)).thenReturn(SESSION_RESPONSE);
+    when(refreshSessionResponseMapper.toResponse(AUTH_RESULT)).thenReturn(SESSION_RESPONSE);
 
     ResponseEntity<RefreshSessionResponse> response = sut.refreshSession(request);
 
@@ -103,7 +98,7 @@ class RefreshSessionControllerTest {
         .thenReturn(new RefreshSessionCommandResult(AUTH_RESULT, USER, COOKIE_INSTRUCTION));
     when(authSetCookieHeaderMapper.toSetCookieHeader(COOKIE_INSTRUCTION))
         .thenReturn("cookie-header");
-    when(refreshSessionResponseMapper.toResponse(AUTH_RESULT, USER)).thenReturn(SESSION_RESPONSE);
+    when(refreshSessionResponseMapper.toResponse(AUTH_RESULT)).thenReturn(SESSION_RESPONSE);
 
     sut.refreshSession(request);
 
@@ -117,7 +112,7 @@ class RefreshSessionControllerTest {
         .thenReturn(new RefreshSessionCommandResult(AUTH_RESULT, USER, COOKIE_INSTRUCTION));
     when(authSetCookieHeaderMapper.toSetCookieHeader(COOKIE_INSTRUCTION))
         .thenReturn("cookie-header");
-    when(refreshSessionResponseMapper.toResponse(AUTH_RESULT, USER)).thenReturn(SESSION_RESPONSE);
+    when(refreshSessionResponseMapper.toResponse(AUTH_RESULT)).thenReturn(SESSION_RESPONSE);
 
     ResponseEntity<RefreshSessionResponse> response = sut.refreshSession(request);
 
@@ -129,11 +124,11 @@ class RefreshSessionControllerTest {
     when(requestCookiesMapper.toCookieMap(request)).thenReturn(Map.of());
     when(useCase.execute(Map.of()))
         .thenReturn(new RefreshSessionCommandResult(AUTH_RESULT, USER, null));
-    when(refreshSessionResponseMapper.toResponse(AUTH_RESULT, USER)).thenReturn(SESSION_RESPONSE);
+    when(refreshSessionResponseMapper.toResponse(AUTH_RESULT)).thenReturn(SESSION_RESPONSE);
 
     sut.refreshSession(request);
 
-    verify(refreshSessionResponseMapper).toResponse(AUTH_RESULT, USER);
+    verify(refreshSessionResponseMapper).toResponse(AUTH_RESULT);
   }
 
   @Test
@@ -141,7 +136,7 @@ class RefreshSessionControllerTest {
     when(requestCookiesMapper.toCookieMap(request)).thenReturn(Map.of());
     when(useCase.execute(Map.of()))
         .thenReturn(new RefreshSessionCommandResult(AUTH_RESULT, USER, null));
-    when(refreshSessionResponseMapper.toResponse(AUTH_RESULT, USER)).thenReturn(SESSION_RESPONSE);
+    when(refreshSessionResponseMapper.toResponse(AUTH_RESULT)).thenReturn(SESSION_RESPONSE);
 
     ResponseEntity<RefreshSessionResponse> response = sut.refreshSession(request);
 
