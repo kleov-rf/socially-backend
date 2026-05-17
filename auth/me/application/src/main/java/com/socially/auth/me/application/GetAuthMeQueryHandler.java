@@ -1,8 +1,8 @@
 package com.socially.auth.me.application;
 
+import com.socially.auth.kernel.application.port.left.GetAuthenticatedUserUseCase;
 import com.socially.auth.me.application.output.AuthMeQueryResult;
 import com.socially.auth.me.application.port.left.GetAuthMeUseCase;
-import com.socially.auth.me.application.port.left.GetAuthenticatedUserUseCase;
 import com.socially.donor.findbyuserid.application.input.FindDonorByUserIdQuery;
 import com.socially.donor.findbyuserid.application.port.left.FindDonorByUserIdUseCase;
 import com.socially.donor.kernel.domain.entity.Donor;

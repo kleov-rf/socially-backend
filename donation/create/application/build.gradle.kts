@@ -23,7 +23,7 @@ dependencyManagement {
 }
 
 dependencies {
-    implementation(project(":auth:me:application"))
+    implementation(project(":auth:kernel:application"))
     implementation(project(":donor:find-by-user-id:application"))
     implementation(project(":donor:kernel:domain"))
     implementation(project(":donation:create:domain"))
@@ -35,6 +35,7 @@ dependencies {
     compileOnly(libs.lombok)
     annotationProcessor(libs.lombok)
 
+    testImplementation(project(":auth:kernel:domain"))
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.junit.jupiter)

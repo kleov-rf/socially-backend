@@ -1,4 +1,4 @@
-package com.socially.auth.me.application;
+package com.socially.auth.kernel.application;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -10,9 +10,9 @@ import static org.mockito.Mockito.when;
 
 import com.socially.auth.kernel.domain.AuthUser;
 import com.socially.auth.kernel.domain.exception.AuthenticatedUserNotFoundException;
+import com.socially.auth.kernel.domain.exception.UnauthenticatedRequestException;
 import com.socially.auth.kernel.infrastructure.right.adapter.oauth.mapper.AuthUserFromJwtMapper;
 import com.socially.auth.kernel.infrastructure.right.adapter.user.AuthenticatedUserResolver;
-import com.socially.auth.me.application.exception.UnauthenticatedRequestException;
 import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.user.kernel.domain.entity.User;
 import com.socially.user.kernel.domain.valueobject.Email;

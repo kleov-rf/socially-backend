@@ -8,8 +8,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import com.socially.auth.me.application.exception.UnauthenticatedRequestException;
-import com.socially.auth.me.application.port.left.GetAuthenticatedUserUseCase;
+import com.socially.auth.kernel.application.port.left.GetAuthenticatedUserUseCase;
+import com.socially.auth.kernel.domain.exception.UnauthenticatedRequestException;
 import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donation.create.application.input.CreateDonationCommand;
 import com.socially.donation.create.application.input.mapper.CreateDonationCommandMapper;

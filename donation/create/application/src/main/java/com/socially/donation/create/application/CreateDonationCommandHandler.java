@@ -1,6 +1,6 @@
 package com.socially.donation.create.application;
 
-import com.socially.auth.me.application.port.left.GetAuthenticatedUserUseCase;
+import com.socially.auth.kernel.application.port.left.GetAuthenticatedUserUseCase;
 import com.socially.donation.create.application.input.CreateDonationCommand;
 import com.socially.donation.create.application.input.mapper.CreateDonationCommandMapper;
 import com.socially.donation.create.application.port.left.CreateDonationUseCase;

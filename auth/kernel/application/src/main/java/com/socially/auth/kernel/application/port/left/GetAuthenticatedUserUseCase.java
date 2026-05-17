@@ -1,4 +1,4 @@
-package com.socially.auth.me.application.port.left;
+package com.socially.auth.kernel.application.port.left;
 
 import com.socially.user.kernel.domain.entity.User;
 import java.security.Principal;

@@ -3,7 +3,7 @@ plugins {
     alias(libs.plugins.spring.dependency.management)
 }
 
-group = "com.socially.donation.delete.application"
+group = "com.socially.auth.kernel.application"
 version = "0.0.1-SNAPSHOT"
 
 java {
@@ -23,24 +23,19 @@ dependencyManagement {
 }
 
 dependencies {
-    implementation(project(":auth:kernel:application"))
-    implementation(project(":donor:find-by-user-id:application"))
-    implementation(project(":donor:kernel:domain"))
-    implementation(project(":donation:delete:domain"))
-    implementation(project(":donation:get-by-id:domain"))
-    implementation(project(":donation:kernel:domain"))
+    implementation(project(":auth:kernel:domain"))
+    implementation(project(":auth:kernel:infrastructure:right"))
     implementation(project(":user:kernel:domain"))
 
     implementation(libs.spring.context)
-    compileOnly(libs.jakarta.validation.api)
 
     compileOnly(libs.lombok)
     annotationProcessor(libs.lombok)
 
-    testImplementation(project(":auth:kernel:domain"))
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.junit.jupiter)
+    testImplementation(libs.spring.boot.starter.oauth2.resource.server)
     testRuntimeOnly(libs.junit.platform.launcher)
 }
 

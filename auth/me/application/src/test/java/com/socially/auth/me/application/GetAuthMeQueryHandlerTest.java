@@ -7,8 +7,8 @@ import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.socially.auth.kernel.application.port.left.GetAuthenticatedUserUseCase;
 import com.socially.auth.me.application.output.AuthMeQueryResult;
-import com.socially.auth.me.application.port.left.GetAuthenticatedUserUseCase;
 import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donor.findbyuserid.application.input.FindDonorByUserIdQuery;
 import com.socially.donor.findbyuserid.application.port.left.FindDonorByUserIdUseCase;

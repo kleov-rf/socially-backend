@@ -1,6 +1,6 @@
 package com.socially.donation.delete.application;
 
-import com.socially.auth.me.application.port.left.GetAuthenticatedUserUseCase;
+import com.socially.auth.kernel.application.port.left.GetAuthenticatedUserUseCase;
 import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donation.delete.application.input.DeleteDonationCommand;
 import com.socially.donation.delete.application.port.left.DeleteDonationUseCase;
