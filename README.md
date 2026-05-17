@@ -92,11 +92,10 @@ docker compose up --build
 Services started:
 
 - Backend: `http://localhost:8080`
-- Postgres: `localhost:5432` (`postgres` / `postgres`, db `socially`)
 
-### Local Cognito (MiniStack)
+### Local AWS emulation (MiniStack)
 
-This repository includes a local Cognito bootstrap using MiniStack (`ministackorg/ministack`) so backend auth can start with production-like Cognito environment variables, without real AWS credentials.
+This repository uses MiniStack (`ministackorg/ministack`) for local **Cognito** and **RDS PostgreSQL**, matching production-style provisioning (API + Secrets Manager) without real AWS credentials. MiniStack requires access to the host **Docker socket** to run RDS database containers.
 
 Run:
 
@@ -108,12 +107,15 @@ What this does:
 
 - starts MiniStack (`http://localhost:4566`)
 - runs `scripts/ministack-init.sh` inside MiniStack to create/reuse:
-  - Cognito user pool `socially-local`
-  - SPA app client
-  - backend app client (with secret)
-  - Secrets Manager entry `socially/cognito/backend-client-secret` (JSON with `client_id` and `client_secret`, aligned with AWS)
-  - writes **`LOCAL_COGNITO_*`** variables to `/tmp/ministack/cognito-outputs.env` for the **`local`** Spring profile (recreate the ministack container if you still have an older `COGNITO_*` version of that file)
-- exports those vars plus derived URLs and starts `postgres` + `backend`
+  - Cognito user pool `socially-local`, SPA/backend clients, and `socially/cognito/backend-client-secret`
+  - RDS instance `socially-local` (PostgreSQL **18.2**, ephemeral / `RDS_PERSIST=0`)
+  - Secrets Manager `socially/db/credentials` (JSON: `host`, `port`, `dbname`, `username`, `password`)
+  - writes **`LOCAL_COGNITO_*`** to `/tmp/ministack/cognito-outputs.env` and **`LOCAL_DB_*`** to `/tmp/ministack/db-outputs.env`
+- exports those vars and starts `backend` (JDBC targets `host.docker.internal:15432` from inside Compose)
+
+**Database (RDS):** default host port **`15432`** (`RDS_BASE_PORT`). Credentials: user `socially_admin`, password `LocalDevPass1!` (override with `LOCAL_RDS_MASTER_PASSWORD`). Data is **ephemeral** — recreating the ministack container yields an empty database; Flyway re-runs on backend start.
+
+Recreate MiniStack after init script changes: `docker compose up -d --force-recreate ministack`, then `./scripts/start-local.sh` again.
 
 MiniStack does not register hosted-UI identity providers named `Google` or `COGNITO`. The **`local`** profile uses **`LOCAL_COGNITO_IDENTITY_PROVIDER`** (default empty) so authorize URLs omit `identity_provider`. For real Cognito, `application-dev.yaml` uses `Google`. Override with **`LOCAL_COGNITO_IDENTITY_PROVIDER`** if needed. Recreate the backend container after changing env.
 
@@ -132,13 +134,20 @@ docker compose exec -T backend sh -lc 'wget -qO- "$LOCAL_COGNITO_ISSUER_URL/.wel
 
 ### Option 2: Run from Gradle/IDE
 
-Start Postgres separately (for example from compose), then:
+Start MiniStack (`./scripts/start-local.sh` once, or `docker compose up -d ministack` and wait for init), then source outputs on the **host**:
 
 ```bash
+docker compose exec -T ministack cat /tmp/ministack/cognito-outputs.env /tmp/ministack/db-outputs.env > /tmp/socially-local.env
+set -a && source /tmp/socially-local.env && set +a
+export LOCAL_DB_HOST=localhost
+export LOCAL_COGNITO_HOSTED_DOMAIN=http://localhost:4566
+export LOCAL_COGNITO_ISSUER_URL="http://localhost:4566/${LOCAL_COGNITO_USER_POOL_ID}"
 ./gradlew :app:bootRun
 ```
 
-The `bootRun` task defaults `spring.profiles.active` to **`local`**, seeds **`LOCAL_DB_*`** for host Postgres (and **`DB_*`** for profile **`dev`**), and can mirror **`LOCAL_COGNITO_USE_MINISTACK`** from **`COGNITO_USE_MINISTACK`**. For MiniStack, export the same **`COGNITO_*`** variables as Compose (pool, issuer, clients). To match **AWS ECS** (real Cognito), use the deployment profile (`dev`, `stg`, or `prd`) with the task’s environment — not the `local` machine profile:
+Use **`LOCAL_DB_HOST=localhost`** (not `host.docker.internal`) when the JVM runs on the host. Port comes from `db-outputs.env` (default **15432**).
+
+The `bootRun` task defaults `spring.profiles.active` to **`local`**, seeds **`LOCAL_DB_*`** defaults, and can mirror **`LOCAL_COGNITO_USE_MINISTACK`** from **`COGNITO_USE_MINISTACK`**. To match **AWS ECS** (real Cognito + RDS), use the deployment profile (`dev`, `stg`, or `prd`) — not the `local` machine profile:
 
 ```bash
 SPRING_PROFILES_ACTIVE=dev ./gradlew :app:bootRun

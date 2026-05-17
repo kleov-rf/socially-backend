@@ -11,6 +11,15 @@ SPA_CLIENT_NAME="socially-local-spa-client"
 BACKEND_CLIENT_NAME="socially-local-backend-client"
 BACKEND_SECRET_PATH="socially/cognito/backend-client-secret"
 OUTPUT_FILE="/tmp/ministack/cognito-outputs.env"
+DB_INSTANCE_ID="socially-local"
+DB_ENGINE_VERSION="18.2"
+DB_NAME="socially"
+DB_MASTER_USERNAME="socially_admin"
+DB_MASTER_PASSWORD="${LOCAL_RDS_MASTER_PASSWORD:-LocalDevPass1!}"
+DB_SECRET_PATH="socially/db/credentials"
+DB_OUTPUT_FILE="/tmp/ministack/db-outputs.env"
+RDS_HOST_PORT="${RDS_BASE_PORT:-15432}"
+LOCAL_RDS_CLIENT_HOST="${LOCAL_RDS_CLIENT_HOST:-host.docker.internal}"
 # Hosted UI username/password sign-in (local dev only; override via ministack container env if needed).
 LOCAL_DEV_USERNAME="${LOCAL_DEV_COGNITO_USERNAME:-dev@socially.local}"
 LOCAL_DEV_PASSWORD="${LOCAL_DEV_COGNITO_PASSWORD:-SociallyDev1!}"
@@ -126,10 +135,70 @@ provision_cognito() {
   cat "${OUTPUT_FILE}"
 }
 
+wait_for_rds_available() {
+  attempts=0
+  while true; do
+    STATUS="$(aws_local rds describe-db-instances --db-instance-identifier "${DB_INSTANCE_ID}" --query "DBInstances[0].DBInstanceStatus" --output text 2>/dev/null || true)"
+    if [ "${STATUS}" = "available" ]; then
+      return 0
+    fi
+    attempts=$((attempts + 1))
+    if [ "${attempts}" -ge 120 ]; then
+      echo "RDS instance ${DB_INSTANCE_ID} did not become available in time (last status: ${STATUS})." >&2
+      exit 1
+    fi
+    sleep 2
+  done
+}
+
+provision_rds() {
+  wait_for_ministack
+
+  if ! aws_local rds describe-db-instances --db-instance-identifier "${DB_INSTANCE_ID}" >/dev/null 2>&1; then
+    aws_local rds create-db-instance \
+      --db-instance-identifier "${DB_INSTANCE_ID}" \
+      --db-instance-class db.t3.micro \
+      --engine postgres \
+      --engine-version "${DB_ENGINE_VERSION}" \
+      --master-username "${DB_MASTER_USERNAME}" \
+      --master-user-password "${DB_MASTER_PASSWORD}" \
+      --db-name "${DB_NAME}" \
+      --allocated-storage 20 >/dev/null
+  fi
+
+  wait_for_rds_available
+
+  DB_SECRET_JSON="$(printf '{"username":"%s","password":"%s","host":"%s","port":"%s","dbname":"%s"}' \
+    "${DB_MASTER_USERNAME}" \
+    "${DB_MASTER_PASSWORD}" \
+    "${LOCAL_RDS_CLIENT_HOST}" \
+    "${RDS_HOST_PORT}" \
+    "${DB_NAME}")"
+
+  if aws_local secretsmanager describe-secret --secret-id "${DB_SECRET_PATH}" >/dev/null 2>&1; then
+    aws_local secretsmanager put-secret-value --secret-id "${DB_SECRET_PATH}" --secret-string "${DB_SECRET_JSON}" >/dev/null
+  else
+    aws_local secretsmanager create-secret --name "${DB_SECRET_PATH}" --secret-string "${DB_SECRET_JSON}" >/dev/null
+  fi
+
+  mkdir -p "$(dirname "${DB_OUTPUT_FILE}")"
+  {
+    printf "LOCAL_DB_HOST=%s\n" "${LOCAL_RDS_CLIENT_HOST}"
+    printf "LOCAL_DB_PORT=%s\n" "${RDS_HOST_PORT}"
+    printf "LOCAL_DB_NAME=%s\n" "${DB_NAME}"
+    printf "LOCAL_DB_USERNAME=%s\n" "${DB_MASTER_USERNAME}"
+    printf "LOCAL_DB_PASSWORD=%s\n" "${DB_MASTER_PASSWORD}"
+  } >"${DB_OUTPUT_FILE}"
+
+  echo "MiniStack RDS initialized (postgres ${DB_ENGINE_VERSION}, host port ${RDS_HOST_PORT})."
+  cat "${DB_OUTPUT_FILE}"
+}
+
 if [ "${1:-}" != "--provision" ]; then
-  mkdir -p "$(dirname "${OUTPUT_FILE}")"
+  mkdir -p "$(dirname "${OUTPUT_FILE}")" "$(dirname "${DB_OUTPUT_FILE}")"
   nohup sh "$0" --provision >/tmp/ministack/ministack-init.log 2>&1 &
   exit 0
 fi
 
 provision_cognito
+provision_rds

@@ -1,25 +1,10 @@
 # Local development environment for Socially backend
-# Run: docker compose up --build
+# Run: ./scripts/start-local.sh (recommended) or docker compose up --build
 #
 # Backend: http://localhost:8080 (Spring Boot, API: /api/*)
-# Postgres: localhost:5432 (for IDE connection if needed)
+# RDS (MiniStack): localhost:15432 by default (see PRE-COMMIT / README)
 
 services:
-  postgres:
-    image: postgres:15-alpine
-    container_name: socially-backend-postgres
-    ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_DB: socially
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
   ministack:
     image: ministackorg/ministack:latest
     container_name: socially-ministack
@@ -29,6 +14,8 @@ services:
       AWS_DEFAULT_REGION: us-east-1
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
+      RDS_PERSIST: "0"
+      RDS_BASE_PORT: "15432"
     healthcheck:
       test: ["CMD", "busybox", "wget", "-q", "-O-", "http://127.0.0.1:4566/_ministack/health"]
       interval: 5s
@@ -36,6 +23,7 @@ services:
       retries: 10
       start_period: 10s
     volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
       - ministack-data:/tmp/ministack
       - ./scripts/ministack-init.sh:/docker-entrypoint-initaws.d/init.sh:ro
 
@@ -46,13 +34,15 @@ services:
     container_name: socially-backend-app
     ports:
       - "8080:8080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       SPRING_PROFILES_ACTIVE: local
-      LOCAL_DB_HOST: postgres
-      LOCAL_DB_PORT: "5432"
-      LOCAL_DB_NAME: socially
-      LOCAL_DB_USERNAME: postgres
-      LOCAL_DB_PASSWORD: postgres
+      LOCAL_DB_HOST: ${LOCAL_DB_HOST:-}
+      LOCAL_DB_PORT: ${LOCAL_DB_PORT:-}
+      LOCAL_DB_NAME: ${LOCAL_DB_NAME:-}
+      LOCAL_DB_USERNAME: ${LOCAL_DB_USERNAME:-}
+      LOCAL_DB_PASSWORD: ${LOCAL_DB_PASSWORD:-}
       LOCAL_COGNITO_HOSTED_DOMAIN: http://localhost:4566
       LOCAL_COGNITO_OAUTH_BASE_URL: http://ministack:4566
       LOCAL_COGNITO_REGION: us-east-1
@@ -67,8 +57,6 @@ services:
       LOCAL_COGNITO_BACKEND_CLIENT_SECRET_JSON: ${LOCAL_COGNITO_BACKEND_CLIENT_SECRET_JSON:-}
     depends_on:
       ministack:
-        condition: service_healthy
-      postgres:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
