@@ -10,17 +10,15 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.socially.auth.kernel.domain.AuthUser;
+import com.socially.auth.kernel.domain.exception.AuthenticatedUserNotFoundException;
 import com.socially.auth.kernel.infrastructure.right.adapter.oauth.mapper.AuthUserFromJwtMapper;
-import com.socially.auth.kernel.infrastructure.right.adapter.user.AuthUserClaimsValidator;
-import com.socially.auth.me.application.exception.MeUserNotFoundException;
+import com.socially.auth.kernel.infrastructure.right.adapter.user.AuthenticatedUserResolver;
 import com.socially.auth.me.application.exception.UnauthenticatedRequestException;
 import com.socially.auth.me.application.output.AuthMeQueryResult;
 import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donor.findbyuserid.application.input.FindDonorByUserIdQuery;
 import com.socially.donor.findbyuserid.application.port.left.FindDonorByUserIdUseCase;
 import com.socially.donor.kernel.domain.entity.Donor;
-import com.socially.user.findbyfederatedidentity.application.input.FindUserByFederatedIdentityQuery;
-import com.socially.user.findbyfederatedidentity.application.port.left.FindUserByFederatedIdentityUseCase;
 import com.socially.user.kernel.domain.entity.User;
 import com.socially.user.kernel.domain.valueobject.Email;
 import java.time.Instant;
@@ -44,10 +42,9 @@ class GetAuthMeQueryHandlerTest {
   private static final AuthUser AUTH_USER =
       new AuthUser("https://idp.example", "sub-99", "me@example.com", "Jane", "Doe");
 
-  @Mock private FindUserByFederatedIdentityUseCase findUserByFederatedIdentityUseCase;
+  @Mock private AuthenticatedUserResolver authenticatedUserResolver;
   @Mock private FindDonorByUserIdUseCase findDonorByUserIdUseCase;
   @Mock private AuthUserFromJwtMapper authUserFromJwtMapper;
-  @Mock private AuthUserClaimsValidator authUserClaimsValidator;
 
   @InjectMocks private GetAuthMeQueryHandler handler;
 
@@ -65,9 +62,7 @@ class GetAuthMeQueryHandlerTest {
     Jwt jwt = jwtWithClaims(baseClaims());
     User user = sampleUser();
     when(authUserFromJwtMapper.fromJwt(same(jwt))).thenReturn(AUTH_USER);
-    when(findUserByFederatedIdentityUseCase.execute(
-            new FindUserByFederatedIdentityQuery("https://idp.example", "sub-99")))
-        .thenReturn(Optional.of(user));
+    when(authenticatedUserResolver.resolveExisting(AUTH_USER)).thenReturn(user);
     when(findDonorByUserIdUseCase.execute(
             new FindDonorByUserIdQuery("550e8400-e29b-41d4-a716-446655440000")))
         .thenReturn(Optional.empty());
@@ -78,50 +73,33 @@ class GetAuthMeQueryHandlerTest {
   }
 
   @Test
-  void execute_should_call_auth_user_claims_validator_with_mapped_auth_user() {
+  void execute_should_call_authenticated_user_resolver_resolve_existing_with_mapped_auth_user() {
     Jwt jwt = jwtWithClaims(baseClaims());
     User user = sampleUser();
     when(authUserFromJwtMapper.fromJwt(any(Jwt.class))).thenReturn(AUTH_USER);
-    when(findUserByFederatedIdentityUseCase.execute(
-            new FindUserByFederatedIdentityQuery("https://idp.example", "sub-99")))
-        .thenReturn(Optional.of(user));
+    when(authenticatedUserResolver.resolveExisting(eq(AUTH_USER))).thenReturn(user);
     when(findDonorByUserIdUseCase.execute(
             new FindDonorByUserIdQuery("550e8400-e29b-41d4-a716-446655440000")))
         .thenReturn(Optional.empty());
 
     handler.execute(new JwtAuthenticationToken(jwt));
 
-    verify(authUserClaimsValidator).requireIssuerAndSubject(AUTH_USER);
+    verify(authenticatedUserResolver).resolveExisting(AUTH_USER);
   }
 
   @Test
-  void execute_should_call_find_by_federated_identity_with_issuer_and_subject() {
-    Jwt jwt = jwtWithClaims(baseClaims());
-    User user = sampleUser();
-    when(authUserFromJwtMapper.fromJwt(any(Jwt.class))).thenReturn(AUTH_USER);
-    when(findUserByFederatedIdentityUseCase.execute(
-            new FindUserByFederatedIdentityQuery("https://idp.example", "sub-99")))
-        .thenReturn(Optional.of(user));
-    when(findDonorByUserIdUseCase.execute(
-            new FindDonorByUserIdQuery("550e8400-e29b-41d4-a716-446655440000")))
-        .thenReturn(Optional.empty());
-
-    handler.execute(new JwtAuthenticationToken(jwt));
-
-    verify(findUserByFederatedIdentityUseCase)
-        .execute(new FindUserByFederatedIdentityQuery("https://idp.example", "sub-99"));
-  }
-
-  @Test
-  void execute_should_throw_me_user_not_found_when_user_missing() {
+  void execute_should_throw_authenticated_user_not_found_when_resolver_reports_missing_user() {
     Jwt jwt = jwtWithClaims(baseClaims());
     when(authUserFromJwtMapper.fromJwt(any(Jwt.class))).thenReturn(AUTH_USER);
-    when(findUserByFederatedIdentityUseCase.execute(
-            new FindUserByFederatedIdentityQuery("https://idp.example", "sub-99")))
-        .thenReturn(Optional.empty());
+    when(authenticatedUserResolver.resolveExisting(AUTH_USER))
+        .thenThrow(new AuthenticatedUserNotFoundException());
 
-    assertThrows(
-        MeUserNotFoundException.class, () -> handler.execute(new JwtAuthenticationToken(jwt)));
+    AuthenticatedUserNotFoundException exception =
+        assertThrows(
+            AuthenticatedUserNotFoundException.class,
+            () -> handler.execute(new JwtAuthenticationToken(jwt)));
+
+    assertEquals("User not found", exception.getMessage());
   }
 
   @Test
@@ -129,9 +107,7 @@ class GetAuthMeQueryHandlerTest {
     Jwt jwt = jwtWithClaims(baseClaims());
     User user = sampleUser();
     when(authUserFromJwtMapper.fromJwt(any(Jwt.class))).thenReturn(AUTH_USER);
-    when(findUserByFederatedIdentityUseCase.execute(
-            new FindUserByFederatedIdentityQuery("https://idp.example", "sub-99")))
-        .thenReturn(Optional.of(user));
+    when(authenticatedUserResolver.resolveExisting(AUTH_USER)).thenReturn(user);
     when(findDonorByUserIdUseCase.execute(
             new FindDonorByUserIdQuery("550e8400-e29b-41d4-a716-446655440000")))
         .thenReturn(Optional.empty());
@@ -147,9 +123,7 @@ class GetAuthMeQueryHandlerTest {
     Jwt jwt = jwtWithClaims(baseClaims());
     User user = sampleUser();
     when(authUserFromJwtMapper.fromJwt(any(Jwt.class))).thenReturn(AUTH_USER);
-    when(findUserByFederatedIdentityUseCase.execute(
-            new FindUserByFederatedIdentityQuery("https://idp.example", "sub-99")))
-        .thenReturn(Optional.of(user));
+    when(authenticatedUserResolver.resolveExisting(AUTH_USER)).thenReturn(user);
     when(findDonorByUserIdUseCase.execute(
             new FindDonorByUserIdQuery("550e8400-e29b-41d4-a716-446655440000")))
         .thenReturn(Optional.empty());
@@ -166,9 +140,7 @@ class GetAuthMeQueryHandlerTest {
     User user = sampleUser();
     Donor donor = sampleDonor();
     when(authUserFromJwtMapper.fromJwt(any(Jwt.class))).thenReturn(AUTH_USER);
-    when(findUserByFederatedIdentityUseCase.execute(
-            new FindUserByFederatedIdentityQuery("https://idp.example", "sub-99")))
-        .thenReturn(Optional.of(user));
+    when(authenticatedUserResolver.resolveExisting(AUTH_USER)).thenReturn(user);
     when(findDonorByUserIdUseCase.execute(
             eq(new FindDonorByUserIdQuery("550e8400-e29b-41d4-a716-446655440000"))))
         .thenReturn(Optional.of(donor));
