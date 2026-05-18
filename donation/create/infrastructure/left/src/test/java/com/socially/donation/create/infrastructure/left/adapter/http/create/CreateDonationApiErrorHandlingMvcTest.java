@@ -45,10 +45,35 @@ class CreateDonationApiErrorHandlingMvcTest {
                     {
                       "id": "550e8400-e29b-41d4-a716-446655440001",
                       "title": "Title",
-                      "description": "Description"
+                      "description": "Description",
+                      "location": {
+                        "address": "Calle Mayor 1, Madrid",
+                        "latitude": 40.4168,
+                        "longitude": -3.7038
+                      }
                     }
                     """))
         .andExpect(status().isUnauthorized());
+  }
+
+  @Test
+  void createDonation_should_return_validation_error_when_location_is_missing() throws Exception {
+    mockMvc
+        .perform(
+            post("/api/donations")
+                .with(jwt())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                    {
+                      "id": "550e8400-e29b-41d4-a716-446655440001",
+                      "title": "Title",
+                      "description": "Description"
+                    }
+                    """))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.fieldErrors").isArray())
+        .andExpect(jsonPath("$.message").exists());
   }
 
   @Test

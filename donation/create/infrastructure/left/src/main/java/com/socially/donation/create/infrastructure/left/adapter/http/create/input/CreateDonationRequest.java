@@ -1,6 +1,10 @@
 package com.socially.donation.create.infrastructure.left.adapter.http.create.input;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
 public record CreateDonationRequest(
-    @NotNull String id, @NotNull String title, @NotNull String description) {}
+    @NotNull String id,
+    @NotNull String title,
+    @NotNull String description,
+    @NotNull @Valid CreateDonationLocationRequest location) {}

@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.socially.app.cucumber.CucumberOAuthJwt;
+import com.socially.donation.create.infrastructure.left.adapter.http.create.input.CreateDonationLocationRequest;
 import com.socially.donation.create.infrastructure.left.adapter.http.create.input.CreateDonationRequest;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
@@ -58,6 +59,8 @@ public class DonationStepDefinitions {
   private static final String CUCUMBER_OTHER_DONOR_ID = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeee0004";
   private static final String CUCUMBER_FEDERATED_IDENTITY_ID_PREFIX =
       "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeee001";
+  private static final CreateDonationLocationRequest DEFAULT_LOCATION =
+      new CreateDonationLocationRequest("Calle Mayor 1, Madrid", 40.4168, -3.7038);
 
   @Before("@donation and not @auth")
   public void resetDonationScenarioState() {
@@ -99,7 +102,7 @@ public class DonationStepDefinitions {
   @When("I create the donation")
   public void iCreateTheDonation() throws Exception {
     String requestBody =
-        objectMapper.writeValueAsString(new CreateDonationRequest(id, title, description));
+        objectMapper.writeValueAsString(createDonationRequest(id, title, description));
 
     mvcResult =
         mockMvc
@@ -114,7 +117,7 @@ public class DonationStepDefinitions {
   @When("I create the donation as the logged-in OAuth user")
   public void iCreateTheDonationAsTheLoggedInOauthUser() throws Exception {
     String requestBody =
-        objectMapper.writeValueAsString(new CreateDonationRequest(id, title, description));
+        objectMapper.writeValueAsString(createDonationRequest(id, title, description));
 
     mvcResult =
         mockMvc
@@ -129,7 +132,7 @@ public class DonationStepDefinitions {
   @When("I create the donation without authentication")
   public void iCreateTheDonationWithoutAuthentication() throws Exception {
     String requestBody =
-        objectMapper.writeValueAsString(new CreateDonationRequest(id, title, description));
+        objectMapper.writeValueAsString(createDonationRequest(id, title, description));
 
     mvcResult =
         mockMvc
@@ -277,7 +280,7 @@ public class DonationStepDefinitions {
       String generatedDescription = "Pagination description " + index;
       String requestBody =
           objectMapper.writeValueAsString(
-              new CreateDonationRequest(generatedId, generatedTitle, generatedDescription));
+              createDonationRequest(generatedId, generatedTitle, generatedDescription));
 
       MvcResult createResult =
           mockMvc
@@ -500,6 +503,11 @@ public class DonationStepDefinitions {
         "Other",
         "User",
         createdAt);
+  }
+
+  private static CreateDonationRequest createDonationRequest(
+      String id, String title, String description) {
+    return new CreateDonationRequest(id, title, description, DEFAULT_LOCATION);
   }
 
   private static RequestPostProcessor cucumberDonorJwt() {

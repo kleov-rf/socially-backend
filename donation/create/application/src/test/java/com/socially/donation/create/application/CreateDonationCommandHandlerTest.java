@@ -12,6 +12,7 @@ import com.socially.auth.kernel.application.port.left.GetAuthenticatedUserUseCas
 import com.socially.auth.kernel.domain.exception.AuthUnauthorizedException;
 import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donation.create.application.input.CreateDonationCommand;
+import com.socially.donation.create.application.input.CreateDonationLocationCommand;
 import com.socially.donation.create.application.input.mapper.CreateDonationCommandMapper;
 import com.socially.donation.create.domain.port.right.CreateDonationRepository;
 import com.socially.donation.kernel.domain.entity.Donation;
@@ -49,6 +50,8 @@ class CreateDonationCommandHandlerTest {
           "Doe",
           CREATED_AT);
   private static final Principal PRINCIPAL = () -> "user@example.com";
+  private static final CreateDonationLocationCommand LOCATION_COMMAND =
+      new CreateDonationLocationCommand("Calle Mayor 1, Madrid", 40.4168, -3.7038);
 
   @Mock private GetAuthenticatedUserUseCase getAuthenticatedUserUseCase;
   @Mock private FindDonorByUserIdUseCase findDonorByUserIdUseCase;
@@ -63,7 +66,9 @@ class CreateDonationCommandHandlerTest {
 
   @BeforeEach
   void setUp() {
-    command = new CreateDonationCommand(DONATION_ID, "Test Title", "Test Description", PRINCIPAL);
+    command =
+        new CreateDonationCommand(
+            DONATION_ID, "Test Title", "Test Description", LOCATION_COMMAND, PRINCIPAL);
     user = User.create(Id.from(USER_ID), Email.from("user@example.com"), "Jane", "Doe", CREATED_AT);
     donorAfterCreate = DONOR;
     lenient()
