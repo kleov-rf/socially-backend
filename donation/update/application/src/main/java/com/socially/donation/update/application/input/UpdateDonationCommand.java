@@ -4,4 +4,8 @@ import jakarta.validation.constraints.NotNull;
 import java.security.Principal;
 
 public record UpdateDonationCommand(
-    @NotNull String id, String title, String description, @NotNull Principal principal) {}
+    @NotNull String id,
+    String title,
+    String description,
+    UpdateDonationLocationCommand location,
+    @NotNull Principal principal) {}

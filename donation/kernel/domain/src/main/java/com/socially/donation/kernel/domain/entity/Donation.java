@@ -77,6 +77,10 @@ public final class Donation {
     return create(id, donorId, title, description, location, createdAt, lastUpdatedAt);
   }
 
+  public Donation withLocation(DonationLocation location, Instant lastUpdatedAt) {
+    return create(id, donorId, title, description, location, createdAt, lastUpdatedAt);
+  }
+
   public Id id() {
     return id;
   }

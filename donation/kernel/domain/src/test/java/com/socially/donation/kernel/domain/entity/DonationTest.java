@@ -336,6 +336,37 @@ class DonationTest {
   }
 
   @Test
+  void withLocation_should_replace_location_and_keep_title_and_description() {
+    Donation donation =
+        Donation.create(
+            Id.from(DONATION_ID),
+            Id.from(DONOR_ID),
+            Title.from("Title"),
+            Description.from("Description"),
+            DEFAULT_LOCATION,
+            CREATED_AT,
+            LAST_UPDATED_AT);
+    DonationLocation newLocation = DonationLocation.from("Plaza Mayor 2, Madrid", 40.42, -3.71);
+
+    Donation updated = donation.withLocation(newLocation, NEW_LAST_UPDATED_AT);
+
+    assertEquals(newLocation, updated.location());
+    assertEquals(Title.from("Title"), updated.title());
+    assertEquals(Description.from("Description"), updated.description());
+    assertEquals(NEW_LAST_UPDATED_AT, updated.lastUpdatedAt());
+  }
+
+  @Test
+  void withLocation_should_set_location_address() {
+    Donation donation = createDonation();
+    DonationLocation newLocation = DonationLocation.from("New Address", 41.0, -4.0);
+
+    Donation updated = donation.withLocation(newLocation, NEW_LAST_UPDATED_AT);
+
+    assertEquals("New Address", updated.location().address());
+  }
+
+  @Test
   void withDescription_should_preserve_location() {
     Donation donation =
         Donation.create(

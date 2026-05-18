@@ -6,8 +6,10 @@ import com.socially.donation.kernel.application.port.left.AssertDonationOwnedByP
 import com.socially.donation.kernel.domain.entity.Donation;
 import com.socially.donation.kernel.domain.exception.DonationNotFoundException;
 import com.socially.donation.kernel.domain.valueobject.Description;
+import com.socially.donation.kernel.domain.valueobject.DonationLocation;
 import com.socially.donation.kernel.domain.valueobject.Title;
 import com.socially.donation.update.application.input.UpdateDonationCommand;
+import com.socially.donation.update.application.input.UpdateDonationLocationCommand;
 import com.socially.donation.update.application.port.left.UpdateDonationUseCase;
 import com.socially.donation.update.domain.port.right.UpdateDonationRepository;
 import java.time.Clock;
@@ -43,6 +45,14 @@ public final class UpdateDonationCommandHandler implements UpdateDonationUseCase
     if (Objects.nonNull(command.description())) {
       now = nowOrRead(now);
       donation = donation.withDescription(Description.from(command.description()), now);
+    }
+    UpdateDonationLocationCommand location = command.location();
+    if (Objects.nonNull(location)) {
+      now = nowOrRead(now);
+      donation =
+          donation.withLocation(
+              DonationLocation.from(location.address(), location.latitude(), location.longitude()),
+              now);
     }
 
     updateDonationRepository.update(donation);

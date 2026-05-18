@@ -35,9 +35,10 @@ class UpdateDonationControllerTest {
 
   @Test
   void patch_should_pass_principal_in_command() {
-    var request = new UpdateDonationRequest("Updated Title", "Updated Description");
+    var request = new UpdateDonationRequest("Updated Title", "Updated Description", null);
     var command =
-        new UpdateDonationCommand(DONATION_ID, "Updated Title", "Updated Description", principal);
+        new UpdateDonationCommand(
+            DONATION_ID, "Updated Title", "Updated Description", null, principal);
     when(updateDonationRequestMapper.toCommand(DONATION_ID, request, principal))
         .thenReturn(command);
 
@@ -52,9 +53,10 @@ class UpdateDonationControllerTest {
 
   @Test
   void patch_should_call_request_mapper_with_received_id_request_body_and_principal() {
-    var request = new UpdateDonationRequest("Updated Title", "Updated Description");
+    var request = new UpdateDonationRequest("Updated Title", "Updated Description", null);
     var command =
-        new UpdateDonationCommand(DONATION_ID, "Updated Title", "Updated Description", principal);
+        new UpdateDonationCommand(
+            DONATION_ID, "Updated Title", "Updated Description", null, principal);
     when(updateDonationRequestMapper.toCommand(DONATION_ID, request, principal))
         .thenReturn(command);
 
@@ -65,9 +67,10 @@ class UpdateDonationControllerTest {
 
   @Test
   void patch_should_call_execute_with_mapped_command() {
-    var request = new UpdateDonationRequest("Updated Title", "Updated Description");
+    var request = new UpdateDonationRequest("Updated Title", "Updated Description", null);
     var mappedCommand =
-        new UpdateDonationCommand(DONATION_ID, "Updated Title", "Updated Description", principal);
+        new UpdateDonationCommand(
+            DONATION_ID, "Updated Title", "Updated Description", null, principal);
     when(updateDonationRequestMapper.toCommand(DONATION_ID, request, principal))
         .thenReturn(mappedCommand);
 
@@ -78,9 +81,10 @@ class UpdateDonationControllerTest {
 
   @Test
   void patch_should_return_no_content() {
-    var request = new UpdateDonationRequest("Updated Title", "Updated Description");
+    var request = new UpdateDonationRequest("Updated Title", "Updated Description", null);
     var mappedCommand =
-        new UpdateDonationCommand(DONATION_ID, "Updated Title", "Updated Description", principal);
+        new UpdateDonationCommand(
+            DONATION_ID, "Updated Title", "Updated Description", null, principal);
     when(updateDonationRequestMapper.toCommand(DONATION_ID, request, principal))
         .thenReturn(mappedCommand);
 
@@ -91,9 +95,10 @@ class UpdateDonationControllerTest {
 
   @Test
   void patch_should_propagate_donation_not_found_exception() {
-    var request = new UpdateDonationRequest("Updated Title", "Updated Description");
+    var request = new UpdateDonationRequest("Updated Title", "Updated Description", null);
     var mappedCommand =
-        new UpdateDonationCommand(DONATION_ID, "Updated Title", "Updated Description", principal);
+        new UpdateDonationCommand(
+            DONATION_ID, "Updated Title", "Updated Description", null, principal);
     when(updateDonationRequestMapper.toCommand(DONATION_ID, request, principal))
         .thenReturn(mappedCommand);
     doThrow(new DonationNotFoundException(DONATION_ID))
@@ -106,9 +111,10 @@ class UpdateDonationControllerTest {
 
   @Test
   void patch_should_propagate_donation_forbidden_exception() {
-    var request = new UpdateDonationRequest("Updated Title", "Updated Description");
+    var request = new UpdateDonationRequest("Updated Title", "Updated Description", null);
     var mappedCommand =
-        new UpdateDonationCommand(DONATION_ID, "Updated Title", "Updated Description", principal);
+        new UpdateDonationCommand(
+            DONATION_ID, "Updated Title", "Updated Description", null, principal);
     when(updateDonationRequestMapper.toCommand(DONATION_ID, request, principal))
         .thenReturn(mappedCommand);
     doThrow(new DonationForbiddenException(DONATION_ID))
