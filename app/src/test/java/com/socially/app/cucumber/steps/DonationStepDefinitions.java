@@ -187,6 +187,26 @@ public class DonationStepDefinitions {
             .andReturn();
   }
 
+  @When(
+      "I partially update the donation location to address {string} latitude {double} and longitude {double}")
+  public void iPartiallyUpdateTheDonationLocationTo(
+      String address, double latitude, double longitude) throws Exception {
+    ObjectNode requestBody = objectMapper.createObjectNode();
+    ObjectNode locationNode = requestBody.putObject("location");
+    locationNode.put("address", address);
+    locationNode.put("latitude", latitude);
+    locationNode.put("longitude", longitude);
+
+    mvcResult =
+        mockMvc
+            .perform(
+                patch("/api/donations/" + id)
+                    .with(cucumberDonorJwt())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(requestBody)))
+            .andReturn();
+  }
+
   @When("I partially update the donation by id without authentication")
   public void iPartiallyUpdateTheDonationByIdWithoutAuthentication() throws Exception {
     ObjectNode requestBody = objectMapper.createObjectNode();

@@ -152,3 +152,16 @@ Feature: Donation management
     Then the response status should be 200
     And the donation should have the expected id, title "Neighborhood Library Expansion" and description "Books and shelves for local students"
     And the donation last updated time should be after the created time
+
+  Scenario: Create a donation, patch only location, and keep title and description unchanged
+    Given I have a donation with random id, title "Neighborhood Library" and description "Books and shelves for local students"
+    And the donation location is address "Calle Mayor 1, Madrid" latitude 40.4168 and longitude -3.7038
+    When I create the donation
+    Then the response status should be 201
+    Given the donation location is address "Plaza Mayor 2, Madrid" latitude 40.42 and longitude -3.71
+    When I partially update the donation location to address "Plaza Mayor 2, Madrid" latitude 40.42 and longitude -3.71
+    Then the response status should be 204
+    When I retrieve the donation by id
+    Then the response status should be 200
+    And the donation should have the expected id, title "Neighborhood Library" and description "Books and shelves for local students"
+    And the donation last updated time should be after the created time
