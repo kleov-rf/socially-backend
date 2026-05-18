@@ -33,28 +33,23 @@ class DonationEntityMapperTest {
           Id.from(DONOR_ID),
           Title.from("Test Title"),
           Description.from("Test Description"),
+          LOCATION,
           CREATED_AT,
           LAST_UPDATED_AT);
-  private static final Donation DONATION_WITH_LOCATION =
-      Donation.create(
-          Id.from(DONATION_ID),
-          Id.from(DONOR_ID),
-          Title.from("Test Title"),
-          Description.from("Test Description"),
-          CREATED_AT,
-          LAST_UPDATED_AT,
-          LOCATION);
 
   private static final Instant ENTITY_CREATED_AT = Instant.parse("2025-01-01T00:00:00Z");
   private static final Instant ENTITY_LAST_UPDATED_AT = Instant.parse("2025-02-01T18:00:00Z");
-  private static final DonationEntity ENTITY =
+  private static final DonationEntity ENTITY_WITH_LOCATION =
       DonationEntity.create(
           UUID.fromString(DONATION_ID),
           UUID.fromString(DONOR_ID),
           "Entity Title",
           "Entity Description",
           ENTITY_CREATED_AT,
-          ENTITY_LAST_UPDATED_AT);
+          ENTITY_LAST_UPDATED_AT,
+          "Calle Mayor 1, Madrid",
+          40.4168,
+          -3.7038);
 
   @Test
   void toEntity_should_map_id() {
@@ -106,100 +101,72 @@ class DonationEntityMapperTest {
   }
 
   @Test
-  void toDomain_should_map_id() {
-    Donation result = donationEntityMapper.toDomain(ENTITY);
-
-    assertEquals(Id.from(DONATION_ID), result.id());
-  }
-
-  @Test
-  void toDomain_should_map_title() {
-    Donation result = donationEntityMapper.toDomain(ENTITY);
-
-    assertEquals(Title.from("Entity Title"), result.title());
-  }
-
-  @Test
-  void toDomain_should_map_donor_id() {
-    Donation result = donationEntityMapper.toDomain(ENTITY);
-
-    assertEquals(Id.from(DONOR_ID), result.donorId());
-  }
-
-  @Test
-  void toDomain_should_map_description() {
-    Donation result = donationEntityMapper.toDomain(ENTITY);
-
-    assertEquals(Description.from("Entity Description"), result.description());
-  }
-
-  @Test
-  void toDomain_should_map_created_at() {
-    Donation result = donationEntityMapper.toDomain(ENTITY);
-
-    assertEquals(ENTITY_CREATED_AT, result.createdAt());
-  }
-
-  @Test
-  void toDomain_should_map_last_updated_at() {
-    Donation result = donationEntityMapper.toDomain(ENTITY);
-
-    assertEquals(ENTITY_LAST_UPDATED_AT, result.lastUpdatedAt());
-  }
-
-  @Test
   void toEntity_should_map_location_address() {
-    DonationEntity result = donationEntityMapper.toEntity(DONATION_WITH_LOCATION);
+    DonationEntity result = donationEntityMapper.toEntity(DONATION);
 
     assertEquals("Calle Mayor 1, Madrid", result.getLocationAddress());
   }
 
   @Test
   void toEntity_should_map_location_latitude() {
-    DonationEntity result = donationEntityMapper.toEntity(DONATION_WITH_LOCATION);
+    DonationEntity result = donationEntityMapper.toEntity(DONATION);
 
     assertEquals(40.4168, result.getLocationLatitude());
   }
 
   @Test
   void toEntity_should_map_location_longitude() {
-    DonationEntity result = donationEntityMapper.toEntity(DONATION_WITH_LOCATION);
+    DonationEntity result = donationEntityMapper.toEntity(DONATION);
 
     assertEquals(-3.7038, result.getLocationLongitude());
   }
 
   @Test
-  void toEntity_should_map_location_fields_as_null_when_location_is_absent() {
-    DonationEntity result = donationEntityMapper.toEntity(DONATION);
+  void toDomain_should_map_id() {
+    Donation result = donationEntityMapper.toDomain(ENTITY_WITH_LOCATION);
 
-    assertNull(result.getLocationAddress());
-    assertNull(result.getLocationLatitude());
-    assertNull(result.getLocationLongitude());
+    assertEquals(Id.from(DONATION_ID), result.id());
+  }
+
+  @Test
+  void toDomain_should_map_title() {
+    Donation result = donationEntityMapper.toDomain(ENTITY_WITH_LOCATION);
+
+    assertEquals(Title.from("Entity Title"), result.title());
+  }
+
+  @Test
+  void toDomain_should_map_donor_id() {
+    Donation result = donationEntityMapper.toDomain(ENTITY_WITH_LOCATION);
+
+    assertEquals(Id.from(DONOR_ID), result.donorId());
+  }
+
+  @Test
+  void toDomain_should_map_description() {
+    Donation result = donationEntityMapper.toDomain(ENTITY_WITH_LOCATION);
+
+    assertEquals(Description.from("Entity Description"), result.description());
+  }
+
+  @Test
+  void toDomain_should_map_created_at() {
+    Donation result = donationEntityMapper.toDomain(ENTITY_WITH_LOCATION);
+
+    assertEquals(ENTITY_CREATED_AT, result.createdAt());
+  }
+
+  @Test
+  void toDomain_should_map_last_updated_at() {
+    Donation result = donationEntityMapper.toDomain(ENTITY_WITH_LOCATION);
+
+    assertEquals(ENTITY_LAST_UPDATED_AT, result.lastUpdatedAt());
   }
 
   @Test
   void toDomain_should_map_location_when_all_columns_are_present() {
-    DonationEntity entityWithLocation =
-        DonationEntity.create(
-            UUID.fromString(DONATION_ID),
-            UUID.fromString(DONOR_ID),
-            "Entity Title",
-            "Entity Description",
-            ENTITY_CREATED_AT,
-            ENTITY_LAST_UPDATED_AT,
-            "Calle Mayor 1, Madrid",
-            40.4168,
-            -3.7038);
-
-    Donation result = donationEntityMapper.toDomain(entityWithLocation);
+    Donation result = donationEntityMapper.toDomain(ENTITY_WITH_LOCATION);
 
     assertEquals(LOCATION, result.location());
-  }
-
-  @Test
-  void toDomain_should_map_location_as_null_when_columns_are_absent() {
-    Donation result = donationEntityMapper.toDomain(ENTITY);
-
-    assertNull(result.location());
   }
 }

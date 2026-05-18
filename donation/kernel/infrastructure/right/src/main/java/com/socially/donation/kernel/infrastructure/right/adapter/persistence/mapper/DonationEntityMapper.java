@@ -20,9 +20,9 @@ public final class DonationEntityMapper {
         donation.description().value(),
         donation.createdAt(),
         donation.lastUpdatedAt(),
-        location != null ? location.address() : null,
-        location != null ? location.latitude() : null,
-        location != null ? location.longitude() : null);
+        location.address(),
+        location.latitude(),
+        location.longitude());
   }
 
   public Donation toDomain(DonationEntity entity) {
@@ -31,19 +31,11 @@ public final class DonationEntityMapper {
         Id.from(entity.getDonorId().toString()),
         Title.from(entity.getTitle()),
         Description.from(entity.getDescription()),
+        DonationLocation.from(
+            entity.getLocationAddress(),
+            entity.getLocationLatitude(),
+            entity.getLocationLongitude()),
         entity.getCreatedAt(),
-        entity.getLastUpdatedAt(),
-        toDonationLocation(entity));
-  }
-
-  private static DonationLocation toDonationLocation(DonationEntity entity) {
-    if (entity.getLocationAddress() == null
-        || entity.getLocationLatitude() == null
-        || entity.getLocationLongitude() == null) {
-      return null;
-    }
-
-    return DonationLocation.from(
-        entity.getLocationAddress(), entity.getLocationLatitude(), entity.getLocationLongitude());
+        entity.getLastUpdatedAt());
   }
 }

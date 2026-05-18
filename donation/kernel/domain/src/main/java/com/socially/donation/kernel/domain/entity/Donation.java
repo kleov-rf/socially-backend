@@ -25,28 +25,56 @@ public final class Donation {
       Id donorId,
       Title title,
       Description description,
+      DonationLocation location,
       Instant createdAt,
       Instant lastUpdatedAt) {
-    return create(id, donorId, title, description, createdAt, lastUpdatedAt, null);
+    validate(id, donorId, title, description, location, createdAt, lastUpdatedAt);
+    return new Donation(id, donorId, title, description, location, createdAt, lastUpdatedAt);
   }
 
-  public static Donation create(
+  private static void validate(
       Id id,
       Id donorId,
       Title title,
       Description description,
+      DonationLocation location,
       Instant createdAt,
-      Instant lastUpdatedAt,
-      DonationLocation location) {
-    return new Donation(id, donorId, title, description, location, createdAt, lastUpdatedAt);
+      Instant lastUpdatedAt) {
+    if (id == null) {
+      throw new IllegalArgumentException("donation id cannot be null");
+    }
+
+    if (donorId == null) {
+      throw new IllegalArgumentException("donation donor id cannot be null");
+    }
+
+    if (title == null) {
+      throw new IllegalArgumentException("donation title cannot be null");
+    }
+
+    if (description == null) {
+      throw new IllegalArgumentException("donation description cannot be null");
+    }
+
+    if (location == null) {
+      throw new IllegalArgumentException("donation location cannot be null");
+    }
+
+    if (createdAt == null) {
+      throw new IllegalArgumentException("donation created at cannot be null");
+    }
+
+    if (lastUpdatedAt == null) {
+      throw new IllegalArgumentException("donation last updated at cannot be null");
+    }
   }
 
   public Donation withTitle(Title title, Instant lastUpdatedAt) {
-    return create(id, donorId, title, description, createdAt, lastUpdatedAt, location);
+    return create(id, donorId, title, description, location, createdAt, lastUpdatedAt);
   }
 
   public Donation withDescription(Description description, Instant lastUpdatedAt) {
-    return create(id, donorId, title, description, createdAt, lastUpdatedAt, location);
+    return create(id, donorId, title, description, location, createdAt, lastUpdatedAt);
   }
 
   public Id id() {

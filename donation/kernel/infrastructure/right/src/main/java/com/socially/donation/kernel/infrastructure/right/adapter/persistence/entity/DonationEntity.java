@@ -21,10 +21,10 @@ public class DonationEntity {
   @Column(name = "donor_id", nullable = false)
   private UUID donorId;
 
-  @Column(name = "title")
+  @Column(name = "title", nullable = false)
   private String title;
 
-  @Column(name = "description")
+  @Column(name = "description", nullable = false)
   private String description;
 
   @Column(name = "created_at", nullable = false)
@@ -36,24 +36,14 @@ public class DonationEntity {
   @Column(name = "deleted_at")
   private Instant deletedAt;
 
-  @Column(name = "location_address")
+  @Column(name = "location_address", nullable = false)
   private String locationAddress;
 
-  @Column(name = "location_latitude")
+  @Column(name = "location_latitude", nullable = false)
   private Double locationLatitude;
 
-  @Column(name = "location_longitude")
+  @Column(name = "location_longitude", nullable = false)
   private Double locationLongitude;
-
-  public static DonationEntity create(
-      UUID id,
-      UUID donorId,
-      String title,
-      String description,
-      Instant createdAt,
-      Instant lastUpdatedAt) {
-    return create(id, donorId, title, description, createdAt, lastUpdatedAt, null, null, null);
-  }
 
   public static DonationEntity create(
       UUID id,

@@ -13,6 +13,7 @@ import com.socially.donation.find.domain.pagination.PageSize;
 import com.socially.donation.find.domain.pagination.PaginationCriteria;
 import com.socially.donation.kernel.domain.entity.Donation;
 import com.socially.donation.kernel.domain.valueobject.Description;
+import com.socially.donation.kernel.domain.valueobject.DonationLocation;
 import com.socially.donation.kernel.domain.valueobject.Title;
 import com.socially.donation.kernel.infrastructure.right.adapter.persistence.DonationEntityRepository;
 import com.socially.donation.kernel.infrastructure.right.adapter.persistence.entity.DonationEntity;
@@ -31,6 +32,8 @@ class JpaFindDonationsRepositoryTest {
   private static final String DONATION_ID = "550e8400-e29b-41d4-a716-446655440000";
   private static final String DONOR_ID = "550e8400-e29b-41d4-a716-446655440001";
   private static final Instant CREATED_AT = Instant.parse("2024-06-01T12:00:00Z");
+  private static final DonationLocation DEFAULT_LOCATION =
+      DonationLocation.from("Calle Mayor 1, Madrid", 40.4168, -3.7038);
 
   @Mock private SearchPatternNormalizer searchPatternNormalizer;
   @Mock private PageFetcher entityPageFetcher;
@@ -139,7 +142,15 @@ class JpaFindDonationsRepositoryTest {
   private static DonationEntity donationEntity(
       String id, String title, String description, Instant createdAt) {
     return DonationEntity.create(
-        Id.from(id).value(), Id.from(DONOR_ID).value(), title, description, createdAt, createdAt);
+        Id.from(id).value(),
+        Id.from(DONOR_ID).value(),
+        title,
+        description,
+        createdAt,
+        createdAt,
+        DEFAULT_LOCATION.address(),
+        DEFAULT_LOCATION.latitude(),
+        DEFAULT_LOCATION.longitude());
   }
 
   private static Donation mappedDonation(DonationEntity entity) {
@@ -148,6 +159,7 @@ class JpaFindDonationsRepositoryTest {
         Id.from(entity.getDonorId().toString()),
         Title.from(entity.getTitle()),
         Description.from(entity.getDescription()),
+        DEFAULT_LOCATION,
         entity.getCreatedAt(),
         entity.getLastUpdatedAt());
   }

@@ -19,6 +19,7 @@ import com.socially.donation.kernel.domain.entity.Donation;
 import com.socially.donation.kernel.domain.exception.DonationForbiddenException;
 import com.socially.donation.kernel.domain.exception.DonationNotFoundException;
 import com.socially.donation.kernel.domain.valueobject.Description;
+import com.socially.donation.kernel.domain.valueobject.DonationLocation;
 import com.socially.donation.kernel.domain.valueobject.Title;
 import java.security.Principal;
 import java.time.Instant;
@@ -55,6 +56,7 @@ class DeleteDonationCommandHandlerTest {
             Id.from(DONOR_ID),
             Title.from("Test Title"),
             Description.from("Test Description"),
+            DonationLocation.from("Calle Mayor 1, Madrid", 40.4168, -3.7038),
             CREATED_AT,
             CREATED_AT);
   }

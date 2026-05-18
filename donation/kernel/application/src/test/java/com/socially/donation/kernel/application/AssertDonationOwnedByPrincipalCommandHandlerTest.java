@@ -11,6 +11,7 @@ import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donation.kernel.domain.entity.Donation;
 import com.socially.donation.kernel.domain.exception.DonationForbiddenException;
 import com.socially.donation.kernel.domain.valueobject.Description;
+import com.socially.donation.kernel.domain.valueobject.DonationLocation;
 import com.socially.donation.kernel.domain.valueobject.Title;
 import com.socially.donor.findbyuserid.application.input.FindDonorByUserIdQuery;
 import com.socially.donor.findbyuserid.application.port.left.FindDonorByUserIdUseCase;
@@ -55,6 +56,7 @@ class AssertDonationOwnedByPrincipalCommandHandlerTest {
             Id.from(DONOR_ID),
             Title.from("Test Title"),
             Description.from("Test Description"),
+            DonationLocation.from("Calle Mayor 1, Madrid", 40.4168, -3.7038),
             CREATED_AT,
             CREATED_AT);
     donor =

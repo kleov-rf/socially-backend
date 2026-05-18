@@ -20,8 +20,8 @@ public final class CreateDonationCommandMapper {
         Id.from(donor.id().value().toString()),
         Title.from(command.title()),
         Description.from(command.description()),
+        DonationLocation.from(location.address(), location.latitude(), location.longitude()),
         now,
-        now,
-        DonationLocation.from(location.address(), location.latitude(), location.longitude()));
+        now);
   }
 }

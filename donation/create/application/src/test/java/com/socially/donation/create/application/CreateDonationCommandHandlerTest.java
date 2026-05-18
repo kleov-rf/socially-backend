@@ -17,6 +17,7 @@ import com.socially.donation.create.application.input.mapper.CreateDonationComma
 import com.socially.donation.create.domain.port.right.CreateDonationRepository;
 import com.socially.donation.kernel.domain.entity.Donation;
 import com.socially.donation.kernel.domain.valueobject.Description;
+import com.socially.donation.kernel.domain.valueobject.DonationLocation;
 import com.socially.donation.kernel.domain.valueobject.Title;
 import com.socially.donor.findbyuserid.application.input.FindDonorByUserIdQuery;
 import com.socially.donor.findbyuserid.application.port.left.FindDonorByUserIdUseCase;
@@ -87,6 +88,7 @@ class CreateDonationCommandHandlerTest {
                 Id.from("550e8400-e29b-41d4-a716-446655440001"),
                 Title.from("Test Title"),
                 Description.from("Test Description"),
+                DonationLocation.from("Calle Mayor 1, Madrid", 40.4168, -3.7038),
                 CREATED_AT,
                 CREATED_AT));
 
@@ -107,6 +109,7 @@ class CreateDonationCommandHandlerTest {
                 Id.from("550e8400-e29b-41d4-a716-446655440001"),
                 Title.from("Test Title"),
                 Description.from("Test Description"),
+                DonationLocation.from("Calle Mayor 1, Madrid", 40.4168, -3.7038),
                 CREATED_AT,
                 CREATED_AT));
 
@@ -123,6 +126,7 @@ class CreateDonationCommandHandlerTest {
             Id.from("550e8400-e29b-41d4-a716-446655440001"),
             Title.from("Test Title"),
             Description.from("Test Description"),
+            DonationLocation.from("Calle Mayor 1, Madrid", 40.4168, -3.7038),
             CREATED_AT,
             CREATED_AT);
     when(getAuthenticatedUserUseCase.execute(PRINCIPAL)).thenReturn(user);
@@ -148,6 +152,7 @@ class CreateDonationCommandHandlerTest {
                 Id.from("550e8400-e29b-41d4-a716-446655440001"),
                 Title.from("Test Title"),
                 Description.from("Test Description"),
+                DonationLocation.from("Calle Mayor 1, Madrid", 40.4168, -3.7038),
                 CREATED_AT,
                 CREATED_AT));
 

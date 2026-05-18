@@ -36,14 +36,20 @@ class DonationEntityPageFetcherTest {
               "Donation Title",
               "Donation Description",
               Instant.parse("2024-06-01T12:00:00Z"),
-              Instant.parse("2024-06-01T12:00:00Z")),
+              Instant.parse("2024-06-01T12:00:00Z"),
+              "Calle Mayor 1, Madrid",
+              40.4168,
+              -3.7038),
           DonationEntity.create(
               Id.from("550e8400-e29b-41d4-a716-446655440001").value(),
               Id.from(DONOR_ID).value(),
               "Another Donation Title",
               "Another Donation Description",
               Instant.parse("2024-06-02T12:00:00Z"),
-              Instant.parse("2024-06-02T12:00:00Z")));
+              Instant.parse("2024-06-02T12:00:00Z"),
+              "Calle Mayor 1, Madrid",
+              40.4168,
+              -3.7038));
 
   @Mock private DonationEntityRepository entityRepository;
 

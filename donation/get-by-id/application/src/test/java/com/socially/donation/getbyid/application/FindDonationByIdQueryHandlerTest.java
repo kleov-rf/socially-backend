@@ -16,6 +16,7 @@ import com.socially.donation.getbyid.application.output.mapper.DonationDtoMapper
 import com.socially.donation.getbyid.domain.port.right.FindDonationByIdRepository;
 import com.socially.donation.kernel.domain.entity.Donation;
 import com.socially.donation.kernel.domain.valueobject.Description;
+import com.socially.donation.kernel.domain.valueobject.DonationLocation;
 import com.socially.donation.kernel.domain.valueobject.Title;
 import com.socially.donor.findbyid.application.input.FindDonorByIdQuery;
 import com.socially.donor.findbyid.application.port.left.FindDonorByIdUseCase;
@@ -62,6 +63,7 @@ class FindDonationByIdQueryHandlerTest {
             Id.from(DONOR_ID),
             Title.from("Test Title"),
             Description.from("Test Description"),
+            DonationLocation.from("Calle Mayor 1, Madrid", 40.4168, -3.7038),
             CREATED_AT,
             LAST_UPDATED_AT);
     when(donationRepository.findById(any(Id.class))).thenReturn(Optional.of(donation));
@@ -92,6 +94,7 @@ class FindDonationByIdQueryHandlerTest {
             Id.from(DONOR_ID),
             Title.from("Test Title"),
             Description.from("Test Description"),
+            DonationLocation.from("Calle Mayor 1, Madrid", 40.4168, -3.7038),
             CREATED_AT,
             LAST_UPDATED_AT);
     when(donationRepository.findById(any(Id.class))).thenReturn(Optional.of(donation));
@@ -122,6 +125,7 @@ class FindDonationByIdQueryHandlerTest {
             Id.from(DONOR_ID),
             Title.from("Test Title"),
             Description.from("Test Description"),
+            DonationLocation.from("Calle Mayor 1, Madrid", 40.4168, -3.7038),
             CREATED_AT,
             LAST_UPDATED_AT);
     when(donationRepository.findById(any(Id.class))).thenReturn(Optional.of(donation));
@@ -152,6 +156,7 @@ class FindDonationByIdQueryHandlerTest {
             Id.from(DONOR_ID),
             Title.from("Test Title"),
             Description.from("Test Description"),
+            DonationLocation.from("Calle Mayor 1, Madrid", 40.4168, -3.7038),
             CREATED_AT,
             LAST_UPDATED_AT);
     when(donationRepository.findById(any(Id.class))).thenReturn(Optional.of(donation));

@@ -18,6 +18,70 @@ class DonationTest {
   private static final Instant LAST_UPDATED_AT = Instant.parse("2024-06-15T08:00:00Z");
   private static final Instant OTHER_INSTANT = Instant.parse("2025-01-01T00:00:00Z");
   private static final Instant NEW_LAST_UPDATED_AT = Instant.parse("2025-03-10T14:30:00Z");
+  private static final Title TITLE = Title.from("Title");
+  private static final Description DESCRIPTION = Description.from("Description");
+  private static final DonationLocation DEFAULT_LOCATION =
+      DonationLocation.from("Calle Mayor 1, Madrid", 40.4168, -3.7038);
+
+  private static Donation createDonation() {
+    return Donation.create(
+        Id.from(DONATION_ID),
+        Id.from(DONOR_ID),
+        TITLE,
+        DESCRIPTION,
+        DEFAULT_LOCATION,
+        CREATED_AT,
+        LAST_UPDATED_AT);
+  }
+
+  @Test
+  void create_should_set_id() {
+    Donation donation = createDonation();
+
+    assertEquals(Id.from(DONATION_ID), donation.id());
+  }
+
+  @Test
+  void create_should_set_donor_id() {
+    Donation donation = createDonation();
+
+    assertEquals(Id.from(DONOR_ID), donation.donorId());
+  }
+
+  @Test
+  void create_should_set_title() {
+    Donation donation = createDonation();
+
+    assertEquals(TITLE, donation.title());
+  }
+
+  @Test
+  void create_should_set_description() {
+    Donation donation = createDonation();
+
+    assertEquals(DESCRIPTION, donation.description());
+  }
+
+  @Test
+  void create_should_set_location() {
+    Donation donation = createDonation();
+
+    assertEquals(DEFAULT_LOCATION, donation.location());
+  }
+
+  @Test
+  void create_should_set_created_at() {
+    Donation donation = createDonation();
+
+    assertEquals(CREATED_AT, donation.createdAt());
+  }
+
+  @Test
+  void create_should_set_last_updated_at() {
+    Donation donation = createDonation();
+
+    assertEquals(LAST_UPDATED_AT, donation.lastUpdatedAt());
+  }
 
   @Test
   void equals_should_return_true_when_ids_are_equal() {
@@ -27,6 +91,7 @@ class DonationTest {
             Id.from(DONOR_ID),
             Title.from("Title 1"),
             Description.from("Description 1"),
+            DEFAULT_LOCATION,
             CREATED_AT,
             LAST_UPDATED_AT);
     Donation donation2 =
@@ -35,6 +100,7 @@ class DonationTest {
             Id.from(DONOR_ID),
             Title.from("Title 2"),
             Description.from("Description 2"),
+            DEFAULT_LOCATION,
             OTHER_INSTANT,
             OTHER_INSTANT);
 
@@ -49,6 +115,7 @@ class DonationTest {
             Id.from(DONOR_ID),
             Title.from("Same Title"),
             Description.from("Same Description"),
+            DEFAULT_LOCATION,
             CREATED_AT,
             LAST_UPDATED_AT);
     Donation donation2 =
@@ -57,6 +124,7 @@ class DonationTest {
             Id.from(DONOR_ID),
             Title.from("Same Title"),
             Description.from("Same Description"),
+            DEFAULT_LOCATION,
             CREATED_AT,
             LAST_UPDATED_AT);
 
@@ -65,28 +133,14 @@ class DonationTest {
 
   @Test
   void belongsToDonor_should_return_true_when_donor_id_matches() {
-    Donation donation =
-        Donation.create(
-            Id.from(DONATION_ID),
-            Id.from(DONOR_ID),
-            Title.from("Title"),
-            Description.from("Description"),
-            CREATED_AT,
-            LAST_UPDATED_AT);
+    Donation donation = createDonation();
 
     assertTrue(donation.belongsToDonor(Id.from(DONOR_ID)));
   }
 
   @Test
   void belongsToDonor_should_return_false_when_donor_id_differs() {
-    Donation donation =
-        Donation.create(
-            Id.from(DONATION_ID),
-            Id.from(DONOR_ID),
-            Title.from("Title"),
-            Description.from("Description"),
-            CREATED_AT,
-            LAST_UPDATED_AT);
+    Donation donation = createDonation();
 
     assertFalse(donation.belongsToDonor(Id.from(DIFFERENT_ID)));
   }
@@ -99,6 +153,7 @@ class DonationTest {
             Id.from(DONOR_ID),
             Title.from("Old Title"),
             Description.from("Old Description"),
+            DEFAULT_LOCATION,
             CREATED_AT,
             LAST_UPDATED_AT);
 
@@ -110,40 +165,150 @@ class DonationTest {
     assertEquals(Id.from(DONATION_ID), updated.id());
     assertEquals(CREATED_AT, updated.createdAt());
     assertEquals(NEW_LAST_UPDATED_AT, updated.lastUpdatedAt());
+    assertEquals(DEFAULT_LOCATION, updated.location());
   }
 
   @Test
-  void create_should_set_location_when_provided() {
-    DonationLocation location = DonationLocation.from("Calle Mayor 1, Madrid", 40.4168, -3.7038);
-    Donation donation =
-        Donation.create(
-            Id.from(DONATION_ID),
-            Id.from(DONOR_ID),
-            Title.from("Title"),
-            Description.from("Description"),
-            CREATED_AT,
-            LAST_UPDATED_AT,
-            location);
+  void create_should_throw_exception_when_id_is_null() {
+    IllegalArgumentException exception =
+        assertThrows(
+            IllegalArgumentException.class,
+            () ->
+                Donation.create(
+                    null,
+                    Id.from(DONOR_ID),
+                    TITLE,
+                    DESCRIPTION,
+                    DEFAULT_LOCATION,
+                    CREATED_AT,
+                    LAST_UPDATED_AT));
 
-    assertEquals(location, donation.location());
+    assertEquals("donation id cannot be null", exception.getMessage());
+  }
+
+  @Test
+  void create_should_throw_exception_when_donor_id_is_null() {
+    IllegalArgumentException exception =
+        assertThrows(
+            IllegalArgumentException.class,
+            () ->
+                Donation.create(
+                    Id.from(DONATION_ID),
+                    null,
+                    TITLE,
+                    DESCRIPTION,
+                    DEFAULT_LOCATION,
+                    CREATED_AT,
+                    LAST_UPDATED_AT));
+
+    assertEquals("donation donor id cannot be null", exception.getMessage());
+  }
+
+  @Test
+  void create_should_throw_exception_when_title_is_null() {
+    IllegalArgumentException exception =
+        assertThrows(
+            IllegalArgumentException.class,
+            () ->
+                Donation.create(
+                    Id.from(DONATION_ID),
+                    Id.from(DONOR_ID),
+                    null,
+                    DESCRIPTION,
+                    DEFAULT_LOCATION,
+                    CREATED_AT,
+                    LAST_UPDATED_AT));
+
+    assertEquals("donation title cannot be null", exception.getMessage());
+  }
+
+  @Test
+  void create_should_throw_exception_when_description_is_null() {
+    IllegalArgumentException exception =
+        assertThrows(
+            IllegalArgumentException.class,
+            () ->
+                Donation.create(
+                    Id.from(DONATION_ID),
+                    Id.from(DONOR_ID),
+                    TITLE,
+                    null,
+                    DEFAULT_LOCATION,
+                    CREATED_AT,
+                    LAST_UPDATED_AT));
+
+    assertEquals("donation description cannot be null", exception.getMessage());
+  }
+
+  @Test
+  void create_should_throw_exception_when_location_is_null() {
+    IllegalArgumentException exception =
+        assertThrows(
+            IllegalArgumentException.class,
+            () ->
+                Donation.create(
+                    Id.from(DONATION_ID),
+                    Id.from(DONOR_ID),
+                    TITLE,
+                    DESCRIPTION,
+                    null,
+                    CREATED_AT,
+                    LAST_UPDATED_AT));
+
+    assertEquals("donation location cannot be null", exception.getMessage());
+  }
+
+  @Test
+  void create_should_throw_exception_when_created_at_is_null() {
+    IllegalArgumentException exception =
+        assertThrows(
+            IllegalArgumentException.class,
+            () ->
+                Donation.create(
+                    Id.from(DONATION_ID),
+                    Id.from(DONOR_ID),
+                    TITLE,
+                    DESCRIPTION,
+                    DEFAULT_LOCATION,
+                    null,
+                    LAST_UPDATED_AT));
+
+    assertEquals("donation created at cannot be null", exception.getMessage());
+  }
+
+  @Test
+  void create_should_throw_exception_when_last_updated_at_is_null() {
+    IllegalArgumentException exception =
+        assertThrows(
+            IllegalArgumentException.class,
+            () ->
+                Donation.create(
+                    Id.from(DONATION_ID),
+                    Id.from(DONOR_ID),
+                    TITLE,
+                    DESCRIPTION,
+                    DEFAULT_LOCATION,
+                    CREATED_AT,
+                    null));
+
+    assertEquals("donation last updated at cannot be null", exception.getMessage());
   }
 
   @Test
   void withTitle_should_preserve_location() {
-    DonationLocation location = DonationLocation.from("Calle Mayor 1, Madrid", 40.4168, -3.7038);
     Donation donation =
         Donation.create(
             Id.from(DONATION_ID),
             Id.from(DONOR_ID),
             Title.from("Old Title"),
             Description.from("Description"),
+            DEFAULT_LOCATION,
             CREATED_AT,
-            LAST_UPDATED_AT,
-            location);
+            LAST_UPDATED_AT);
 
     Donation updated = donation.withTitle(Title.from("New Title"), NEW_LAST_UPDATED_AT);
 
-    assertEquals(location, updated.location());
+    assertEquals(DEFAULT_LOCATION, updated.location());
   }
 
   @Test
@@ -154,6 +319,7 @@ class DonationTest {
             Id.from(DONOR_ID),
             Title.from("Old Title"),
             Description.from("Old Description"),
+            DEFAULT_LOCATION,
             CREATED_AT,
             LAST_UPDATED_AT);
 
@@ -166,24 +332,24 @@ class DonationTest {
     assertEquals(Id.from(DONATION_ID), updated.id());
     assertEquals(CREATED_AT, updated.createdAt());
     assertEquals(NEW_LAST_UPDATED_AT, updated.lastUpdatedAt());
+    assertEquals(DEFAULT_LOCATION, updated.location());
   }
 
   @Test
   void withDescription_should_preserve_location() {
-    DonationLocation location = DonationLocation.from("Calle Mayor 1, Madrid", 40.4168, -3.7038);
     Donation donation =
         Donation.create(
             Id.from(DONATION_ID),
             Id.from(DONOR_ID),
             Title.from("Title"),
             Description.from("Old Description"),
+            DEFAULT_LOCATION,
             CREATED_AT,
-            LAST_UPDATED_AT,
-            location);
+            LAST_UPDATED_AT);
 
     Donation updated =
         donation.withDescription(Description.from("New Description"), NEW_LAST_UPDATED_AT);
 
-    assertEquals(location, updated.location());
+    assertEquals(DEFAULT_LOCATION, updated.location());
   }
 }

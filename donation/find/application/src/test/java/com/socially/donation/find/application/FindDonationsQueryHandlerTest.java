@@ -22,6 +22,7 @@ import com.socially.donation.find.domain.pagination.PaginationCriteria;
 import com.socially.donation.find.domain.port.right.FindDonationsRepository;
 import com.socially.donation.kernel.domain.entity.Donation;
 import com.socially.donation.kernel.domain.valueobject.Description;
+import com.socially.donation.kernel.domain.valueobject.DonationLocation;
 import com.socially.donation.kernel.domain.valueobject.Title;
 import com.socially.donor.findbyid.application.input.FindDonorByIdQuery;
 import com.socially.donor.findbyid.application.port.left.FindDonorByIdUseCase;
@@ -79,6 +80,7 @@ class FindDonationsQueryHandlerTest {
             Id.from(DONOR_ID),
             Title.from("First Test Title"),
             Description.from("First Test Description"),
+            DonationLocation.from("Calle Mayor 1, Madrid", 40.4168, -3.7038),
             CREATED_AT,
             LAST_UPDATED_AT);
     Donation secondDonation =
@@ -87,6 +89,7 @@ class FindDonationsQueryHandlerTest {
             Id.from(DONOR_ID),
             Title.from("Second Test Title"),
             Description.from("Second Test Description"),
+            DonationLocation.from("Calle Mayor 1, Madrid", 40.4168, -3.7038),
             CREATED_AT,
             LAST_UPDATED_AT);
     Donor donor =
@@ -120,6 +123,7 @@ class FindDonationsQueryHandlerTest {
             Id.from(DONOR_ID),
             Title.from("Test Title"),
             Description.from("Test Description"),
+            DonationLocation.from("Calle Mayor 1, Madrid", 40.4168, -3.7038),
             CREATED_AT,
             LAST_UPDATED_AT);
     Donor donor =
@@ -149,6 +153,7 @@ class FindDonationsQueryHandlerTest {
             Id.from(DONOR_ID),
             Title.from("Test Title"),
             Description.from("Test Description"),
+            DonationLocation.from("Calle Mayor 1, Madrid", 40.4168, -3.7038),
             CREATED_AT,
             LAST_UPDATED_AT);
     FindDonationsQuery query =
@@ -174,6 +179,7 @@ class FindDonationsQueryHandlerTest {
             Id.from(DONOR_ID),
             Title.from("Test Title"),
             Description.from("Test Description"),
+            DonationLocation.from("Calle Mayor 1, Madrid", 40.4168, -3.7038),
             CREATED_AT,
             LAST_UPDATED_AT);
     Donor donor =
@@ -204,6 +210,7 @@ class FindDonationsQueryHandlerTest {
             Id.from(DONOR_ID),
             Title.from("Test Title"),
             Description.from("Test Description"),
+            DonationLocation.from("Calle Mayor 1, Madrid", 40.4168, -3.7038),
             CREATED_AT,
             LAST_UPDATED_AT);
     Donor donor =

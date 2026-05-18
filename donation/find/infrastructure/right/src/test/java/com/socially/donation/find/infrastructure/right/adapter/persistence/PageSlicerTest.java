@@ -110,6 +110,9 @@ class PageSlicerTest {
         "Title " + sequence,
         "Description " + sequence,
         CREATED_AT,
-        CREATED_AT);
+        CREATED_AT,
+        "Calle Mayor 1, Madrid",
+        40.4168,
+        -3.7038);
   }
 }

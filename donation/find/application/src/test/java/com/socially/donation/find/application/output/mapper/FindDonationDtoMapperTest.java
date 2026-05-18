@@ -6,6 +6,7 @@ import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donation.find.application.output.FindDonationDto;
 import com.socially.donation.kernel.domain.entity.Donation;
 import com.socially.donation.kernel.domain.valueobject.Description;
+import com.socially.donation.kernel.domain.valueobject.DonationLocation;
 import com.socially.donation.kernel.domain.valueobject.Title;
 import com.socially.donor.kernel.domain.entity.Donor;
 import java.time.Instant;
@@ -31,6 +32,7 @@ class FindDonationDtoMapperTest {
         Id.from(DONOR_ID),
         Title.from("Test Title"),
         Description.from("Test Description"),
+        DonationLocation.from("Calle Mayor 1, Madrid", 40.4168, -3.7038),
         CREATED_AT,
         LAST_UPDATED_AT);
   }
@@ -54,6 +56,7 @@ class FindDonationDtoMapperTest {
             Id.from(DONOR_ID),
             Title.from("Test Title"),
             Description.from("Test Description"),
+            DonationLocation.from("Calle Mayor 1, Madrid", 40.4168, -3.7038),
             CREATED_AT,
             LAST_UPDATED_AT);
 
@@ -71,6 +74,7 @@ class FindDonationDtoMapperTest {
             Id.from(DONOR_ID),
             expectedTitle,
             Description.from("Test Description"),
+            DonationLocation.from("Calle Mayor 1, Madrid", 40.4168, -3.7038),
             CREATED_AT,
             LAST_UPDATED_AT);
 
@@ -88,6 +92,7 @@ class FindDonationDtoMapperTest {
             Id.from(DONOR_ID),
             Title.from("Test Title"),
             expectedDescription,
+            DonationLocation.from("Calle Mayor 1, Madrid", 40.4168, -3.7038),
             CREATED_AT,
             LAST_UPDATED_AT);
 
@@ -105,6 +110,7 @@ class FindDonationDtoMapperTest {
             Id.from(DONOR_ID),
             Title.from("Test Title"),
             Description.from("Test Description"),
+            DonationLocation.from("Calle Mayor 1, Madrid", 40.4168, -3.7038),
             expectedCreatedAt,
             LAST_UPDATED_AT);
 
@@ -122,6 +128,7 @@ class FindDonationDtoMapperTest {
             Id.from(DONOR_ID),
             Title.from("Test Title"),
             Description.from("Test Description"),
+            DonationLocation.from("Calle Mayor 1, Madrid", 40.4168, -3.7038),
             CREATED_AT,
             expectedLastUpdatedAt);
 
