@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donation.kernel.domain.valueobject.Description;
+import com.socially.donation.kernel.domain.valueobject.DonationLocation;
 import com.socially.donation.kernel.domain.valueobject.Title;
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
@@ -112,6 +113,40 @@ class DonationTest {
   }
 
   @Test
+  void create_should_set_location_when_provided() {
+    DonationLocation location = DonationLocation.from("Calle Mayor 1, Madrid", 40.4168, -3.7038);
+    Donation donation =
+        Donation.create(
+            Id.from(DONATION_ID),
+            Id.from(DONOR_ID),
+            Title.from("Title"),
+            Description.from("Description"),
+            CREATED_AT,
+            LAST_UPDATED_AT,
+            location);
+
+    assertEquals(location, donation.location());
+  }
+
+  @Test
+  void withTitle_should_preserve_location() {
+    DonationLocation location = DonationLocation.from("Calle Mayor 1, Madrid", 40.4168, -3.7038);
+    Donation donation =
+        Donation.create(
+            Id.from(DONATION_ID),
+            Id.from(DONOR_ID),
+            Title.from("Old Title"),
+            Description.from("Description"),
+            CREATED_AT,
+            LAST_UPDATED_AT,
+            location);
+
+    Donation updated = donation.withTitle(Title.from("New Title"), NEW_LAST_UPDATED_AT);
+
+    assertEquals(location, updated.location());
+  }
+
+  @Test
   void withDescription_should_replace_description_and_keep_title_and_id() {
     Donation donation =
         Donation.create(
@@ -131,5 +166,24 @@ class DonationTest {
     assertEquals(Id.from(DONATION_ID), updated.id());
     assertEquals(CREATED_AT, updated.createdAt());
     assertEquals(NEW_LAST_UPDATED_AT, updated.lastUpdatedAt());
+  }
+
+  @Test
+  void withDescription_should_preserve_location() {
+    DonationLocation location = DonationLocation.from("Calle Mayor 1, Madrid", 40.4168, -3.7038);
+    Donation donation =
+        Donation.create(
+            Id.from(DONATION_ID),
+            Id.from(DONOR_ID),
+            Title.from("Title"),
+            Description.from("Old Description"),
+            CREATED_AT,
+            LAST_UPDATED_AT,
+            location);
+
+    Donation updated =
+        donation.withDescription(Description.from("New Description"), NEW_LAST_UPDATED_AT);
+
+    assertEquals(location, updated.location());
   }
 }

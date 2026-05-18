@@ -2,6 +2,7 @@ package com.socially.donation.kernel.domain.entity;
 
 import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donation.kernel.domain.valueobject.Description;
+import com.socially.donation.kernel.domain.valueobject.DonationLocation;
 import com.socially.donation.kernel.domain.valueobject.Title;
 import java.time.Instant;
 import lombok.EqualsAndHashCode;
@@ -15,6 +16,7 @@ public final class Donation {
   private final Id donorId;
   private final Title title;
   private final Description description;
+  private final DonationLocation location;
   private final Instant createdAt;
   private final Instant lastUpdatedAt;
 
@@ -25,15 +27,26 @@ public final class Donation {
       Description description,
       Instant createdAt,
       Instant lastUpdatedAt) {
-    return new Donation(id, donorId, title, description, createdAt, lastUpdatedAt);
+    return create(id, donorId, title, description, createdAt, lastUpdatedAt, null);
+  }
+
+  public static Donation create(
+      Id id,
+      Id donorId,
+      Title title,
+      Description description,
+      Instant createdAt,
+      Instant lastUpdatedAt,
+      DonationLocation location) {
+    return new Donation(id, donorId, title, description, location, createdAt, lastUpdatedAt);
   }
 
   public Donation withTitle(Title title, Instant lastUpdatedAt) {
-    return create(id, donorId, title, description, createdAt, lastUpdatedAt);
+    return create(id, donorId, title, description, createdAt, lastUpdatedAt, location);
   }
 
   public Donation withDescription(Description description, Instant lastUpdatedAt) {
-    return create(id, donorId, title, description, createdAt, lastUpdatedAt);
+    return create(id, donorId, title, description, createdAt, lastUpdatedAt, location);
   }
 
   public Id id() {
@@ -54,6 +67,10 @@ public final class Donation {
 
   public Description description() {
     return description;
+  }
+
+  public DonationLocation location() {
+    return location;
   }
 
   public Instant createdAt() {
