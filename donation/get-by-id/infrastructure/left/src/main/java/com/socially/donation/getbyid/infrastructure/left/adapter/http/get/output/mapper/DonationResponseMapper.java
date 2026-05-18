@@ -1,6 +1,7 @@
 package com.socially.donation.getbyid.infrastructure.left.adapter.http.get.output.mapper;
 
 import com.socially.donation.getbyid.application.output.DonationDto;
+import com.socially.donation.getbyid.infrastructure.left.adapter.http.get.output.DonationLocationResponseDto;
 import com.socially.donation.getbyid.infrastructure.left.adapter.http.get.output.DonationResponseDto;
 import com.socially.donation.getbyid.infrastructure.left.adapter.http.get.output.DonorResponseDto;
 import org.springframework.stereotype.Component;
@@ -12,6 +13,10 @@ public class DonationResponseMapper {
         result.id().value().toString(),
         result.title().value(),
         result.description().value(),
+        new DonationLocationResponseDto(
+            result.location().address(),
+            result.location().latitude(),
+            result.location().longitude()),
         result.createdAt(),
         result.lastUpdatedAt(),
         new DonorResponseDto(

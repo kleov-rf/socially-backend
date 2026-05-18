@@ -7,8 +7,10 @@ import static org.mockito.Mockito.when;
 import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donation.getbyid.application.input.FindDonationByIdQuery;
 import com.socially.donation.getbyid.application.output.DonationDto;
+import com.socially.donation.getbyid.application.output.DonationLocationDto;
 import com.socially.donation.getbyid.application.output.DonorSummaryDto;
 import com.socially.donation.getbyid.application.port.left.FindDonationByIdUseCase;
+import com.socially.donation.getbyid.infrastructure.left.adapter.http.get.output.DonationLocationResponseDto;
 import com.socially.donation.getbyid.infrastructure.left.adapter.http.get.output.DonationResponseDto;
 import com.socially.donation.getbyid.infrastructure.left.adapter.http.get.output.DonorResponseDto;
 import com.socially.donation.getbyid.infrastructure.left.adapter.http.get.output.mapper.DonationResponseMapper;
@@ -33,6 +35,10 @@ class GetDonationControllerTest {
 
   private static final DonorSummaryDto DONOR_SUMMARY =
       new DonorSummaryDto(DONOR_ID, "donor@example.com", "Donor", "User");
+  private static final DonationLocationDto LOCATION_DTO =
+      new DonationLocationDto("Calle Mayor 1, Madrid", 40.4168, -3.7038);
+  private static final DonationLocationResponseDto LOCATION_RESPONSE =
+      new DonationLocationResponseDto("Calle Mayor 1, Madrid", 40.4168, -3.7038);
 
   @Mock private FindDonationByIdUseCase findDonationByIdUseCase;
 
@@ -54,6 +60,7 @@ class GetDonationControllerTest {
             Id.from(DONATION_ID),
             Title.from("Test Title"),
             Description.from("Test Description"),
+            LOCATION_DTO,
             CREATED_AT,
             LAST_UPDATED_AT,
             DONOR_SUMMARY);
@@ -72,6 +79,7 @@ class GetDonationControllerTest {
             Id.from(DONATION_ID),
             Title.from("Test Title"),
             Description.from("Test Description"),
+            LOCATION_DTO,
             CREATED_AT,
             LAST_UPDATED_AT,
             DONOR_SUMMARY);
@@ -80,6 +88,7 @@ class GetDonationControllerTest {
             DONATION_ID,
             "Test Title",
             "Test Description",
+            LOCATION_RESPONSE,
             CREATED_AT,
             LAST_UPDATED_AT,
             new DonorResponseDto(DONOR_ID, "donor@example.com", "Donor", "User"));

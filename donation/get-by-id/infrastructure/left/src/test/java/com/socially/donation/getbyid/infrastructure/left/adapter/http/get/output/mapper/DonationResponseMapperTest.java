@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donation.getbyid.application.output.DonationDto;
+import com.socially.donation.getbyid.application.output.DonationLocationDto;
 import com.socially.donation.getbyid.application.output.DonorSummaryDto;
 import com.socially.donation.getbyid.infrastructure.left.adapter.http.get.output.DonationResponseDto;
 import com.socially.donation.kernel.domain.valueobject.Description;
@@ -20,11 +21,15 @@ class DonationResponseMapperTest {
 
   private final DonationResponseMapper mapper = new DonationResponseMapper();
 
+  private static final DonationLocationDto LOCATION_DTO =
+      new DonationLocationDto("Calle Mayor 1, Madrid", 40.4168, -3.7038);
+
   private static DonationDto sampleDto() {
     return new DonationDto(
         Id.from(DONATION_ID),
         Title.from("Test Title"),
         Description.from("Test Description"),
+        LOCATION_DTO,
         CREATED_AT,
         LAST_UPDATED_AT,
         new DonorSummaryDto(DONOR_ID, "donor@example.com", "Jane", "Doe"));
@@ -49,6 +54,27 @@ class DonationResponseMapperTest {
     DonationResponseDto response = mapper.toResponse(sampleDto());
 
     assertEquals("Test Description", response.description());
+  }
+
+  @Test
+  void toResponse_should_map_location_address() {
+    DonationResponseDto response = mapper.toResponse(sampleDto());
+
+    assertEquals("Calle Mayor 1, Madrid", response.location().address());
+  }
+
+  @Test
+  void toResponse_should_map_location_latitude() {
+    DonationResponseDto response = mapper.toResponse(sampleDto());
+
+    assertEquals(40.4168, response.location().latitude());
+  }
+
+  @Test
+  void toResponse_should_map_location_longitude() {
+    DonationResponseDto response = mapper.toResponse(sampleDto());
+
+    assertEquals(-3.7038, response.location().longitude());
   }
 
   @Test

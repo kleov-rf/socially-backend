@@ -7,6 +7,7 @@ public record DonationResponseDto(
     @NotNull String id,
     @NotNull String title,
     @NotNull String description,
+    @NotNull DonationLocationResponseDto location,
     @NotNull Instant createdAt,
     @NotNull Instant lastUpdatedAt,
     @NotNull DonorResponseDto donor) {}

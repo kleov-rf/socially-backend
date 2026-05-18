@@ -9,6 +9,7 @@ public record DonationDto(
     Id id,
     Title title,
     Description description,
+    DonationLocationDto location,
     Instant createdAt,
     Instant lastUpdatedAt,
     DonorSummaryDto donor) {}

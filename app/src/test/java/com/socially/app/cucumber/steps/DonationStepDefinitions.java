@@ -404,6 +404,12 @@ public class DonationStepDefinitions {
     assertThat(jsonNode.get("id").asText()).isEqualTo(id);
     assertThat(jsonNode.get("title").asText()).isEqualTo(expectedTitle);
     assertThat(jsonNode.get("description").asText()).isEqualTo(expectedDescription);
+    JsonNode locationNode = jsonNode.get("location");
+    assertThat(locationNode).isNotNull();
+    assertThat(locationNode.isObject()).isTrue();
+    assertThat(locationNode.get("address").asText()).isEqualTo(DEFAULT_LOCATION.address());
+    assertThat(locationNode.get("latitude").asDouble()).isEqualTo(DEFAULT_LOCATION.latitude());
+    assertThat(locationNode.get("longitude").asDouble()).isEqualTo(DEFAULT_LOCATION.longitude());
     JsonNode donorNode = jsonNode.get("donor");
     assertThat(donorNode).isNotNull();
     assertThat(donorNode.isObject()).isTrue();

@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donation.getbyid.application.input.FindDonationByIdQuery;
 import com.socially.donation.getbyid.application.output.DonationDto;
+import com.socially.donation.getbyid.application.output.DonationLocationDto;
 import com.socially.donation.getbyid.application.output.DonorSummaryDto;
 import com.socially.donation.getbyid.application.output.mapper.DonationDtoMapper;
 import com.socially.donation.getbyid.domain.port.right.FindDonationByIdRepository;
@@ -37,6 +38,8 @@ class FindDonationByIdQueryHandlerTest {
   private static final String USER_ID = "550e8400-e29b-41d4-a716-446655440010";
   private static final Instant CREATED_AT = Instant.parse("2024-06-01T12:00:00Z");
   private static final Instant LAST_UPDATED_AT = Instant.parse("2024-06-20T09:00:00Z");
+  private static final DonationLocationDto LOCATION_DTO =
+      new DonationLocationDto("Calle Mayor 1, Madrid", 40.4168, -3.7038);
 
   @Mock private FindDonationByIdRepository donationRepository;
 
@@ -77,6 +80,7 @@ class FindDonationByIdQueryHandlerTest {
                 donation.id(),
                 donation.title(),
                 donation.description(),
+                LOCATION_DTO,
                 donation.createdAt(),
                 donation.lastUpdatedAt(),
                 new DonorSummaryDto(DONOR_ID, "a@b.com", "A", "B")));
@@ -108,6 +112,7 @@ class FindDonationByIdQueryHandlerTest {
                 donation.id(),
                 donation.title(),
                 donation.description(),
+                LOCATION_DTO,
                 donation.createdAt(),
                 donation.lastUpdatedAt(),
                 new DonorSummaryDto(DONOR_ID, "a@b.com", "A", "B")));
@@ -138,6 +143,7 @@ class FindDonationByIdQueryHandlerTest {
             donation.id(),
             donation.title(),
             donation.description(),
+            LOCATION_DTO,
             donation.createdAt(),
             donation.lastUpdatedAt(),
             new DonorSummaryDto(DONOR_ID, "a@b.com", "A", "B"));

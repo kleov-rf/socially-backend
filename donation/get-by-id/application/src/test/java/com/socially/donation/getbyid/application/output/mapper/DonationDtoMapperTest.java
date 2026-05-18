@@ -69,6 +69,27 @@ class DonationDtoMapperTest {
   }
 
   @Test
+  void fromDomain_should_map_location_address() {
+    DonationDto result = donationDtoMapper.fromDomain(sampleDonation(), sampleDonor());
+
+    assertEquals("Calle Mayor 1, Madrid", result.location().address());
+  }
+
+  @Test
+  void fromDomain_should_map_location_latitude() {
+    DonationDto result = donationDtoMapper.fromDomain(sampleDonation(), sampleDonor());
+
+    assertEquals(40.4168, result.location().latitude());
+  }
+
+  @Test
+  void fromDomain_should_map_location_longitude() {
+    DonationDto result = donationDtoMapper.fromDomain(sampleDonation(), sampleDonor());
+
+    assertEquals(-3.7038, result.location().longitude());
+  }
+
+  @Test
   void fromDomain_should_map_donation_created_at_to_dto() {
     DonationDto result = donationDtoMapper.fromDomain(sampleDonation(), sampleDonor());
 
