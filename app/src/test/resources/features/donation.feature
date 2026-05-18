@@ -39,6 +39,7 @@ Feature: Donation management
 
   Scenario: Create a donation and retrieve it by ID
     Given I have a donation with random id, title "Winter Clothes Drive" and description "Collecting warm clothes for homeless shelters"
+    And the donation location is address "Playa de la Victoria, Cádiz" latitude 36.5290 and longitude -6.2920
     When I create the donation
     Then the response status should be 201
     When I retrieve the donation by id

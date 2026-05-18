@@ -19,6 +19,7 @@ import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import io.cucumber.spring.ScenarioScope;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -32,6 +33,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
+@ScenarioScope
 @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 public class DonationStepDefinitions {
 
@@ -44,6 +46,8 @@ public class DonationStepDefinitions {
   private String id;
   private String title;
   private String description;
+  private CreateDonationLocationRequest expectedLocation = DEFAULT_LOCATION;
+  private String lastCreateRequestBody;
   private MvcResult mvcResult;
 
   private String firstDonationId;
@@ -72,6 +76,8 @@ public class DonationStepDefinitions {
     lastPageSize = null;
     lastOrder = null;
     lastQuery = null;
+    expectedLocation = DEFAULT_LOCATION;
+    lastCreateRequestBody = null;
   }
 
   @Before("@donation and @auth")
@@ -83,6 +89,8 @@ public class DonationStepDefinitions {
     lastPageSize = null;
     lastOrder = null;
     lastQuery = null;
+    expectedLocation = DEFAULT_LOCATION;
+    lastCreateRequestBody = null;
   }
 
   private void resetDonationData() {
@@ -97,11 +105,17 @@ public class DonationStepDefinitions {
     this.id = UUID.randomUUID().toString();
     this.title = title;
     this.description = description;
+    this.expectedLocation = DEFAULT_LOCATION;
+  }
+
+  @Given("the donation location is address {string} latitude {double} and longitude {double}")
+  public void theDonationLocationIs(String address, double latitude, double longitude) {
+    this.expectedLocation = new CreateDonationLocationRequest(address, latitude, longitude);
   }
 
   @When("I create the donation")
   public void iCreateTheDonation() throws Exception {
-    String requestBody =
+    lastCreateRequestBody =
         objectMapper.writeValueAsString(createDonationRequest(id, title, description));
 
     mvcResult =
@@ -110,13 +124,13 @@ public class DonationStepDefinitions {
                 post("/api/donations")
                     .with(cucumberDonorJwt())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(requestBody))
+                    .content(lastCreateRequestBody))
             .andReturn();
   }
 
   @When("I create the donation as the logged-in OAuth user")
   public void iCreateTheDonationAsTheLoggedInOauthUser() throws Exception {
-    String requestBody =
+    lastCreateRequestBody =
         objectMapper.writeValueAsString(createDonationRequest(id, title, description));
 
     mvcResult =
@@ -125,7 +139,7 @@ public class DonationStepDefinitions {
                 post("/api/donations")
                     .with(CucumberOAuthJwt.postProcessor())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(requestBody))
+                    .content(lastCreateRequestBody))
             .andReturn();
   }
 
@@ -407,9 +421,9 @@ public class DonationStepDefinitions {
     JsonNode locationNode = jsonNode.get("location");
     assertThat(locationNode).isNotNull();
     assertThat(locationNode.isObject()).isTrue();
-    assertThat(locationNode.get("address").asText()).isEqualTo(DEFAULT_LOCATION.address());
-    assertThat(locationNode.get("latitude").asDouble()).isEqualTo(DEFAULT_LOCATION.latitude());
-    assertThat(locationNode.get("longitude").asDouble()).isEqualTo(DEFAULT_LOCATION.longitude());
+    assertThat(locationNode.get("address").asText()).isEqualTo(expectedLocation.address());
+    assertThat(locationNode.get("latitude").asDouble()).isEqualTo(expectedLocation.latitude());
+    assertThat(locationNode.get("longitude").asDouble()).isEqualTo(expectedLocation.longitude());
     JsonNode donorNode = jsonNode.get("donor");
     assertThat(donorNode).isNotNull();
     assertThat(donorNode.isObject()).isTrue();
@@ -511,9 +525,8 @@ public class DonationStepDefinitions {
         createdAt);
   }
 
-  private static CreateDonationRequest createDonationRequest(
-      String id, String title, String description) {
-    return new CreateDonationRequest(id, title, description, DEFAULT_LOCATION);
+  private CreateDonationRequest createDonationRequest(String id, String title, String description) {
+    return new CreateDonationRequest(id, title, description, expectedLocation);
   }
 
   private static RequestPostProcessor cucumberDonorJwt() {
