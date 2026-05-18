@@ -23,10 +23,31 @@ class PageOrderTest {
   }
 
   @Test
+  void fromValue_should_return_nearest_first_if_received_nearest_first() {
+    assertEquals(PageOrder.NEAREST_FIRST, PageOrder.fromValue("nearest_first"));
+  }
+
+  @Test
+  void value_should_return_newest_first() {
+    assertEquals("newest_first", PageOrder.NEWEST_FIRST.value());
+  }
+
+  @Test
+  void value_should_return_oldest_first() {
+    assertEquals("oldest_first", PageOrder.OLDEST_FIRST.value());
+  }
+
+  @Test
+  void value_should_return_nearest_first() {
+    assertEquals("nearest_first", PageOrder.NEAREST_FIRST.value());
+  }
+
+  @Test
   void fromValue_should_throw_for_unsupported_value() {
     IllegalArgumentException exception =
         assertThrows(IllegalArgumentException.class, () -> PageOrder.fromValue("invalid"));
 
-    assertEquals("Order must be one of: newest_first, oldest_first", exception.getMessage());
+    assertEquals(
+        "Order must be one of: newest_first, oldest_first, nearest_first", exception.getMessage());
   }
 }

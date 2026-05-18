@@ -31,8 +31,11 @@ public class FindDonationsController {
       @RequestParam(required = false) String cursor,
       @RequestParam(required = false) Integer size,
       @RequestParam(required = false) String order,
-      @RequestParam(required = false) String query) {
-    FindDonationsQuery queryModel = queryMapper.toQuery(cursor, size, order, query);
+      @RequestParam(required = false) String query,
+      @RequestParam(required = false) Double latitude,
+      @RequestParam(required = false) Double longitude) {
+    FindDonationsQuery queryModel =
+        queryMapper.toQuery(cursor, size, order, query, latitude, longitude);
 
     Page<FindDonationDto> page = findDonationsUseCase.execute(queryModel);
 

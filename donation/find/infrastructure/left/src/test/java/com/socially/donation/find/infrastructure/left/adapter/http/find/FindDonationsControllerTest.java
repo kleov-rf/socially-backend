@@ -48,10 +48,17 @@ class FindDonationsControllerTest {
   @InjectMocks private FindDonationsController controller;
 
   @Test
-  void find_should_call_query_mapper_with_received_arguments() {
-    controller.find("next-cursor", 10, "oldest_first", "school");
+  void find_should_pass_latitude_and_longitude_to_query_mapper() {
+    controller.find("next-cursor", 10, "nearest_first", "school", 40.4168, -3.7038);
 
-    verify(queryMapper).toQuery("next-cursor", 10, "oldest_first", "school");
+    verify(queryMapper).toQuery("next-cursor", 10, "nearest_first", "school", 40.4168, -3.7038);
+  }
+
+  @Test
+  void find_should_call_query_mapper_with_received_arguments() {
+    controller.find("next-cursor", 10, "oldest_first", "school", null, null);
+
+    verify(queryMapper).toQuery("next-cursor", 10, "oldest_first", "school", null, null);
   }
 
   @Test
@@ -60,10 +67,12 @@ class FindDonationsControllerTest {
         new FindDonationsQuery(
             PaginationCriteria.create(
                 "next-cursor", PageSize.TEN_ITEMS, PaginationCriteria.DEFAULT_ORDER),
-            FilterCriteria.create("school"));
-    when(queryMapper.toQuery("next-cursor", 10, "newest_first", "school")).thenReturn(query);
+            FilterCriteria.create("school"),
+            null);
+    when(queryMapper.toQuery("next-cursor", 10, "newest_first", "school", null, null))
+        .thenReturn(query);
 
-    controller.find("next-cursor", 10, "newest_first", "school");
+    controller.find("next-cursor", 10, "newest_first", "school", null, null);
 
     verify(findDonationsUseCase).execute(query);
   }
@@ -74,19 +83,42 @@ class FindDonationsControllerTest {
         new FindDonationsQuery(
             PaginationCriteria.create(
                 "next-cursor", PageSize.TEN_ITEMS, PaginationCriteria.DEFAULT_ORDER),
-            FilterCriteria.create("school"));
+            FilterCriteria.create("school"),
+            null);
     Page<FindDonationDto> page =
         Page.create(List.of(), Metadata.create("next-cursor", "previous-cursor", 10, 100L));
-    when(queryMapper.toQuery("next-cursor", 10, "newest_first", "school")).thenReturn(query);
+    when(queryMapper.toQuery("next-cursor", 10, "newest_first", "school", null, null))
+        .thenReturn(query);
     when(findDonationsUseCase.execute(query)).thenReturn(page);
 
-    controller.find("next-cursor", 10, "newest_first", "school");
+    controller.find("next-cursor", 10, "newest_first", "school", null, null);
 
     verify(pageResponseMapper).toResponse(page);
   }
 
   @Test
-  void find_should_return_ok_with_mapped_response() {
+  void find_should_return_ok_status() {
+    FindDonationsQuery query =
+        new FindDonationsQuery(
+            PaginationCriteria.create(
+                "next-cursor", PageSize.TEN_ITEMS, PaginationCriteria.DEFAULT_ORDER),
+            FilterCriteria.create("school"),
+            null);
+    Page<FindDonationDto> page =
+        Page.create(List.of(), Metadata.create("next-cursor", "previous-cursor", 10, 100L));
+    when(queryMapper.toQuery("next-cursor", 10, "newest_first", "school", null, null))
+        .thenReturn(query);
+    when(findDonationsUseCase.execute(query)).thenReturn(page);
+    when(pageResponseMapper.toResponse(page)).thenReturn(emptyMappedPageResponse());
+
+    ResponseEntity<PageResponse<FindDonationResponse>> response =
+        controller.find("next-cursor", 10, "newest_first", "school", null, null);
+
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+  }
+
+  @Test
+  void find_should_return_mapped_response_body() {
     var donationDto =
         new FindDonationDto(
             Id.from(DONATION_ID),
@@ -99,11 +131,13 @@ class FindDonationsControllerTest {
         new FindDonationsQuery(
             PaginationCriteria.create(
                 "next-cursor", PageSize.TEN_ITEMS, PaginationCriteria.DEFAULT_ORDER),
-            FilterCriteria.create("school"));
+            FilterCriteria.create("school"),
+            null);
     Page<FindDonationDto> page =
         Page.create(
             List.of(donationDto), Metadata.create("next-cursor", "previous-cursor", 10, 100L));
-    when(queryMapper.toQuery("next-cursor", 10, "newest_first", "school")).thenReturn(query);
+    when(queryMapper.toQuery("next-cursor", 10, "newest_first", "school", null, null))
+        .thenReturn(query);
     when(findDonationsUseCase.execute(query)).thenReturn(page);
 
     PageResponse<FindDonationResponse> mappedPageResponse =
@@ -120,9 +154,13 @@ class FindDonationsControllerTest {
     when(pageResponseMapper.toResponse(page)).thenReturn(mappedPageResponse);
 
     ResponseEntity<PageResponse<FindDonationResponse>> response =
-        controller.find("next-cursor", 10, "newest_first", "school");
+        controller.find("next-cursor", 10, "newest_first", "school", null, null);
 
     assertThat(response.getBody()).isEqualTo(mappedPageResponse);
-    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+  }
+
+  private static PageResponse<FindDonationResponse> emptyMappedPageResponse() {
+    return new PageResponse<>(
+        List.of(), new MetadataResponse("next-cursor", "previous-cursor", true, true, 10, 100L));
   }
 }

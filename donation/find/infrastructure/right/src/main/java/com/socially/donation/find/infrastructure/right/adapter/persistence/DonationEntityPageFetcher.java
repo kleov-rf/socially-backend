@@ -30,6 +30,7 @@ public class DonationEntityPageFetcher implements PageFetcher {
             entityRepository.findByOrderByCreatedAtAscIdAsc(criteria.pageRequest());
         case NEWEST_FIRST ->
             entityRepository.findByOrderByCreatedAtDescIdDesc(criteria.pageRequest());
+        case NEAREST_FIRST -> null;
       };
     }
 
@@ -40,6 +41,7 @@ public class DonationEntityPageFetcher implements PageFetcher {
       case NEWEST_FIRST ->
           entityRepository.findBySearchPatternOrderByCreatedAtDescIdDesc(
               criteria.searchPattern(), criteria.pageRequest());
+      case NEAREST_FIRST -> null;
     };
   }
 
@@ -52,6 +54,7 @@ public class DonationEntityPageFetcher implements PageFetcher {
         case NEWEST_FIRST ->
             entityRepository.findPreviousPage(
                 criteria.boundary().createdAt(), criteria.boundary().id(), criteria.pageRequest());
+        case NEAREST_FIRST -> null;
       };
     }
     return switch (criteria.paginationCriteria().order()) {
@@ -67,6 +70,7 @@ public class DonationEntityPageFetcher implements PageFetcher {
               criteria.boundary().createdAt(),
               criteria.boundary().id(),
               criteria.pageRequest());
+      case NEAREST_FIRST -> null;
     };
   }
 
@@ -79,6 +83,7 @@ public class DonationEntityPageFetcher implements PageFetcher {
         case NEWEST_FIRST ->
             entityRepository.findNextPage(
                 criteria.boundary().createdAt(), criteria.boundary().id(), criteria.pageRequest());
+        case NEAREST_FIRST -> null;
       };
     }
     return switch (criteria.paginationCriteria().order()) {
@@ -94,6 +99,7 @@ public class DonationEntityPageFetcher implements PageFetcher {
               criteria.boundary().createdAt(),
               criteria.boundary().id(),
               criteria.pageRequest());
+      case NEAREST_FIRST -> null;
     };
   }
 }

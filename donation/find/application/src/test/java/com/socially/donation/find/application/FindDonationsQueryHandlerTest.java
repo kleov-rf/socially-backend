@@ -60,7 +60,8 @@ class FindDonationsQueryHandlerTest {
         new FindDonationsQuery(
             PaginationCriteria.create(
                 null, PaginationCriteria.DEFAULT_SIZE, PaginationCriteria.DEFAULT_ORDER),
-            FilterCriteria.create(null));
+            FilterCriteria.create(null),
+            null);
     when(donationRepository.find(query.paginationCriteria(), query.filterCriteria()))
         .thenReturn(
             Page.create(
@@ -97,7 +98,8 @@ class FindDonationsQueryHandlerTest {
     FindDonationsQuery query =
         new FindDonationsQuery(
             PaginationCriteria.create(null, PageSize.TEN_ITEMS, PaginationCriteria.DEFAULT_ORDER),
-            FilterCriteria.create("school"));
+            FilterCriteria.create("school"),
+            null);
     when(donationRepository.find(query.paginationCriteria(), query.filterCriteria()))
         .thenReturn(
             Page.create(
@@ -131,7 +133,8 @@ class FindDonationsQueryHandlerTest {
     FindDonationsQuery query =
         new FindDonationsQuery(
             PaginationCriteria.create(null, PageSize.TEN_ITEMS, PaginationCriteria.DEFAULT_ORDER),
-            FilterCriteria.create("school"));
+            FilterCriteria.create("school"),
+            null);
     when(donationRepository.find(query.paginationCriteria(), query.filterCriteria()))
         .thenReturn(
             Page.create(
@@ -159,7 +162,8 @@ class FindDonationsQueryHandlerTest {
     FindDonationsQuery query =
         new FindDonationsQuery(
             PaginationCriteria.create(null, PageSize.TEN_ITEMS, PaginationCriteria.DEFAULT_ORDER),
-            FilterCriteria.create("school"));
+            FilterCriteria.create("school"),
+            null);
     when(donationRepository.find(query.paginationCriteria(), query.filterCriteria()))
         .thenReturn(
             Page.create(
@@ -188,7 +192,8 @@ class FindDonationsQueryHandlerTest {
     FindDonationsQuery query =
         new FindDonationsQuery(
             PaginationCriteria.create(null, PageSize.TEN_ITEMS, PaginationCriteria.DEFAULT_ORDER),
-            FilterCriteria.create("school"));
+            FilterCriteria.create("school"),
+            null);
     when(donationRepository.find(query.paginationCriteria(), query.filterCriteria()))
         .thenReturn(
             Page.create(
@@ -219,7 +224,8 @@ class FindDonationsQueryHandlerTest {
     FindDonationsQuery query =
         new FindDonationsQuery(
             PaginationCriteria.create(null, PageSize.TEN_ITEMS, PaginationCriteria.DEFAULT_ORDER),
-            FilterCriteria.create("school"));
+            FilterCriteria.create("school"),
+            null);
     when(donationRepository.find(query.paginationCriteria(), query.filterCriteria()))
         .thenReturn(
             Page.create(

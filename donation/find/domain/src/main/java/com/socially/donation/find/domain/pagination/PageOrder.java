@@ -7,7 +7,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum PageOrder {
   NEWEST_FIRST("newest_first"),
-  OLDEST_FIRST("oldest_first");
+  OLDEST_FIRST("oldest_first"),
+  NEAREST_FIRST("nearest_first");
 
   private final String value;
 
@@ -24,6 +25,8 @@ public enum PageOrder {
         .filter(order -> order.value.equals(value))
         .findFirst()
         .orElseThrow(
-            () -> new IllegalArgumentException("Order must be one of: newest_first, oldest_first"));
+            () ->
+                new IllegalArgumentException(
+                    "Order must be one of: newest_first, oldest_first, nearest_first"));
   }
 }
