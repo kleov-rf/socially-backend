@@ -36,6 +36,15 @@ public class DonationEntity {
   @Column(name = "deleted_at")
   private Instant deletedAt;
 
+  @Column(name = "location_address")
+  private String locationAddress;
+
+  @Column(name = "location_latitude")
+  private Double locationLatitude;
+
+  @Column(name = "location_longitude")
+  private Double locationLongitude;
+
   public static DonationEntity create(
       UUID id,
       UUID donorId,
@@ -43,6 +52,29 @@ public class DonationEntity {
       String description,
       Instant createdAt,
       Instant lastUpdatedAt) {
-    return new DonationEntity(id, donorId, title, description, createdAt, lastUpdatedAt, null);
+    return create(id, donorId, title, description, createdAt, lastUpdatedAt, null, null, null);
+  }
+
+  public static DonationEntity create(
+      UUID id,
+      UUID donorId,
+      String title,
+      String description,
+      Instant createdAt,
+      Instant lastUpdatedAt,
+      String locationAddress,
+      Double locationLatitude,
+      Double locationLongitude) {
+    return new DonationEntity(
+        id,
+        donorId,
+        title,
+        description,
+        createdAt,
+        lastUpdatedAt,
+        null,
+        locationAddress,
+        locationLatitude,
+        locationLongitude);
   }
 }

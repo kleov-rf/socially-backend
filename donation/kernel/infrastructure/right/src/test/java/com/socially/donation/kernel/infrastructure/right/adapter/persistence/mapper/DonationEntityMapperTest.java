@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donation.kernel.domain.entity.Donation;
 import com.socially.donation.kernel.domain.valueobject.Description;
+import com.socially.donation.kernel.domain.valueobject.DonationLocation;
 import com.socially.donation.kernel.domain.valueobject.Title;
 import com.socially.donation.kernel.infrastructure.right.adapter.persistence.entity.DonationEntity;
 import java.time.Instant;
@@ -24,6 +25,8 @@ class DonationEntityMapperTest {
   private static final String DONOR_ID = "550e8400-e29b-41d4-a716-446655440001";
   private static final Instant CREATED_AT = Instant.parse("2024-06-01T12:00:00Z");
   private static final Instant LAST_UPDATED_AT = Instant.parse("2024-06-20T09:30:00Z");
+  private static final DonationLocation LOCATION =
+      DonationLocation.from("Calle Mayor 1, Madrid", 40.4168, -3.7038);
   private static final Donation DONATION =
       Donation.create(
           Id.from(DONATION_ID),
@@ -32,6 +35,15 @@ class DonationEntityMapperTest {
           Description.from("Test Description"),
           CREATED_AT,
           LAST_UPDATED_AT);
+  private static final Donation DONATION_WITH_LOCATION =
+      Donation.create(
+          Id.from(DONATION_ID),
+          Id.from(DONOR_ID),
+          Title.from("Test Title"),
+          Description.from("Test Description"),
+          CREATED_AT,
+          LAST_UPDATED_AT,
+          LOCATION);
 
   private static final Instant ENTITY_CREATED_AT = Instant.parse("2025-01-01T00:00:00Z");
   private static final Instant ENTITY_LAST_UPDATED_AT = Instant.parse("2025-02-01T18:00:00Z");
@@ -133,5 +145,61 @@ class DonationEntityMapperTest {
     Donation result = donationEntityMapper.toDomain(ENTITY);
 
     assertEquals(ENTITY_LAST_UPDATED_AT, result.lastUpdatedAt());
+  }
+
+  @Test
+  void toEntity_should_map_location_address() {
+    DonationEntity result = donationEntityMapper.toEntity(DONATION_WITH_LOCATION);
+
+    assertEquals("Calle Mayor 1, Madrid", result.getLocationAddress());
+  }
+
+  @Test
+  void toEntity_should_map_location_latitude() {
+    DonationEntity result = donationEntityMapper.toEntity(DONATION_WITH_LOCATION);
+
+    assertEquals(40.4168, result.getLocationLatitude());
+  }
+
+  @Test
+  void toEntity_should_map_location_longitude() {
+    DonationEntity result = donationEntityMapper.toEntity(DONATION_WITH_LOCATION);
+
+    assertEquals(-3.7038, result.getLocationLongitude());
+  }
+
+  @Test
+  void toEntity_should_map_location_fields_as_null_when_location_is_absent() {
+    DonationEntity result = donationEntityMapper.toEntity(DONATION);
+
+    assertNull(result.getLocationAddress());
+    assertNull(result.getLocationLatitude());
+    assertNull(result.getLocationLongitude());
+  }
+
+  @Test
+  void toDomain_should_map_location_when_all_columns_are_present() {
+    DonationEntity entityWithLocation =
+        DonationEntity.create(
+            UUID.fromString(DONATION_ID),
+            UUID.fromString(DONOR_ID),
+            "Entity Title",
+            "Entity Description",
+            ENTITY_CREATED_AT,
+            ENTITY_LAST_UPDATED_AT,
+            "Calle Mayor 1, Madrid",
+            40.4168,
+            -3.7038);
+
+    Donation result = donationEntityMapper.toDomain(entityWithLocation);
+
+    assertEquals(LOCATION, result.location());
+  }
+
+  @Test
+  void toDomain_should_map_location_as_null_when_columns_are_absent() {
+    Donation result = donationEntityMapper.toDomain(ENTITY);
+
+    assertNull(result.location());
   }
 }
