@@ -194,4 +194,167 @@ public interface DonationEntityRepository extends JpaRepository<DonationEntity, 
       @Param("createdAt") Instant createdAt,
       @Param("id") UUID id,
       Pageable pageable);
+
+  @Query(
+      value =
+          """
+          select d.*
+          from donations d
+          where d.deleted_at is null
+          order by (6371000 * acos(LEAST(1.0, GREATEST(-1.0,
+            cos(radians(:refLat)) * cos(radians(d.location_latitude))
+            * cos(radians(d.location_longitude) - radians(:refLng))
+            + sin(radians(:refLat)) * sin(radians(d.location_latitude))
+          )))) asc, d.id asc
+          """,
+      nativeQuery = true)
+  List<DonationEntity> findNearestFirst(
+      @Param("refLat") double refLat, @Param("refLng") double refLng, Pageable pageable);
+
+  @Query(
+      value =
+          """
+          select d.*
+          from donations d
+          where d.deleted_at is null
+            and (lower(d.title) like :searchPattern
+             or lower(d.description) like :searchPattern)
+          order by (6371000 * acos(LEAST(1.0, GREATEST(-1.0,
+            cos(radians(:refLat)) * cos(radians(d.location_latitude))
+            * cos(radians(d.location_longitude) - radians(:refLng))
+            + sin(radians(:refLat)) * sin(radians(d.location_latitude))
+          )))) asc, d.id asc
+          """,
+      nativeQuery = true)
+  List<DonationEntity> findNearestFirstBySearchPattern(
+      @Param("searchPattern") String searchPattern,
+      @Param("refLat") double refLat,
+      @Param("refLng") double refLng,
+      Pageable pageable);
+
+  @Query(
+      value =
+          """
+          select d.*
+          from donations d
+          where d.deleted_at is null
+            and ((6371000 * acos(LEAST(1.0, GREATEST(-1.0,
+              cos(radians(:refLat)) * cos(radians(d.location_latitude))
+              * cos(radians(d.location_longitude) - radians(:refLng))
+              + sin(radians(:refLat)) * sin(radians(d.location_latitude))
+            )))) > :boundaryDistance
+             or ((6371000 * acos(LEAST(1.0, GREATEST(-1.0,
+              cos(radians(:refLat)) * cos(radians(d.location_latitude))
+              * cos(radians(d.location_longitude) - radians(:refLng))
+              + sin(radians(:refLat)) * sin(radians(d.location_latitude))
+            )))) = :boundaryDistance and d.id > :id))
+          order by (6371000 * acos(LEAST(1.0, GREATEST(-1.0,
+            cos(radians(:refLat)) * cos(radians(d.location_latitude))
+            * cos(radians(d.location_longitude) - radians(:refLng))
+            + sin(radians(:refLat)) * sin(radians(d.location_latitude))
+          )))) asc, d.id asc
+          """,
+      nativeQuery = true)
+  List<DonationEntity> findNextNearestFirstPage(
+      @Param("refLat") double refLat,
+      @Param("refLng") double refLng,
+      @Param("boundaryDistance") double boundaryDistance,
+      @Param("id") UUID id,
+      Pageable pageable);
+
+  @Query(
+      value =
+          """
+          select d.*
+          from donations d
+          where d.deleted_at is null
+            and (lower(d.title) like :searchPattern
+             or lower(d.description) like :searchPattern)
+            and ((6371000 * acos(LEAST(1.0, GREATEST(-1.0,
+              cos(radians(:refLat)) * cos(radians(d.location_latitude))
+              * cos(radians(d.location_longitude) - radians(:refLng))
+              + sin(radians(:refLat)) * sin(radians(d.location_latitude))
+            )))) > :boundaryDistance
+             or ((6371000 * acos(LEAST(1.0, GREATEST(-1.0,
+              cos(radians(:refLat)) * cos(radians(d.location_latitude))
+              * cos(radians(d.location_longitude) - radians(:refLng))
+              + sin(radians(:refLat)) * sin(radians(d.location_latitude))
+            )))) = :boundaryDistance and d.id > :id))
+          order by (6371000 * acos(LEAST(1.0, GREATEST(-1.0,
+            cos(radians(:refLat)) * cos(radians(d.location_latitude))
+            * cos(radians(d.location_longitude) - radians(:refLng))
+            + sin(radians(:refLat)) * sin(radians(d.location_latitude))
+          )))) asc, d.id asc
+          """,
+      nativeQuery = true)
+  List<DonationEntity> findNextNearestFirstPageBySearchPattern(
+      @Param("searchPattern") String searchPattern,
+      @Param("refLat") double refLat,
+      @Param("refLng") double refLng,
+      @Param("boundaryDistance") double boundaryDistance,
+      @Param("id") UUID id,
+      Pageable pageable);
+
+  @Query(
+      value =
+          """
+          select d.*
+          from donations d
+          where d.deleted_at is null
+            and ((6371000 * acos(LEAST(1.0, GREATEST(-1.0,
+              cos(radians(:refLat)) * cos(radians(d.location_latitude))
+              * cos(radians(d.location_longitude) - radians(:refLng))
+              + sin(radians(:refLat)) * sin(radians(d.location_latitude))
+            )))) < :boundaryDistance
+             or ((6371000 * acos(LEAST(1.0, GREATEST(-1.0,
+              cos(radians(:refLat)) * cos(radians(d.location_latitude))
+              * cos(radians(d.location_longitude) - radians(:refLng))
+              + sin(radians(:refLat)) * sin(radians(d.location_latitude))
+            )))) = :boundaryDistance and d.id < :id))
+          order by (6371000 * acos(LEAST(1.0, GREATEST(-1.0,
+            cos(radians(:refLat)) * cos(radians(d.location_latitude))
+            * cos(radians(d.location_longitude) - radians(:refLng))
+            + sin(radians(:refLat)) * sin(radians(d.location_latitude))
+          )))) desc, d.id desc
+          """,
+      nativeQuery = true)
+  List<DonationEntity> findPreviousNearestFirstPage(
+      @Param("refLat") double refLat,
+      @Param("refLng") double refLng,
+      @Param("boundaryDistance") double boundaryDistance,
+      @Param("id") UUID id,
+      Pageable pageable);
+
+  @Query(
+      value =
+          """
+          select d.*
+          from donations d
+          where d.deleted_at is null
+            and (lower(d.title) like :searchPattern
+             or lower(d.description) like :searchPattern)
+            and ((6371000 * acos(LEAST(1.0, GREATEST(-1.0,
+              cos(radians(:refLat)) * cos(radians(d.location_latitude))
+              * cos(radians(d.location_longitude) - radians(:refLng))
+              + sin(radians(:refLat)) * sin(radians(d.location_latitude))
+            )))) < :boundaryDistance
+             or ((6371000 * acos(LEAST(1.0, GREATEST(-1.0,
+              cos(radians(:refLat)) * cos(radians(d.location_latitude))
+              * cos(radians(d.location_longitude) - radians(:refLng))
+              + sin(radians(:refLat)) * sin(radians(d.location_latitude))
+            )))) = :boundaryDistance and d.id < :id))
+          order by (6371000 * acos(LEAST(1.0, GREATEST(-1.0,
+            cos(radians(:refLat)) * cos(radians(d.location_latitude))
+            * cos(radians(d.location_longitude) - radians(:refLng))
+            + sin(radians(:refLat)) * sin(radians(d.location_latitude))
+          )))) desc, d.id desc
+          """,
+      nativeQuery = true)
+  List<DonationEntity> findPreviousNearestFirstPageBySearchPattern(
+      @Param("searchPattern") String searchPattern,
+      @Param("refLat") double refLat,
+      @Param("refLng") double refLng,
+      @Param("boundaryDistance") double boundaryDistance,
+      @Param("id") UUID id,
+      Pageable pageable);
 }

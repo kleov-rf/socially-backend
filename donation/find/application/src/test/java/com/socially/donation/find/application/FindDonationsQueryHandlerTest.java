@@ -20,6 +20,7 @@ import com.socially.donation.find.domain.pagination.Page;
 import com.socially.donation.find.domain.pagination.PageSize;
 import com.socially.donation.find.domain.pagination.PaginationCriteria;
 import com.socially.donation.find.domain.port.right.FindDonationsRepository;
+import com.socially.donation.find.domain.proximity.ProximityReference;
 import com.socially.donation.kernel.domain.entity.Donation;
 import com.socially.donation.kernel.domain.valueobject.Description;
 import com.socially.donation.kernel.domain.valueobject.DonationLocation;
@@ -29,7 +30,6 @@ import com.socially.donor.findbyid.application.port.left.FindDonorByIdUseCase;
 import com.socially.donor.kernel.domain.entity.Donor;
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -45,6 +45,8 @@ class FindDonationsQueryHandlerTest {
   private static final String USER_ID = "550e8400-e29b-41d4-a716-446655440010";
   private static final Instant CREATED_AT = Instant.parse("2024-06-01T12:00:00Z");
   private static final Instant LAST_UPDATED_AT = Instant.parse("2024-06-20T09:00:00Z");
+  private static final ProximityReference PROXIMITY_REFERENCE =
+      ProximityReference.from(40.4168, -3.7038);
 
   @Mock private FindDonationsRepository donationRepository;
 
@@ -62,7 +64,8 @@ class FindDonationsQueryHandlerTest {
                 null, PaginationCriteria.DEFAULT_SIZE, PaginationCriteria.DEFAULT_ORDER),
             FilterCriteria.create(null),
             null);
-    when(donationRepository.find(query.paginationCriteria(), query.filterCriteria()))
+    when(donationRepository.find(
+            query.paginationCriteria(), query.filterCriteria(), query.proximityReference()))
         .thenReturn(
             Page.create(
                 List.of(),
@@ -70,7 +73,29 @@ class FindDonationsQueryHandlerTest {
 
     handler.execute(query);
 
-    verify(donationRepository).find(query.paginationCriteria(), query.filterCriteria());
+    verify(donationRepository)
+        .find(query.paginationCriteria(), query.filterCriteria(), query.proximityReference());
+  }
+
+  @Test
+  void execute_should_call_repository_with_proximity_reference_when_present() {
+    FindDonationsQuery query =
+        new FindDonationsQuery(
+            PaginationCriteria.create(
+                null, PaginationCriteria.DEFAULT_SIZE, PaginationCriteria.DEFAULT_ORDER),
+            FilterCriteria.create(null),
+            PROXIMITY_REFERENCE);
+    when(donationRepository.find(
+            query.paginationCriteria(), query.filterCriteria(), PROXIMITY_REFERENCE))
+        .thenReturn(
+            Page.create(
+                List.of(),
+                Metadata.create(null, null, PaginationCriteria.DEFAULT_SIZE.value(), 0L)));
+
+    handler.execute(query);
+
+    verify(donationRepository)
+        .find(query.paginationCriteria(), query.filterCriteria(), PROXIMITY_REFERENCE);
   }
 
   @Test
@@ -100,13 +125,14 @@ class FindDonationsQueryHandlerTest {
             PaginationCriteria.create(null, PageSize.TEN_ITEMS, PaginationCriteria.DEFAULT_ORDER),
             FilterCriteria.create("school"),
             null);
-    when(donationRepository.find(query.paginationCriteria(), query.filterCriteria()))
+    when(donationRepository.find(
+            query.paginationCriteria(), query.filterCriteria(), query.proximityReference()))
         .thenReturn(
             Page.create(
                 List.of(firstDonation, secondDonation),
                 Metadata.create("next-cursor", null, 10, 100L)));
     when(findDonorByIdUseCase.execute(new FindDonorByIdQuery(DONOR_ID)))
-        .thenReturn(Optional.of(donor));
+        .thenReturn(java.util.Optional.of(donor));
     when(donationDtoMapper.fromDomain(eq(firstDonation), eq(donor)))
         .thenReturn(mappedDto(firstDonation, donor));
     when(donationDtoMapper.fromDomain(eq(secondDonation), eq(donor)))
@@ -135,12 +161,13 @@ class FindDonationsQueryHandlerTest {
             PaginationCriteria.create(null, PageSize.TEN_ITEMS, PaginationCriteria.DEFAULT_ORDER),
             FilterCriteria.create("school"),
             null);
-    when(donationRepository.find(query.paginationCriteria(), query.filterCriteria()))
+    when(donationRepository.find(
+            query.paginationCriteria(), query.filterCriteria(), query.proximityReference()))
         .thenReturn(
             Page.create(
                 List.of(donation), Metadata.create("next-cursor", "previous-cursor", 10, 100L)));
     when(findDonorByIdUseCase.execute(new FindDonorByIdQuery(DONOR_ID)))
-        .thenReturn(Optional.of(donor));
+        .thenReturn(java.util.Optional.of(donor));
     when(donationDtoMapper.fromDomain(donation, donor)).thenReturn(mappedDto(donation, donor));
 
     handler.execute(query);
@@ -164,12 +191,13 @@ class FindDonationsQueryHandlerTest {
             PaginationCriteria.create(null, PageSize.TEN_ITEMS, PaginationCriteria.DEFAULT_ORDER),
             FilterCriteria.create("school"),
             null);
-    when(donationRepository.find(query.paginationCriteria(), query.filterCriteria()))
+    when(donationRepository.find(
+            query.paginationCriteria(), query.filterCriteria(), query.proximityReference()))
         .thenReturn(
             Page.create(
                 List.of(donation), Metadata.create("next-cursor", "previous-cursor", 10, 100L)));
     when(findDonorByIdUseCase.execute(new FindDonorByIdQuery(DONOR_ID)))
-        .thenReturn(Optional.empty());
+        .thenReturn(java.util.Optional.empty());
 
     assertThrows(IllegalStateException.class, () -> handler.execute(query));
     verifyNoInteractions(donationDtoMapper);
@@ -194,12 +222,13 @@ class FindDonationsQueryHandlerTest {
             PaginationCriteria.create(null, PageSize.TEN_ITEMS, PaginationCriteria.DEFAULT_ORDER),
             FilterCriteria.create("school"),
             null);
-    when(donationRepository.find(query.paginationCriteria(), query.filterCriteria()))
+    when(donationRepository.find(
+            query.paginationCriteria(), query.filterCriteria(), query.proximityReference()))
         .thenReturn(
             Page.create(
                 List.of(donation), Metadata.create("next-cursor", "previous-cursor", 10, 100L)));
     when(findDonorByIdUseCase.execute(new FindDonorByIdQuery(DONOR_ID)))
-        .thenReturn(Optional.of(donor));
+        .thenReturn(java.util.Optional.of(donor));
     when(donationDtoMapper.fromDomain(donation, donor)).thenReturn(mappedDto);
 
     Page<FindDonationDto> result = handler.execute(query);
@@ -208,7 +237,48 @@ class FindDonationsQueryHandlerTest {
   }
 
   @Test
-  void execute_should_return_page_with_donation_page_metadata() {
+  void execute_should_return_page_with_next_cursor() {
+    Page<FindDonationDto> result = handler.execute(queryWithMetadataPage());
+
+    assertEquals("next-cursor", result.metadata().nextCursor());
+  }
+
+  @Test
+  void execute_should_return_page_with_previous_cursor() {
+    Page<FindDonationDto> result = handler.execute(queryWithMetadataPage());
+
+    assertEquals("previous-cursor", result.metadata().previousCursor());
+  }
+
+  @Test
+  void execute_should_return_page_with_has_next() {
+    Page<FindDonationDto> result = handler.execute(queryWithMetadataPage());
+
+    assertTrue(result.metadata().hasNext());
+  }
+
+  @Test
+  void execute_should_return_page_with_has_previous() {
+    Page<FindDonationDto> result = handler.execute(queryWithMetadataPage());
+
+    assertTrue(result.metadata().hasPrevious());
+  }
+
+  @Test
+  void execute_should_return_page_with_size() {
+    Page<FindDonationDto> result = handler.execute(queryWithMetadataPage());
+
+    assertEquals(10, result.metadata().size());
+  }
+
+  @Test
+  void execute_should_return_page_with_total_count() {
+    Page<FindDonationDto> result = handler.execute(queryWithMetadataPage());
+
+    assertEquals(100L, result.metadata().totalCount());
+  }
+
+  private FindDonationsQuery queryWithMetadataPage() {
     Donation donation =
         Donation.create(
             Id.from(DONATION_ID),
@@ -226,22 +296,15 @@ class FindDonationsQueryHandlerTest {
             PaginationCriteria.create(null, PageSize.TEN_ITEMS, PaginationCriteria.DEFAULT_ORDER),
             FilterCriteria.create("school"),
             null);
-    when(donationRepository.find(query.paginationCriteria(), query.filterCriteria()))
+    when(donationRepository.find(
+            query.paginationCriteria(), query.filterCriteria(), query.proximityReference()))
         .thenReturn(
             Page.create(
                 List.of(donation), Metadata.create("next-cursor", "previous-cursor", 10, 100L)));
     when(findDonorByIdUseCase.execute(new FindDonorByIdQuery(DONOR_ID)))
-        .thenReturn(Optional.of(donor));
+        .thenReturn(java.util.Optional.of(donor));
     when(donationDtoMapper.fromDomain(donation, donor)).thenReturn(mappedDto);
-
-    Page<FindDonationDto> result = handler.execute(query);
-
-    assertEquals("next-cursor", result.metadata().nextCursor());
-    assertEquals("previous-cursor", result.metadata().previousCursor());
-    assertTrue(result.metadata().hasNext());
-    assertTrue(result.metadata().hasPrevious());
-    assertEquals(10, result.metadata().size());
-    assertEquals(100L, result.metadata().totalCount());
+    return query;
   }
 
   private static FindDonationDto mappedDto(Donation donation, Donor donor) {

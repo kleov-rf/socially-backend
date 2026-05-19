@@ -3,8 +3,10 @@ package com.socially.donation.find.infrastructure.right.adapter.persistence;
 import com.socially.donation.find.domain.filter.FilterCriteria;
 import com.socially.donation.find.domain.pagination.Metadata;
 import com.socially.donation.find.domain.pagination.Page;
+import com.socially.donation.find.domain.pagination.PageOrder;
 import com.socially.donation.find.domain.pagination.PaginationCriteria;
 import com.socially.donation.find.domain.port.right.FindDonationsRepository;
+import com.socially.donation.find.domain.proximity.ProximityReference;
 import com.socially.donation.kernel.domain.entity.Donation;
 import com.socially.donation.kernel.infrastructure.right.adapter.persistence.DonationEntityRepository;
 import com.socially.donation.kernel.infrastructure.right.adapter.persistence.entity.DonationEntity;
@@ -26,26 +28,37 @@ public class JpaFindDonationsRepository implements FindDonationsRepository {
   private final DonationEntityRepository entityRepository;
   private final DonationEntityMapper entityMapper;
   private final KeysetCursorCodec cursorCodec;
+  private final ProximityKeysetCursorCodec proximityCursorCodec;
+  private final HaversineDistanceCalculator distanceCalculator;
 
   @Override
-  public Page<Donation> find(PaginationCriteria paginationCriteria, FilterCriteria filterCriteria) {
+  public Page<Donation> find(
+      PaginationCriteria paginationCriteria,
+      FilterCriteria filterCriteria,
+      ProximityReference proximityReference) {
     String searchPattern = searchPatternNormalizer.toSearchPattern(filterCriteria);
 
-    KeysetCursor boundary =
-        Objects.isNull(paginationCriteria.cursor())
-            ? null
-            : cursorCodec.decode(paginationCriteria.cursor());
+    KeysetCursor dateBoundary = null;
+    ProximityKeysetCursor proximityBoundary = null;
+    if (Objects.nonNull(paginationCriteria.cursor())) {
+      if (paginationCriteria.order() == PageOrder.NEAREST_FIRST) {
+        proximityBoundary = proximityCursorCodec.decode(paginationCriteria.cursor());
+      } else {
+        dateBoundary = cursorCodec.decode(paginationCriteria.cursor());
+      }
+    }
 
     boolean isPreviousCursorRequest =
-        Objects.nonNull(paginationCriteria.cursor())
-            && cursorCodec.isPreviousCursor(paginationCriteria.cursor());
+        Objects.nonNull(paginationCriteria.cursor()) && isPreviousCursor(paginationCriteria);
 
     List<DonationEntity> entities =
         entityPageFetcher.fetch(
             new FetchCriteria(
                 paginationCriteria,
                 searchPattern,
-                boundary,
+                dateBoundary,
+                proximityBoundary,
+                proximityReference,
                 isPreviousCursorRequest,
                 PageRequest.of(0, paginationCriteria.size() + 1)));
 
@@ -56,9 +69,12 @@ public class JpaFindDonationsRepository implements FindDonationsRepository {
         cursorMetadataBuilder.build(
             pageSlice.entities(),
             paginationCriteria,
+            proximityReference,
             isPreviousCursorRequest,
             pageSlice.overflowItemsExist(),
-            cursorCodec);
+            cursorCodec,
+            proximityCursorCodec,
+            distanceCalculator);
 
     long totalCount;
     if (Objects.isNull(searchPattern)) {
@@ -77,5 +93,12 @@ public class JpaFindDonationsRepository implements FindDonationsRepository {
     List<Donation> donations = pageSlice.entities().stream().map(entityMapper::toDomain).toList();
 
     return Page.create(donations, metadata);
+  }
+
+  private boolean isPreviousCursor(PaginationCriteria paginationCriteria) {
+    if (paginationCriteria.order() == PageOrder.NEAREST_FIRST) {
+      return proximityCursorCodec.isPreviousCursor(paginationCriteria.cursor());
+    }
+    return cursorCodec.isPreviousCursor(paginationCriteria.cursor());
   }
 }

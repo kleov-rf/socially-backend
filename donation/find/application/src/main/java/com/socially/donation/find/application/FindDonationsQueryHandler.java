@@ -24,7 +24,8 @@ public final class FindDonationsQueryHandler implements FindDonationsUseCase {
   @Override
   public Page<FindDonationDto> execute(FindDonationsQuery query) {
     Page<Donation> donations =
-        donationRepository.find(query.paginationCriteria(), query.filterCriteria());
+        donationRepository.find(
+            query.paginationCriteria(), query.filterCriteria(), query.proximityReference());
 
     return Page.create(donations.items().stream().map(this::toDto).toList(), donations.metadata());
   }
