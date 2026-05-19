@@ -56,6 +56,8 @@ public class DonationStepDefinitions {
   private Integer lastPageSize;
   private String lastOrder;
   private String lastQuery;
+  private Double lastLatitude;
+  private Double lastLongitude;
 
   private static final String CUCUMBER_DONOR_USER_ID = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeee0001";
   private static final String CUCUMBER_DONOR_ID = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeee0002";
@@ -76,6 +78,8 @@ public class DonationStepDefinitions {
     lastPageSize = null;
     lastOrder = null;
     lastQuery = null;
+    lastLatitude = null;
+    lastLongitude = null;
     expectedLocation = DEFAULT_LOCATION;
     lastCreateRequestBody = null;
   }
@@ -89,6 +93,8 @@ public class DonationStepDefinitions {
     lastPageSize = null;
     lastOrder = null;
     lastQuery = null;
+    lastLatitude = null;
+    lastLongitude = null;
     expectedLocation = DEFAULT_LOCATION;
     lastCreateRequestBody = null;
   }
@@ -259,7 +265,28 @@ public class DonationStepDefinitions {
     lastPageSize = null;
     lastOrder = order;
     lastQuery = null;
+    lastLatitude = null;
+    lastLongitude = null;
     mvcResult = mockMvc.perform(get("/api/donations").param("order", order)).andReturn();
+  }
+
+  @When(
+      "I retrieve all donations with order {string} from latitude {double} and longitude {double}")
+  public void iRetrieveAllDonationsWithOrderFromCoordinates(
+      String order, double latitude, double longitude) throws Exception {
+    lastPageSize = null;
+    lastOrder = order;
+    lastQuery = null;
+    lastLatitude = latitude;
+    lastLongitude = longitude;
+    mvcResult =
+        mockMvc
+            .perform(
+                get("/api/donations")
+                    .param("order", order)
+                    .param("latitude", String.valueOf(latitude))
+                    .param("longitude", String.valueOf(longitude)))
+            .andReturn();
   }
 
   @When("I retrieve all donations with query {string}")
@@ -385,6 +412,10 @@ public class DonationStepDefinitions {
     }
     if (lastQuery != null) {
       request = request.param("query", lastQuery);
+    }
+    if (lastLatitude != null && lastLongitude != null) {
+      request = request.param("latitude", String.valueOf(lastLatitude));
+      request = request.param("longitude", String.valueOf(lastLongitude));
     }
 
     mvcResult = mockMvc.perform(request).andReturn();

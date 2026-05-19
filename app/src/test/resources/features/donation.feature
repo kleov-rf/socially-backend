@@ -97,6 +97,25 @@ Feature: Donation management
     Then the response status should be 200
     And the first donation in the current page should be donation 1
 
+  Scenario: Retrieve donations with nearest first order
+    Given I have a donation with random id, title "Nearby donation" and description "Close to reference point"
+    And the donation location is address "Madrid" latitude 40.4168 and longitude -3.7038
+    When I create the donation
+    Then the response status should be 201
+    And I record this donation as donation 1
+    Given I have a donation with random id, title "Far donation" and description "Far from reference point"
+    And the donation location is address "London" latitude 51.5074 and longitude -0.1278
+    When I create the donation
+    Then the response status should be 201
+    And I record this donation as donation 2
+    When I retrieve all donations with order "nearest_first" from latitude 40.4168 and longitude -3.7038
+    Then the response status should be 200
+    And the first donation in the current page should be donation 1
+
+  Scenario: Retrieve donations with nearest first without coordinates returns bad request
+    When I retrieve all donations with order "nearest_first"
+    Then the response status should be 400
+
   Scenario: Retrieve donations with query filter
     Given I have a donation with random id, title "School notebooks" and description "Buying books"
     When I create the donation
