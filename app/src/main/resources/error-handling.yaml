@@ -8,10 +8,11 @@ error:
       com.socially.auth.kernel.domain.exception.AuthUpstreamFailureException: AUTH_UPSTREAM_FAILURE
       com.socially.auth.kernel.domain.exception.AuthInternalErrorException: AUTH_INTERNAL_ERROR
       com.socially.donor.kernel.domain.exception.DonorInternalErrorException: DONOR_INTERNAL_ERROR
-      java.lang.IllegalArgumentException: BAD_REQUEST
+      com.socially.donation.find.domain.exception.FindDonationsBadRequestException: FIND_DONATIONS_BAD_REQUEST
+      "[java.lang.IllegalArgumentException]": BAD_REQUEST
       org.springframework.security.core.AuthenticationException: UNAUTHENTICATED
       org.springframework.security.access.AccessDeniedException: FORBIDDEN
     http-statuses:
-      java.lang.IllegalArgumentException: bad_request
+      "[java.lang.IllegalArgumentException]": BAD_REQUEST
       org.springframework.security.core.AuthenticationException: unauthorized
       org.springframework.security.access.AccessDeniedException: forbidden

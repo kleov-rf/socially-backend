@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.socially.donation.find.application.input.FindDonationsQuery;
+import com.socially.donation.find.domain.exception.FindDonationsBadRequestException;
 import com.socially.donation.find.domain.pagination.PageOrder;
 import com.socially.donation.find.domain.pagination.PaginationCriteria;
 import com.socially.donation.find.domain.proximity.ProximityReference;
@@ -90,9 +91,9 @@ class FindDonationsQueryMapperTest {
 
   @Test
   void toQuery_should_throw_when_nearest_first_without_coordinates() {
-    IllegalArgumentException exception =
+    FindDonationsBadRequestException exception =
         assertThrows(
-            IllegalArgumentException.class,
+            FindDonationsBadRequestException.class,
             () -> mapper.toQuery("next", 10, "nearest_first", "school", null, null));
 
     assertEquals(
