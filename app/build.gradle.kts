@@ -29,6 +29,7 @@ dependencies {
     implementation(project(":auth:kernel:domain"))
     implementation(project(":auth:kernel:infrastructure:left"))
     implementation(project(":donation:create:infrastructure:left"))
+    implementation(project(":donation:create-image:infrastructure:left"))
     implementation(project(":donor:create:infrastructure:right"))
     implementation(project(":donor:find-by-user-id:infrastructure:right"))
     implementation(project(":donor:find-by-id:infrastructure:right"))
