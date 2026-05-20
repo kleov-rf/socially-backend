@@ -1,7 +1,9 @@
 package com.socially.app.cucumber.steps;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -9,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.socially.app.cucumber.CucumberDonationContext;
 import com.socially.app.cucumber.CucumberOAuthJwt;
+import com.socially.app.cucumber.CucumberSpringConfiguration;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -17,16 +20,20 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 
 @ScenarioScope
 @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-public class CreateDonationImageStepDefinitions {
+public class DonationImageStepDefinitions {
 
   @Autowired private MockMvc mockMvc;
 
@@ -46,9 +53,8 @@ public class CreateDonationImageStepDefinitions {
   private Boolean lastPrimary;
   private Integer lastPresignedUploadStatus;
 
-  String getLastImageId() {
-    return lastImageId;
-  }
+  private String lastDeletedImageId;
+  private String lastStorageObjectKey;
 
   @When(
       "I add a donation image with file name {string} content type {string} size {long} and primary {word}")
@@ -141,6 +147,56 @@ public class CreateDonationImageStepDefinitions {
     assertThat(image.get("primary").asBoolean()).isEqualTo(lastPrimary);
   }
 
+  @When("I delete the current donation image")
+  public void iDeleteTheCurrentDonationImage() throws Exception {
+    iDeleteDonationImage(lastImageId, cucumberDonorJwt(), true);
+  }
+
+  @When("I delete the current donation image without authentication")
+  public void iDeleteTheCurrentDonationImageWithoutAuthentication() throws Exception {
+    iDeleteDonationImage(lastImageId, null, true);
+  }
+
+  @When("I delete the current donation image as another user")
+  public void iDeleteTheCurrentDonationImageAsAnotherUser() throws Exception {
+    iDeleteDonationImage(lastImageId, cucumberOtherUserJwt(), true);
+  }
+
+  @When("I delete a donation image with unknown id")
+  public void iDeleteADonationImageWithUnknownId() throws Exception {
+    iDeleteDonationImage(UUID.randomUUID().toString(), cucumberDonorJwt(), false);
+  }
+
+  @And("the donation image should not be persisted for the current donation")
+  public void theDonationImageShouldNotBePersistedForTheCurrentDonation() {
+    Integer rowCount =
+        jdbcTemplate.queryForObject(
+            """
+            SELECT COUNT(*)
+            FROM donation_images
+            WHERE donation_id = ?::uuid AND id = ?::uuid
+            """,
+            Integer.class,
+            donationContext.getCurrentDonationId(),
+            lastDeletedImageId);
+
+    assertThat(rowCount).isZero();
+  }
+
+  @And("the donation image object should not exist in S3")
+  public void theDonationImageObjectShouldNotExistInS3() {
+    try (S3Client s3Client = CucumberSpringConfiguration.createTestS3Client()) {
+      assertThrows(
+          NoSuchKeyException.class,
+          () ->
+              s3Client.headObject(
+                  HeadObjectRequest.builder()
+                      .bucket(CucumberSpringConfiguration.MEDIA_BUCKET)
+                      .key(lastStorageObjectKey)
+                      .build()));
+    }
+  }
+
   private void iAddDonationImage(
       String fileName,
       String contentType,
@@ -176,6 +232,37 @@ public class CreateDonationImageStepDefinitions {
       lastUploadUrl = response.get("uploadUrl").asText();
       lastMediaUrl = response.get("mediaUrl").asText();
     }
+  }
+
+  private void iDeleteDonationImage(
+      String imageId, RequestPostProcessor authentication, boolean captureStorageObjectKey)
+      throws Exception {
+    lastDeletedImageId = imageId;
+    if (captureStorageObjectKey) {
+      lastStorageObjectKey = loadStorageObjectKey(imageId);
+    }
+
+    var requestBuilder =
+        delete("/api/donations/" + donationContext.getCurrentDonationId() + "/images/" + imageId);
+
+    if (authentication != null) {
+      requestBuilder = requestBuilder.with(authentication);
+    }
+
+    MvcResult result = mockMvc.perform(requestBuilder).andReturn();
+    donationStepDefinitions.captureMvcResult(result);
+  }
+
+  private String loadStorageObjectKey(String imageId) {
+    return jdbcTemplate.queryForObject(
+        """
+        SELECT storage_object_key
+        FROM donation_images
+        WHERE donation_id = ?::uuid AND id = ?::uuid
+        """,
+        String.class,
+        donationContext.getCurrentDonationId(),
+        imageId);
   }
 
   private JsonNode parseLastResponseBody() throws Exception {
