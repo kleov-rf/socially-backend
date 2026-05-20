@@ -1,16 +1,22 @@
 package com.socially.donation.kernel.domain.entity;
 
 import com.socially.commons.kernel.domain.valueobject.Id;
+import com.socially.donation.kernel.domain.exception.InvalidDonationImageException;
 import com.socially.donation.kernel.domain.valueobject.Description;
 import com.socially.donation.kernel.domain.valueobject.DonationLocation;
 import com.socially.donation.kernel.domain.valueobject.Title;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @RequiredArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public final class Donation {
+
+  public static final Integer MAX_IMAGES = 5;
 
   @EqualsAndHashCode.Include private final Id id;
   private final Id donorId;
@@ -19,6 +25,7 @@ public final class Donation {
   private final DonationLocation location;
   private final Instant createdAt;
   private final Instant lastUpdatedAt;
+  private final List<DonationImage> images;
 
   public static Donation create(
       Id id,
@@ -28,8 +35,21 @@ public final class Donation {
       DonationLocation location,
       Instant createdAt,
       Instant lastUpdatedAt) {
-    validate(id, donorId, title, description, location, createdAt, lastUpdatedAt);
-    return new Donation(id, donorId, title, description, location, createdAt, lastUpdatedAt);
+    return create(id, donorId, title, description, location, createdAt, lastUpdatedAt, List.of());
+  }
+
+  public static Donation create(
+      Id id,
+      Id donorId,
+      Title title,
+      Description description,
+      DonationLocation location,
+      Instant createdAt,
+      Instant lastUpdatedAt,
+      List<DonationImage> images) {
+    validate(id, donorId, title, description, location, createdAt, lastUpdatedAt, images);
+    return new Donation(
+        id, donorId, title, description, location, createdAt, lastUpdatedAt, List.copyOf(images));
   }
 
   private static void validate(
@@ -39,7 +59,8 @@ public final class Donation {
       Description description,
       DonationLocation location,
       Instant createdAt,
-      Instant lastUpdatedAt) {
+      Instant lastUpdatedAt,
+      List<DonationImage> images) {
     if (id == null) {
       throw new IllegalArgumentException("donation id cannot be null");
     }
@@ -67,18 +88,46 @@ public final class Donation {
     if (lastUpdatedAt == null) {
       throw new IllegalArgumentException("donation last updated at cannot be null");
     }
+
+    if (images == null) {
+      throw new IllegalArgumentException("donation images cannot be null");
+    }
   }
 
   public Donation withTitle(Title title, Instant lastUpdatedAt) {
-    return create(id, donorId, title, description, location, createdAt, lastUpdatedAt);
+    return create(id, donorId, title, description, location, createdAt, lastUpdatedAt, images);
   }
 
   public Donation withDescription(Description description, Instant lastUpdatedAt) {
-    return create(id, donorId, title, description, location, createdAt, lastUpdatedAt);
+    return create(id, donorId, title, description, location, createdAt, lastUpdatedAt, images);
   }
 
   public Donation withLocation(DonationLocation location, Instant lastUpdatedAt) {
-    return create(id, donorId, title, description, location, createdAt, lastUpdatedAt);
+    return create(id, donorId, title, description, location, createdAt, lastUpdatedAt, images);
+  }
+
+  public Donation withImageAdded(DonationImage image) {
+    if (Objects.isNull(image)) {
+      throw new IllegalArgumentException("donation image cannot be null");
+    }
+
+    if (images.size() >= MAX_IMAGES) {
+      throw new InvalidDonationImageException(
+          "Donation " + id.value() + " cannot have more than " + MAX_IMAGES + " images");
+    }
+
+    List<DonationImage> updatedImages = new ArrayList<>(images.size() + 1);
+    for (DonationImage existing : images) {
+      if (Boolean.TRUE.equals(image.primary()) && Boolean.TRUE.equals(existing.primary())) {
+        updatedImages.add(existing.withPrimary(Boolean.FALSE));
+      } else {
+        updatedImages.add(existing);
+      }
+    }
+    updatedImages.add(image);
+
+    return create(
+        id, donorId, title, description, location, createdAt, lastUpdatedAt, updatedImages);
   }
 
   public Id id() {
@@ -93,8 +142,8 @@ public final class Donation {
     return donorId;
   }
 
-  public boolean belongsToDonor(Id donorId) {
-    return this.donorId.equals(donorId);
+  public Boolean belongsToDonor(Id donorId) {
+    return Boolean.valueOf(this.donorId.equals(donorId));
   }
 
   public Description description() {
@@ -111,5 +160,9 @@ public final class Donation {
 
   public Instant lastUpdatedAt() {
     return lastUpdatedAt;
+  }
+
+  public List<DonationImage> images() {
+    return images;
   }
 }

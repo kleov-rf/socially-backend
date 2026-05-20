@@ -3,8 +3,11 @@ package com.socially.donation.kernel.domain.entity;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.socially.commons.kernel.domain.valueobject.Id;
+import com.socially.donation.kernel.domain.exception.InvalidDonationImageException;
+import com.socially.donation.kernel.domain.valueobject.ContentType;
 import com.socially.donation.kernel.domain.valueobject.Description;
 import com.socially.donation.kernel.domain.valueobject.DonationLocation;
+import com.socially.donation.kernel.domain.valueobject.StorageObjectKey;
 import com.socially.donation.kernel.domain.valueobject.Title;
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
@@ -382,5 +385,68 @@ class DonationTest {
         donation.withDescription(Description.from("New Description"), NEW_LAST_UPDATED_AT);
 
     assertEquals(DEFAULT_LOCATION, updated.location());
+  }
+
+  private static DonationImage createImage(String imageId, Boolean primary) {
+    return DonationImage.create(
+        Id.from(imageId),
+        StorageObjectKey.from("donations/" + DONATION_ID + "/images/" + imageId + ".jpg"),
+        ContentType.from("image/jpeg"),
+        1024L,
+        primary,
+        CREATED_AT);
+  }
+
+  @Test
+  void withImageAdded_should_add_image_to_empty_list() {
+    DonationImage image = createImage("660e8400-e29b-41d4-a716-446655440001", Boolean.TRUE);
+
+    Donation updated = createDonation().withImageAdded(image);
+
+    assertEquals(1, updated.images().size());
+    assertEquals(image, updated.images().getFirst());
+  }
+
+  @Test
+  void withImageAdded_should_clear_existing_primary_when_new_image_is_primary() {
+    DonationImage first = createImage("660e8400-e29b-41d4-a716-446655440001", Boolean.TRUE);
+    DonationImage second = createImage("660e8400-e29b-41d4-a716-446655440002", Boolean.TRUE);
+    Donation withFirst = createDonation().withImageAdded(first);
+
+    Donation updated = withFirst.withImageAdded(second);
+
+    assertEquals(2, updated.images().size());
+    assertFalse(updated.images().get(0).primary());
+    assertTrue(updated.images().get(1).primary());
+  }
+
+  @Test
+  void withImageAdded_should_throw_when_image_limit_exceeded() {
+    Donation donationAtLimit = donationWithMaxImages();
+    DonationImage extra = createImage("660e8400-e29b-41d4-a716-446655440099", Boolean.FALSE);
+
+    assertThrows(InvalidDonationImageException.class, () -> donationAtLimit.withImageAdded(extra));
+  }
+
+  private static Donation donationWithMaxImages() {
+    Donation donation = createDonation();
+    for (Integer i = 0; i < Donation.MAX_IMAGES; i++) {
+      donation =
+          donation.withImageAdded(
+              createImage("660e8400-e29b-41d4-a716-44665544000" + i, Boolean.FALSE));
+    }
+    return donation;
+  }
+
+  @Test
+  void withImageAdded_should_throw_when_image_is_null() {
+    assertThrows(IllegalArgumentException.class, () -> createDonation().withImageAdded(null));
+  }
+
+  @Test
+  void images_should_default_to_empty_list() {
+    Donation donation = createDonation();
+
+    assertTrue(donation.images().isEmpty());
   }
 }

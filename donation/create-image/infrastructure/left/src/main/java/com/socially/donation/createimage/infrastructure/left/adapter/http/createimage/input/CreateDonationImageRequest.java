@@ -7,5 +7,5 @@ import jakarta.validation.constraints.Positive;
 public record CreateDonationImageRequest(
     @NotBlank String originalFileName,
     @NotNull String contentType,
-    @Positive long sizeBytes,
-    boolean primary) {}
+    @Positive Long sizeBytes,
+    @NotNull Boolean primary) {}

@@ -6,7 +6,7 @@ plugins {
     alias(libs.plugins.spring.dependency.management)
 }
 
-group = "com.socially.donation.createimage.infrastructure.left"
+group = "com.socially.donation.createimage.infrastructure.right"
 version = "0.0.1-SNAPSHOT"
 
 java {
@@ -20,20 +20,14 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":commons:observability"))
-    implementation(project(":donation:create-image:application"))
-    implementation(project(":donation:create-image:infrastructure:right"))
+    implementation(project(":donation:create-image:domain"))
 
-    implementation(libs.spring.boot.starter.webmvc)
-    implementation(libs.spring.boot.starter.validation)
+    implementation(libs.spring.boot.starter)
 
     compileOnly(libs.lombok)
     annotationProcessor(libs.lombok)
 
-    testImplementation(libs.spring.boot.starter.webmvc.test)
-    testImplementation(libs.spring.boot.starter.security)
-    testImplementation(libs.spring.security.test)
-    testImplementation(libs.error.handling.spring.boot.starter)
+    testImplementation(libs.spring.boot.starter.test)
     testRuntimeOnly(libs.junit.platform.launcher)
 }
 

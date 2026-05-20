@@ -23,6 +23,13 @@ dependencyManagement {
 }
 
 dependencies {
+    implementation(project(":commons:kernel:domain"))
+    implementation(project(":donation:kernel:domain"))
+    implementation(project(":donation:kernel:application"))
+    implementation(project(":donation:get-by-id:domain"))
+    implementation(project(":donation:update:domain"))
+    implementation(project(":donation:create-image:domain"))
+
     implementation(libs.spring.context)
     compileOnly(libs.jakarta.validation.api)
 

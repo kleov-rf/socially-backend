@@ -17,7 +17,7 @@ class CreateDonationImageRequestMapperTest {
   private static final String DONATION_ID = "550e8400-e29b-41d4-a716-446655440000";
   private static final Principal PRINCIPAL = () -> "user@example.com";
   private static final CreateDonationImageRequest REQUEST =
-      new CreateDonationImageRequest("photo.jpg", "image/jpeg", 1024L, true);
+      new CreateDonationImageRequest("photo.jpg", "image/jpeg", 1024L, Boolean.TRUE);
 
   @InjectMocks private CreateDonationImageRequestMapper mapper;
 

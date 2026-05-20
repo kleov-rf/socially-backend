@@ -30,7 +30,7 @@ class CreateDonationImageControllerTest {
 
   private static final Principal PRINCIPAL = () -> "user@example.com";
   private static final CreateDonationImageRequest REQUEST =
-      new CreateDonationImageRequest("photo.jpg", "image/jpeg", 1024L, true);
+      new CreateDonationImageRequest("photo.jpg", "image/jpeg", 1024L, Boolean.TRUE);
 
   @Mock private CreateDonationImageUseCase createDonationImageUseCase;
   @Mock private CreateDonationImageRequestMapper requestMapper;
@@ -39,17 +39,17 @@ class CreateDonationImageControllerTest {
 
   private static CreateDonationImageCommand command() {
     return new CreateDonationImageCommand(
-        DONATION_ID, "photo.jpg", "image/jpeg", 1024L, true, PRINCIPAL);
+        DONATION_ID, "photo.jpg", "image/jpeg", 1024L, Boolean.TRUE, PRINCIPAL);
   }
 
   private static CreateDonationImageResult result() {
     return new CreateDonationImageResult(
-        IMAGE_ID, UPLOAD_URL, MEDIA_URL, "image/jpeg", 1024L, true);
+        IMAGE_ID, UPLOAD_URL, MEDIA_URL, "image/jpeg", 1024L, Boolean.TRUE);
   }
 
   private static CreateDonationImageResponse response() {
     return new CreateDonationImageResponse(
-        IMAGE_ID, UPLOAD_URL, MEDIA_URL, "image/jpeg", 1024L, true);
+        IMAGE_ID, UPLOAD_URL, MEDIA_URL, "image/jpeg", 1024L, Boolean.TRUE);
   }
 
   @Test

@@ -9,6 +9,7 @@ error:
       com.socially.auth.kernel.domain.exception.AuthInternalErrorException: AUTH_INTERNAL_ERROR
       com.socially.donor.kernel.domain.exception.DonorInternalErrorException: DONOR_INTERNAL_ERROR
       com.socially.donation.find.domain.exception.FindDonationsBadRequestException: FIND_DONATIONS_BAD_REQUEST
+      com.socially.donation.kernel.domain.exception.InvalidDonationImageException: INVALID_DONATION_IMAGE
       "[java.lang.IllegalArgumentException]": BAD_REQUEST
       org.springframework.security.core.AuthenticationException: UNAUTHENTICATED
       org.springframework.security.access.AccessDeniedException: FORBIDDEN

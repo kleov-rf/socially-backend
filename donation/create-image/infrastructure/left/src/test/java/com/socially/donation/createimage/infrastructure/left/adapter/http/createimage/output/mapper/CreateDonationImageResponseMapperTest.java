@@ -21,7 +21,7 @@ class CreateDonationImageResponseMapperTest {
 
   private static CreateDonationImageResult result() {
     return new CreateDonationImageResult(
-        IMAGE_ID, UPLOAD_URL, MEDIA_URL, "image/jpeg", 1024L, true);
+        IMAGE_ID, UPLOAD_URL, MEDIA_URL, "image/jpeg", 1024L, Boolean.TRUE);
   }
 
   @Test

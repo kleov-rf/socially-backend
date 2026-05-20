@@ -9,6 +9,6 @@ public record CreateDonationImageCommand(
     @NotNull String donationId,
     @NotBlank String originalFileName,
     @NotNull String contentType,
-    @Positive long sizeBytes,
-    boolean primary,
+    @Positive Long sizeBytes,
+    @NotNull Boolean primary,
     @NotNull Principal principal) {}

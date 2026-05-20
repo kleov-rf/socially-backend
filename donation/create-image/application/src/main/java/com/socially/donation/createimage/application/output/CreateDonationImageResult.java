@@ -5,5 +5,5 @@ public record CreateDonationImageResult(
     String uploadUrl,
     String mediaUrl,
     String contentType,
-    long sizeBytes,
-    boolean primary) {}
+    Long sizeBytes,
+    Boolean primary) {}

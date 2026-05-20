@@ -3,7 +3,7 @@ plugins {
     alias(libs.plugins.spring.dependency.management)
 }
 
-group = "com.socially.donation.kernel.domain"
+group = "com.socially.donation.createimage.domain"
 version = "0.0.1-SNAPSHOT"
 
 java {
@@ -23,14 +23,9 @@ dependencyManagement {
 }
 
 dependencies {
-    api(project(":commons:kernel:domain"))
-
-    compileOnly(libs.spring.core)
-    compileOnly(libs.spring.web)
     compileOnly(libs.lombok)
     annotationProcessor(libs.lombok)
 
-    testImplementation(libs.spring.core)
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junit.platform.launcher)
 }
