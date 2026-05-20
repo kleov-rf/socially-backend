@@ -1,9 +1,9 @@
 plugins {
-    java
+    `java-library`
     alias(libs.plugins.spring.dependency.management)
 }
 
-group = "com.socially.donation.deleteimage.application"
+group = "com.socially.donation.deleteimage.domain"
 version = "0.0.1-SNAPSHOT"
 
 java {
@@ -23,22 +23,12 @@ dependencyManagement {
 }
 
 dependencies {
-    implementation(project(":commons:kernel:domain"))
-    implementation(project(":donation:kernel:domain"))
-    implementation(project(":donation:kernel:application"))
-    implementation(project(":donation:delete-image:domain"))
-    implementation(project(":donation:get-by-id:domain"))
-    implementation(project(":donation:update:domain"))
-
-    implementation(libs.spring.context)
-    compileOnly(libs.jakarta.validation.api)
+    api(project(":donation:kernel:domain"))
 
     compileOnly(libs.lombok)
     annotationProcessor(libs.lombok)
 
     testImplementation(libs.junit.jupiter)
-    testImplementation(libs.mockito.core)
-    testImplementation(libs.mockito.junit.jupiter)
     testRuntimeOnly(libs.junit.platform.launcher)
 }
 

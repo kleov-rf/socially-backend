@@ -3,6 +3,7 @@ package com.socially.donation.kernel.domain.entity;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.socially.commons.kernel.domain.valueobject.Id;
+import com.socially.donation.kernel.domain.exception.DonationImageNotFoundException;
 import com.socially.donation.kernel.domain.exception.InvalidDonationImageException;
 import com.socially.donation.kernel.domain.valueobject.ContentType;
 import com.socially.donation.kernel.domain.valueobject.Description;
@@ -17,6 +18,9 @@ class DonationTest {
   private static final String DONATION_ID = "550e8400-e29b-41d4-a716-446655440000";
   private static final String DIFFERENT_ID = "550e8400-e29b-41d4-a716-446655440001";
   private static final String DONOR_ID = "550e8400-e29b-41d4-a716-446655440010";
+  private static final String PRIMARY_IMAGE_ID = "660e8400-e29b-41d4-a716-446655440001";
+  private static final String SECOND_IMAGE_ID = "660e8400-e29b-41d4-a716-446655440002";
+  private static final String UNKNOWN_IMAGE_ID = "660e8400-e29b-41d4-a716-446655440099";
   private static final Instant CREATED_AT = Instant.parse("2024-06-01T12:00:00Z");
   private static final Instant LAST_UPDATED_AT = Instant.parse("2024-06-15T08:00:00Z");
   private static final Instant OTHER_INSTANT = Instant.parse("2025-01-01T00:00:00Z");
@@ -448,5 +452,64 @@ class DonationTest {
     Donation donation = createDonation();
 
     assertTrue(donation.images().isEmpty());
+  }
+
+  @Test
+  void withImageRemoved_should_remove_matching_image() {
+    DonationImage image = createImage(PRIMARY_IMAGE_ID, Boolean.TRUE);
+    Donation withImage = createDonation().withImageAdded(image);
+
+    Donation updated = withImage.withImageRemoved(Id.from(PRIMARY_IMAGE_ID));
+
+    assertTrue(updated.images().isEmpty());
+  }
+
+  @Test
+  void withImageRemoved_should_promote_first_remaining_when_primary_removed() {
+    DonationImage primary = createImage(PRIMARY_IMAGE_ID, Boolean.TRUE);
+    DonationImage second = createImage(SECOND_IMAGE_ID, Boolean.FALSE);
+    Donation withImages = createDonation().withImageAdded(primary).withImageAdded(second);
+
+    Donation updated = withImages.withImageRemoved(Id.from(PRIMARY_IMAGE_ID));
+
+    assertEquals(1, updated.images().size());
+    assertEquals(Id.from(SECOND_IMAGE_ID), updated.images().getFirst().id());
+    assertTrue(updated.images().getFirst().primary());
+  }
+
+  @Test
+  void withImageRemoved_should_leave_primaries_unchanged_when_non_primary_removed() {
+    DonationImage primary = createImage(PRIMARY_IMAGE_ID, Boolean.TRUE);
+    DonationImage second = createImage(SECOND_IMAGE_ID, Boolean.FALSE);
+    Donation withImages = createDonation().withImageAdded(primary).withImageAdded(second);
+
+    Donation updated = withImages.withImageRemoved(Id.from(SECOND_IMAGE_ID));
+
+    assertEquals(1, updated.images().size());
+    assertTrue(updated.images().getFirst().primary());
+    assertEquals(Id.from(PRIMARY_IMAGE_ID), updated.images().getFirst().id());
+  }
+
+  @Test
+  void withImageRemoved_should_throw_donation_image_not_found_when_id_not_in_list() {
+    DonationImage image = createImage(PRIMARY_IMAGE_ID, Boolean.TRUE);
+    Donation withImage = createDonation().withImageAdded(image);
+
+    DonationImageNotFoundException exception =
+        assertThrows(
+            DonationImageNotFoundException.class,
+            () -> withImage.withImageRemoved(Id.from(UNKNOWN_IMAGE_ID)));
+
+    assertEquals(
+        "Donation image not found: " + UNKNOWN_IMAGE_ID + " on donation " + DONATION_ID,
+        exception.getMessage());
+  }
+
+  @Test
+  void withImageRemoved_should_throw_when_image_id_is_null() {
+    DonationImage image = createImage(PRIMARY_IMAGE_ID, Boolean.TRUE);
+    Donation withImage = createDonation().withImageAdded(image);
+
+    assertThrows(IllegalArgumentException.class, () -> withImage.withImageRemoved(null));
   }
 }

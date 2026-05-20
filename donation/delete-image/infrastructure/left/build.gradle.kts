@@ -22,6 +22,7 @@ repositories {
 dependencies {
     implementation(project(":commons:observability"))
     implementation(project(":donation:delete-image:application"))
+    implementation(project(":donation:delete-image:infrastructure:right"))
 
     implementation(libs.spring.boot.starter.webmvc)
     implementation(libs.spring.boot.starter.validation)

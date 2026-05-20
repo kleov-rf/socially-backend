@@ -6,9 +6,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
+import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donation.deleteimage.application.input.DeleteDonationImageCommand;
 import com.socially.donation.deleteimage.application.port.left.DeleteDonationImageUseCase;
 import com.socially.donation.kernel.domain.exception.DonationForbiddenException;
+import com.socially.donation.kernel.domain.exception.DonationImageNotFoundException;
 import com.socially.donation.kernel.domain.exception.DonationNotFoundException;
 import java.security.Principal;
 import org.junit.jupiter.api.Test;
@@ -73,5 +75,15 @@ class DeleteDonationImageControllerTest {
 
     assertThatThrownBy(() -> controller.delete(DONATION_ID, IMAGE_ID, principal))
         .isInstanceOf(DonationForbiddenException.class);
+  }
+
+  @Test
+  void delete_should_propagate_donation_image_not_found_exception() {
+    doThrow(new DonationImageNotFoundException(Id.from(DONATION_ID), Id.from(IMAGE_ID)))
+        .when(deleteDonationImageUseCase)
+        .execute(any(DeleteDonationImageCommand.class));
+
+    assertThatThrownBy(() -> controller.delete(DONATION_ID, IMAGE_ID, principal))
+        .isInstanceOf(DonationImageNotFoundException.class);
   }
 }

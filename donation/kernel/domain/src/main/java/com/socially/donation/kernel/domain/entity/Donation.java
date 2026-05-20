@@ -1,6 +1,7 @@
 package com.socially.donation.kernel.domain.entity;
 
 import com.socially.commons.kernel.domain.valueobject.Id;
+import com.socially.donation.kernel.domain.exception.DonationImageNotFoundException;
 import com.socially.donation.kernel.domain.exception.InvalidDonationImageException;
 import com.socially.donation.kernel.domain.valueobject.Description;
 import com.socially.donation.kernel.domain.valueobject.DonationLocation;
@@ -125,6 +126,37 @@ public final class Donation {
       }
     }
     updatedImages.add(image);
+
+    return create(
+        id, donorId, title, description, location, createdAt, lastUpdatedAt, updatedImages);
+  }
+
+  public Donation withImageRemoved(Id imageId) {
+    if (Objects.isNull(imageId)) {
+      throw new IllegalArgumentException("donation image id cannot be null");
+    }
+
+    DonationImage removedImage = null;
+    List<DonationImage> updatedImages = new ArrayList<>(images.size());
+    for (DonationImage existing : images) {
+      if (existing.id().equals(imageId)) {
+        removedImage = existing;
+      } else {
+        updatedImages.add(existing);
+      }
+    }
+
+    if (Objects.isNull(removedImage)) {
+      throw new DonationImageNotFoundException(id, imageId);
+    }
+
+    if (Boolean.TRUE.equals(removedImage.primary()) && !updatedImages.isEmpty()) {
+      boolean hasPrimary =
+          updatedImages.stream().anyMatch(image -> Boolean.TRUE.equals(image.primary()));
+      if (!hasPrimary) {
+        updatedImages.set(0, updatedImages.getFirst().withPrimary(Boolean.TRUE));
+      }
+    }
 
     return create(
         id, donorId, title, description, location, createdAt, lastUpdatedAt, updatedImages);

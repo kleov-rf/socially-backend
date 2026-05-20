@@ -2,6 +2,7 @@ error:
   handling:
     codes:
       com.socially.donation.kernel.domain.exception.DonationNotFoundException: DONATION_NOT_FOUND
+      com.socially.donation.kernel.domain.exception.DonationImageNotFoundException: DONATION_IMAGE_NOT_FOUND
       com.socially.donation.kernel.domain.exception.DonationForbiddenException: DONATION_FORBIDDEN
       com.socially.auth.kernel.domain.exception.AuthBadRequestException: AUTH_BAD_REQUEST
       com.socially.auth.kernel.domain.exception.AuthUnauthorizedException: AUTH_UNAUTHORIZED
