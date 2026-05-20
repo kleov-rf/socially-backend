@@ -8,8 +8,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 class CognitoMinistackJwtConfigurationTest {
 
-  private final CognitoMinistackJwtConfiguration sut = new CognitoMinistackJwtConfiguration();
-
   @ParameterizedTest
   @CsvSource({
     "https://ministack.local/, https://ministack.local",

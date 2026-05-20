@@ -9,6 +9,17 @@ spring:
         jwt:
           issuer-uri: "${LOCAL_COGNITO_ISSUER_URL:}"
 
+media:
+  storage:
+    s3:
+      bucket: "${LOCAL_MEDIA_STORAGE_S3_BUCKET:socially-media}"
+      region: "${LOCAL_MEDIA_STORAGE_S3_REGION:us-east-1}"
+      endpoint-url: "${LOCAL_MEDIA_STORAGE_S3_ENDPOINT_URL:http://localhost:4566}"
+    cdn:
+      base-url: "${LOCAL_MEDIA_STORAGE_CDN_BASE_URL:http://localhost:4566/socially-media}"
+    presign:
+      duration: PT15M
+
 auth:
   redirect-uri: "${LOCAL_AUTH_REDIRECT_URI:http://localhost:5173/auth/callback/google}"
   cookies:

@@ -9,6 +9,16 @@ spring:
         jwt:
           issuer-uri: ${COGNITO_ISSUER_URL}
 
+media:
+  storage:
+    s3:
+      bucket: ${MEDIA_STORAGE_S3_BUCKET}
+      region: ${COGNITO_REGION}
+    cdn:
+      base-url: ${MEDIA_STORAGE_CDN_BASE_URL}
+    presign:
+      duration: PT5M
+
 auth:
   redirect-uri: ${AUTH_REDIRECT_URI}
   cookies:

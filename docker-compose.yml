@@ -55,6 +55,10 @@ services:
       LOCAL_COGNITO_SPA_CLIENT_ID: ${LOCAL_COGNITO_SPA_CLIENT_ID:-}
       LOCAL_COGNITO_BACKEND_CLIENT_ID: ${LOCAL_COGNITO_BACKEND_CLIENT_ID:-}
       LOCAL_COGNITO_BACKEND_CLIENT_SECRET_JSON: ${LOCAL_COGNITO_BACKEND_CLIENT_SECRET_JSON:-}
+      LOCAL_MEDIA_STORAGE_S3_BUCKET: socially-media
+      LOCAL_MEDIA_STORAGE_S3_REGION: us-east-1
+      LOCAL_MEDIA_STORAGE_S3_ENDPOINT_URL: http://localhost:4566
+      LOCAL_MEDIA_STORAGE_CDN_BASE_URL: http://localhost:4566/socially-media
     depends_on:
       ministack:
         condition: service_healthy
