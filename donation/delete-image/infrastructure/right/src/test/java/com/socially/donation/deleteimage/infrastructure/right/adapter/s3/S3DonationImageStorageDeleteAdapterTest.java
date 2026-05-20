@@ -27,14 +27,14 @@ class S3DonationImageStorageDeleteAdapterTest {
 
   @InjectMocks private S3DonationImageStorageDeleteAdapter adapter;
 
-  private void stubValidS3Properties() {
+  private void givenValidS3Properties() {
     when(mediaStorageProperties.s3())
         .thenReturn(new MediaStorageProperties.S3(BUCKET, REGION, null, null, null));
   }
 
   @Test
   void deleteObject_should_call_deleter_with_bucket_and_key_from_storage_object_key() {
-    stubValidS3Properties();
+    givenValidS3Properties();
 
     adapter.deleteObject(STORAGE_OBJECT_KEY);
 

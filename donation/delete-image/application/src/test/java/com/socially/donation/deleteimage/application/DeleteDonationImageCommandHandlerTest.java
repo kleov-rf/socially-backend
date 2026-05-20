@@ -51,8 +51,8 @@ class DeleteDonationImageCommandHandlerTest {
   private static final Instant CREATED_AT = Instant.parse("2024-06-01T12:00:00Z");
   private static final Instant LAST_UPDATED_AT = Instant.parse("2024-06-15T08:00:00Z");
   private static final Principal PRINCIPAL = () -> "user@example.com";
-  private static final String STORAGE_DELETE_NOT_IMPLEMENTED_MESSAGE =
-      "Donation image storage delete not implemented yet";
+  private static final RuntimeException STORAGE_DELETE_FAILURE =
+      new RuntimeException("storage delete failed");
 
   private static final DeleteDonationImageCommand COMMAND =
       new DeleteDonationImageCommand(DONATION_ID, IMAGE_ID, PRINCIPAL);
@@ -194,13 +194,13 @@ class DeleteDonationImageCommandHandlerTest {
   }
 
   @Test
-  void execute_should_call_storage_delete_when_image_exists() {
+  void execute_should_call_storage_delete_port_when_storage_delete_throws() {
     givenDonationWithImagesFound();
-    doThrow(new UnsupportedOperationException(STORAGE_DELETE_NOT_IMPLEMENTED_MESSAGE))
+    doThrow(STORAGE_DELETE_FAILURE)
         .when(donationImageStorageDeletePort)
         .deleteObject(any(StorageObjectKey.class));
 
-    assertThrows(UnsupportedOperationException.class, () -> handler.execute(COMMAND));
+    assertThrows(RuntimeException.class, () -> handler.execute(COMMAND));
 
     verify(donationImageStorageDeletePort).deleteObject(PRIMARY_IMAGE_STORAGE_KEY);
   }
@@ -208,11 +208,11 @@ class DeleteDonationImageCommandHandlerTest {
   @Test
   void execute_should_not_call_update_when_storage_delete_throws() {
     givenDonationWithImagesFound();
-    doThrow(new UnsupportedOperationException(STORAGE_DELETE_NOT_IMPLEMENTED_MESSAGE))
+    doThrow(STORAGE_DELETE_FAILURE)
         .when(donationImageStorageDeletePort)
         .deleteObject(any(StorageObjectKey.class));
 
-    assertThrows(UnsupportedOperationException.class, () -> handler.execute(COMMAND));
+    assertThrows(RuntimeException.class, () -> handler.execute(COMMAND));
 
     verify(updateDonationRepository, never()).update(any());
   }

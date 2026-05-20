@@ -24,6 +24,7 @@ dependencies {
     implementation(project(":donation:kernel:infrastructure:right"))
 
     implementation(libs.spring.boot.starter)
+    implementation(libs.aws.s3)
 
     compileOnly(libs.lombok)
     annotationProcessor(libs.lombok)

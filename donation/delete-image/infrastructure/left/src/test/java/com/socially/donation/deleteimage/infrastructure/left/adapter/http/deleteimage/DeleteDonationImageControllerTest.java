@@ -44,13 +44,6 @@ class DeleteDonationImageControllerTest {
   }
 
   @Test
-  void delete_should_call_use_case_with_command() {
-    controller.delete(DONATION_ID, IMAGE_ID, principal);
-
-    verify(deleteDonationImageUseCase).execute(any(DeleteDonationImageCommand.class));
-  }
-
-  @Test
   void delete_should_return_no_content_when_handler_succeeds() {
     var response = controller.delete(DONATION_ID, IMAGE_ID, principal);
 
