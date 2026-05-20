@@ -2,6 +2,7 @@ package com.socially.donation.getbyid.infrastructure.left.adapter.http.get.outpu
 
 import jakarta.validation.constraints.NotNull;
 import java.time.Instant;
+import java.util.List;
 
 public record DonationResponseDto(
     @NotNull String id,
@@ -10,4 +11,5 @@ public record DonationResponseDto(
     @NotNull DonationLocationResponseDto location,
     @NotNull Instant createdAt,
     @NotNull Instant lastUpdatedAt,
-    @NotNull DonorResponseDto donor) {}
+    @NotNull DonorResponseDto donor,
+    @NotNull List<DonationImageResponseDto> images) {}

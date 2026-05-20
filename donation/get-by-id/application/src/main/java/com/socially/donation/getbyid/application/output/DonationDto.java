@@ -4,6 +4,7 @@ import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donation.kernel.domain.valueobject.Description;
 import com.socially.donation.kernel.domain.valueobject.Title;
 import java.time.Instant;
+import java.util.List;
 
 public record DonationDto(
     Id id,
@@ -12,4 +13,5 @@ public record DonationDto(
     DonationLocationDto location,
     Instant createdAt,
     Instant lastUpdatedAt,
-    DonorSummaryDto donor) {}
+    DonorSummaryDto donor,
+    List<DonationImageDto> images) {}

@@ -5,11 +5,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donation.getbyid.application.output.DonationDto;
 import com.socially.donation.kernel.domain.entity.Donation;
+import com.socially.donation.kernel.domain.entity.DonationImage;
+import com.socially.donation.kernel.domain.valueobject.ContentType;
 import com.socially.donation.kernel.domain.valueobject.Description;
 import com.socially.donation.kernel.domain.valueobject.DonationLocation;
+import com.socially.donation.kernel.domain.valueobject.StorageObjectKey;
 import com.socially.donation.kernel.domain.valueobject.Title;
 import com.socially.donor.kernel.domain.entity.Donor;
 import java.time.Instant;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -21,6 +25,7 @@ class DonationDtoMapperTest {
   @InjectMocks private DonationDtoMapper donationDtoMapper;
 
   private static final String DONATION_ID = "550e8400-e29b-41d4-a716-446655440000";
+  private static final String IMAGE_ID = "660e8400-e29b-41d4-a716-446655440001";
   private static final String DONOR_ID = "550e8400-e29b-41d4-a716-446655440001";
   private static final String USER_ID = "550e8400-e29b-41d4-a716-446655440010";
   private static final Instant CREATED_AT = Instant.parse("2024-06-01T12:00:00Z");
@@ -45,6 +50,18 @@ class DonationDtoMapperTest {
         "Jane",
         "Doe",
         Instant.parse("2024-05-01T10:00:00Z"));
+  }
+
+  private static Donation donationWithImage() {
+    return sampleDonation()
+        .withImageAdded(
+            DonationImage.create(
+                Id.from(IMAGE_ID),
+                StorageObjectKey.from("donations/" + DONATION_ID + "/images/" + IMAGE_ID + ".jpg"),
+                ContentType.from("image/jpeg"),
+                1024L,
+                Boolean.TRUE,
+                CREATED_AT));
   }
 
   @Test
@@ -129,5 +146,19 @@ class DonationDtoMapperTest {
     DonationDto result = donationDtoMapper.fromDomain(sampleDonation(), sampleDonor());
 
     assertEquals("Doe", result.donor().familyName());
+  }
+
+  @Test
+  void fromDomain_should_return_empty_images_when_donation_has_no_images() {
+    DonationDto result = donationDtoMapper.fromDomain(sampleDonation(), sampleDonor());
+
+    assertEquals(List.of(), result.images());
+  }
+
+  @Test
+  void fromDomain_should_return_empty_images_when_donation_has_images() {
+    DonationDto result = donationDtoMapper.fromDomain(donationWithImage(), sampleDonor());
+
+    assertEquals(List.of(), result.images());
   }
 }

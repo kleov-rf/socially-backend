@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -23,7 +24,9 @@ import com.socially.donor.findbyid.application.input.FindDonorByIdQuery;
 import com.socially.donor.findbyid.application.port.left.FindDonorByIdUseCase;
 import com.socially.donor.kernel.domain.entity.Donor;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -49,41 +52,53 @@ class FindDonationByIdQueryHandlerTest {
 
   @InjectMocks private FindDonationByIdQueryHandler handler;
 
+  @BeforeEach
+  void setUp() {
+    lenient()
+        .when(donationDtoMapper.fromDomain(any(Donation.class), any(Donor.class)))
+        .thenReturn(mappedDonationDto());
+  }
+
+  private static Donation sampleDonation() {
+    return Donation.create(
+        Id.from(DONATION_ID),
+        Id.from(DONOR_ID),
+        Title.from("Test Title"),
+        Description.from("Test Description"),
+        DonationLocation.from("Calle Mayor 1, Madrid", 40.4168, -3.7038),
+        CREATED_AT,
+        LAST_UPDATED_AT);
+  }
+
+  private static Donor sampleDonor() {
+    return Donor.create(Id.from(DONOR_ID), Id.from(USER_ID), "a@b.com", "A", "B", CREATED_AT);
+  }
+
+  private static DonationDto mappedDonationDto() {
+    return new DonationDto(
+        Id.from(DONATION_ID),
+        Title.from("Test Title"),
+        Description.from("Test Description"),
+        LOCATION_DTO,
+        CREATED_AT,
+        LAST_UPDATED_AT,
+        new DonorSummaryDto(DONOR_ID, "a@b.com", "A", "B"),
+        List.of());
+  }
+
   @Test
   void execute_should_call_find_by_id() {
-    var query = new FindDonationByIdQuery(DONATION_ID);
-
-    handler.execute(query);
+    handler.execute(new FindDonationByIdQuery(DONATION_ID));
 
     verify(donationRepository).findById(Id.from(DONATION_ID));
   }
 
   @Test
   void execute_should_call_find_donor_by_id_when_donation_found() {
-    Donation donation =
-        Donation.create(
-            Id.from(DONATION_ID),
-            Id.from(DONOR_ID),
-            Title.from("Test Title"),
-            Description.from("Test Description"),
-            DonationLocation.from("Calle Mayor 1, Madrid", 40.4168, -3.7038),
-            CREATED_AT,
-            LAST_UPDATED_AT);
+    Donation donation = sampleDonation();
     when(donationRepository.findById(any(Id.class))).thenReturn(Optional.of(donation));
-    Donor donor =
-        Donor.create(Id.from(DONOR_ID), Id.from(USER_ID), "a@b.com", "A", "B", CREATED_AT);
     when(findDonorByIdUseCase.execute(new FindDonorByIdQuery(DONOR_ID)))
-        .thenReturn(Optional.of(donor));
-    when(donationDtoMapper.fromDomain(donation, donor))
-        .thenReturn(
-            new DonationDto(
-                donation.id(),
-                donation.title(),
-                donation.description(),
-                LOCATION_DTO,
-                donation.createdAt(),
-                donation.lastUpdatedAt(),
-                new DonorSummaryDto(DONOR_ID, "a@b.com", "A", "B")));
+        .thenReturn(Optional.of(sampleDonor()));
 
     handler.execute(new FindDonationByIdQuery(DONATION_ID));
 
@@ -92,30 +107,11 @@ class FindDonationByIdQueryHandlerTest {
 
   @Test
   void execute_should_call_mapper_with_donation_and_donor_when_both_found() {
-    Donation donation =
-        Donation.create(
-            Id.from(DONATION_ID),
-            Id.from(DONOR_ID),
-            Title.from("Test Title"),
-            Description.from("Test Description"),
-            DonationLocation.from("Calle Mayor 1, Madrid", 40.4168, -3.7038),
-            CREATED_AT,
-            LAST_UPDATED_AT);
+    Donation donation = sampleDonation();
+    Donor donor = sampleDonor();
     when(donationRepository.findById(any(Id.class))).thenReturn(Optional.of(donation));
-    Donor donor =
-        Donor.create(Id.from(DONOR_ID), Id.from(USER_ID), "a@b.com", "A", "B", CREATED_AT);
     when(findDonorByIdUseCase.execute(new FindDonorByIdQuery(DONOR_ID)))
         .thenReturn(Optional.of(donor));
-    when(donationDtoMapper.fromDomain(eq(donation), eq(donor)))
-        .thenReturn(
-            new DonationDto(
-                donation.id(),
-                donation.title(),
-                donation.description(),
-                LOCATION_DTO,
-                donation.createdAt(),
-                donation.lastUpdatedAt(),
-                new DonorSummaryDto(DONOR_ID, "a@b.com", "A", "B")));
 
     handler.execute(new FindDonationByIdQuery(DONATION_ID));
 
@@ -124,48 +120,22 @@ class FindDonationByIdQueryHandlerTest {
 
   @Test
   void execute_should_return_donation_dto_if_donation_and_donor_found() {
-    Donation donation =
-        Donation.create(
-            Id.from(DONATION_ID),
-            Id.from(DONOR_ID),
-            Title.from("Test Title"),
-            Description.from("Test Description"),
-            DonationLocation.from("Calle Mayor 1, Madrid", 40.4168, -3.7038),
-            CREATED_AT,
-            LAST_UPDATED_AT);
+    Donation donation = sampleDonation();
+    Donor donor = sampleDonor();
+    DonationDto mappedDto = mappedDonationDto();
     when(donationRepository.findById(any(Id.class))).thenReturn(Optional.of(donation));
-    Donor donor =
-        Donor.create(Id.from(DONOR_ID), Id.from(USER_ID), "a@b.com", "A", "B", CREATED_AT);
     when(findDonorByIdUseCase.execute(new FindDonorByIdQuery(DONOR_ID)))
         .thenReturn(Optional.of(donor));
-    DonationDto mappedDto =
-        new DonationDto(
-            donation.id(),
-            donation.title(),
-            donation.description(),
-            LOCATION_DTO,
-            donation.createdAt(),
-            donation.lastUpdatedAt(),
-            new DonorSummaryDto(DONOR_ID, "a@b.com", "A", "B"));
-    when(donationDtoMapper.fromDomain(donation, donor)).thenReturn(mappedDto);
+    when(donationDtoMapper.fromDomain(eq(donation), eq(donor))).thenReturn(mappedDto);
 
-    var donationDto = handler.execute(new FindDonationByIdQuery(DONATION_ID)).orElseThrow();
+    DonationDto donationDto = handler.execute(new FindDonationByIdQuery(DONATION_ID)).orElseThrow();
 
     assertEquals(mappedDto, donationDto);
   }
 
   @Test
   void execute_should_throw_when_donation_found_but_donor_missing() {
-    Donation donation =
-        Donation.create(
-            Id.from(DONATION_ID),
-            Id.from(DONOR_ID),
-            Title.from("Test Title"),
-            Description.from("Test Description"),
-            DonationLocation.from("Calle Mayor 1, Madrid", 40.4168, -3.7038),
-            CREATED_AT,
-            LAST_UPDATED_AT);
-    when(donationRepository.findById(any(Id.class))).thenReturn(Optional.of(donation));
+    when(donationRepository.findById(any(Id.class))).thenReturn(Optional.of(sampleDonation()));
     when(findDonorByIdUseCase.execute(new FindDonorByIdQuery(DONOR_ID)))
         .thenReturn(Optional.empty());
 
@@ -178,7 +148,7 @@ class FindDonationByIdQueryHandlerTest {
   void execute_should_return_empty_if_donation_not_found() {
     when(donationRepository.findById(any(Id.class))).thenReturn(Optional.empty());
 
-    var result = handler.execute(new FindDonationByIdQuery(DONATION_ID));
+    Optional<DonationDto> result = handler.execute(new FindDonationByIdQuery(DONATION_ID));
 
     assertEquals(Optional.empty(), result);
     verifyNoInteractions(findDonorByIdUseCase);

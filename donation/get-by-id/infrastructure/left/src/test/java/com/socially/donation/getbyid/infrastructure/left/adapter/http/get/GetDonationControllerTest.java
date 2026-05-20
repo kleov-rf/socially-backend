@@ -17,6 +17,7 @@ import com.socially.donation.getbyid.infrastructure.left.adapter.http.get.output
 import com.socially.donation.kernel.domain.valueobject.Description;
 import com.socially.donation.kernel.domain.valueobject.Title;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,6 +25,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 @ExtendWith(MockitoExtension.class)
 class GetDonationControllerTest {
@@ -46,6 +48,30 @@ class GetDonationControllerTest {
 
   @InjectMocks private GetDonationController controller;
 
+  private static DonationDto queryResult() {
+    return new DonationDto(
+        Id.from(DONATION_ID),
+        Title.from("Test Title"),
+        Description.from("Test Description"),
+        LOCATION_DTO,
+        CREATED_AT,
+        LAST_UPDATED_AT,
+        DONOR_SUMMARY,
+        List.of());
+  }
+
+  private static DonationResponseDto donationResponse() {
+    return new DonationResponseDto(
+        DONATION_ID,
+        "Test Title",
+        "Test Description",
+        LOCATION_RESPONSE,
+        CREATED_AT,
+        LAST_UPDATED_AT,
+        new DonorResponseDto(DONOR_ID, "donor@example.com", "Donor", "User"),
+        List.of());
+  }
+
   @Test
   void get_should_call_handler_with_query() {
     controller.get(DONATION_ID);
@@ -55,15 +81,7 @@ class GetDonationControllerTest {
 
   @Test
   void get_should_call_mapper_with_result() {
-    var queryResult =
-        new DonationDto(
-            Id.from(DONATION_ID),
-            Title.from("Test Title"),
-            Description.from("Test Description"),
-            LOCATION_DTO,
-            CREATED_AT,
-            LAST_UPDATED_AT,
-            DONOR_SUMMARY);
+    DonationDto queryResult = queryResult();
     when(findDonationByIdUseCase.execute(new FindDonationByIdQuery(DONATION_ID)))
         .thenReturn(Optional.of(queryResult));
 
@@ -74,32 +92,30 @@ class GetDonationControllerTest {
 
   @Test
   void get_should_return_ok_response_if_donation_found() {
-    var queryResult =
-        new DonationDto(
-            Id.from(DONATION_ID),
-            Title.from("Test Title"),
-            Description.from("Test Description"),
-            LOCATION_DTO,
-            CREATED_AT,
-            LAST_UPDATED_AT,
-            DONOR_SUMMARY);
-    var expectedResponse =
-        new DonationResponseDto(
-            DONATION_ID,
-            "Test Title",
-            "Test Description",
-            LOCATION_RESPONSE,
-            CREATED_AT,
-            LAST_UPDATED_AT,
-            new DonorResponseDto(DONOR_ID, "donor@example.com", "Donor", "User"));
+    DonationDto queryResult = queryResult();
+    DonationResponseDto expectedResponse = donationResponse();
     when(findDonationByIdUseCase.execute(new FindDonationByIdQuery(DONATION_ID)))
         .thenReturn(Optional.of(queryResult));
     when(mapper.toResponse(queryResult)).thenReturn(expectedResponse);
 
-    var response = controller.get(DONATION_ID);
+    ResponseEntity<DonationResponseDto> response = controller.get(DONATION_ID);
 
-    assertThat(response.getBody()).isEqualTo(expectedResponse);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    assertThat(response.getBody()).isEqualTo(expectedResponse);
+  }
+
+  @Test
+  void get_should_return_response_with_empty_images() {
+    DonationDto queryResult = queryResult();
+    DonationResponseDto expectedResponse = donationResponse();
+    when(findDonationByIdUseCase.execute(new FindDonationByIdQuery(DONATION_ID)))
+        .thenReturn(Optional.of(queryResult));
+    when(mapper.toResponse(queryResult)).thenReturn(expectedResponse);
+
+    ResponseEntity<DonationResponseDto> response = controller.get(DONATION_ID);
+
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    assertThat(response.getBody().images()).isEmpty();
   }
 
   @Test
@@ -107,7 +123,7 @@ class GetDonationControllerTest {
     when(findDonationByIdUseCase.execute(new FindDonationByIdQuery(DONATION_ID)))
         .thenReturn(Optional.empty());
 
-    var response = controller.get(DONATION_ID);
+    ResponseEntity<DonationResponseDto> response = controller.get(DONATION_ID);
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
   }

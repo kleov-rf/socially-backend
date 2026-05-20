@@ -6,6 +6,7 @@ import com.socially.donation.getbyid.application.output.DonorSummaryDto;
 import com.socially.donation.kernel.domain.entity.Donation;
 import com.socially.donation.kernel.domain.valueobject.DonationLocation;
 import com.socially.donor.kernel.domain.entity.Donor;
+import java.util.List;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -20,6 +21,7 @@ public final class DonationDtoMapper {
         donation.createdAt(),
         donation.lastUpdatedAt(),
         new DonorSummaryDto(
-            donor.id().value().toString(), donor.email(), donor.givenName(), donor.familyName()));
+            donor.id().value().toString(), donor.email(), donor.givenName(), donor.familyName()),
+        List.of());
   }
 }
