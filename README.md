@@ -95,7 +95,7 @@ Services started:
 
 ### Local AWS emulation (MiniStack)
 
-This repository uses MiniStack (`ministackorg/ministack`) for local **Cognito** and **RDS PostgreSQL**, matching production-style provisioning (API + Secrets Manager) without real AWS credentials. MiniStack requires access to the host **Docker socket** to run RDS database containers.
+This repository uses MiniStack (`ministackorg/ministack`) for local **Cognito**, **RDS PostgreSQL**, and **S3-compatible storage** (presigned donation image uploads), matching production-style provisioning (API + Secrets Manager) without real AWS credentials. MiniStack requires access to the host **Docker socket** to run RDS database containers.
 
 Run:
 
@@ -110,12 +110,21 @@ What this does:
   - Cognito user pool `socially-local`, SPA/backend clients, and `socially/cognito/backend-client-secret`
   - RDS instance `socially-local` (PostgreSQL **18.2**, ephemeral / `RDS_PERSIST=0`)
   - Secrets Manager `socially/db/credentials` (JSON: `host`, `port`, `dbname`, `username`, `password`)
+  - S3 bucket **`socially-media`** (bucket name from **`LOCAL_MEDIA_STORAGE_S3_BUCKET`**, default **`socially-media`**) used for presigned `PUT` uploads
   - writes **`LOCAL_COGNITO_*`** to `/tmp/ministack/cognito-outputs.env` and **`LOCAL_DB_*`** to `/tmp/ministack/db-outputs.env`
 - exports those vars and starts `backend` (JDBC targets `host.docker.internal:15432` from inside Compose)
 
 **Database (RDS):** default host port **`15432`** (`RDS_BASE_PORT`). Credentials: user `socially_admin`, password `LocalDevPass1!` (override with `LOCAL_RDS_MASTER_PASSWORD`). Data is **ephemeral** — recreating the ministack container yields an empty database; Flyway re-runs on backend start.
 
 Recreate MiniStack after init script changes: `docker compose up -d --force-recreate ministack`, then `./scripts/start-local.sh` again.
+
+If browser uploads fail with **404** on `PUT` to `http://localhost:4566/...`, the media bucket may be missing (e.g. init not re-run). Create it manually:
+
+```bash
+aws --endpoint-url http://localhost:4566 --region us-east-1 s3 mb s3://socially-media
+```
+
+(Default local credentials: **`test`** / **`test`**, same as **`AWS_ACCESS_KEY_ID`** / **`AWS_SECRET_ACCESS_KEY`** in `ministack-init.sh`.)
 
 MiniStack does not register hosted-UI identity providers named `Google` or `COGNITO`. The **`local`** profile uses **`LOCAL_COGNITO_IDENTITY_PROVIDER`** (default empty) so authorize URLs omit `identity_provider`. For real Cognito, `application-dev.yaml` uses `Google`. Override with **`LOCAL_COGNITO_IDENTITY_PROVIDER`** if needed. Recreate the backend container after changing env.
 

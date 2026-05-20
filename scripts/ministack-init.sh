@@ -194,11 +194,25 @@ provision_rds() {
   cat "${DB_OUTPUT_FILE}"
 }
 
+provision_s3() {
+  wait_for_ministack
+  MEDIA_BUCKET="${LOCAL_MEDIA_STORAGE_S3_BUCKET:-socially-media}"
+
+  if aws_local s3api head-bucket --bucket "${MEDIA_BUCKET}" 2>/dev/null; then
+    echo "MiniStack S3: bucket ${MEDIA_BUCKET} already exists." >&2
+    return 0
+  fi
+
+  aws_local s3 mb "s3://${MEDIA_BUCKET}" >/dev/null
+  echo "MiniStack S3: created bucket ${MEDIA_BUCKET}." >&2
+}
+
 if [ "${1:-}" != "--provision" ]; then
   mkdir -p "$(dirname "${OUTPUT_FILE}")" "$(dirname "${DB_OUTPUT_FILE}")"
   nohup sh "$0" --provision >/tmp/ministack/ministack-init.log 2>&1 &
   exit 0
 fi
 
+provision_s3
 provision_cognito
 provision_rds
