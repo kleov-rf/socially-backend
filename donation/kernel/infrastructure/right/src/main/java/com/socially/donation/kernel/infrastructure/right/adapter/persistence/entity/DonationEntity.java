@@ -1,10 +1,14 @@
 package com.socially.donation.kernel.infrastructure.right.adapter.persistence.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -45,6 +49,9 @@ public class DonationEntity {
   @Column(name = "location_longitude", nullable = false)
   private Double locationLongitude;
 
+  @OneToMany(mappedBy = "donation", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<DonationImageEntity> images = new ArrayList<>();
+
   public static DonationEntity create(
       UUID id,
       UUID donorId,
@@ -65,6 +72,7 @@ public class DonationEntity {
         null,
         locationAddress,
         locationLatitude,
-        locationLongitude);
+        locationLongitude,
+        new ArrayList<>());
   }
 }

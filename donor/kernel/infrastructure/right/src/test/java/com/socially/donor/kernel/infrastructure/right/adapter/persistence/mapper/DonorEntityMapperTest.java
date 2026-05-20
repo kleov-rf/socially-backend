@@ -8,10 +8,14 @@ import com.socially.donor.kernel.infrastructure.right.adapter.persistence.entity
 import java.time.Instant;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 class DonorEntityMapperTest {
 
-  private final DonorEntityMapper donorEntityMapper = new DonorEntityMapper();
+  @InjectMocks private DonorEntityMapper donorEntityMapper;
 
   private static final String DONOR_ID = "550e8400-e29b-41d4-a716-446655440000";
   private static final String USER_ID = "550e8400-e29b-41d4-a716-446655440001";

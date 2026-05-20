@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -43,6 +44,7 @@ public interface DonationEntityRepository extends JpaRepository<DonationEntity, 
       """)
   long countBySearchPattern(@Param("searchPattern") String searchPattern);
 
+  @EntityGraph(attributePaths = "images")
   Optional<DonationEntity> findByIdAndDeletedAtIsNull(UUID id);
 
   @Modifying(clearAutomatically = true, flushAutomatically = true)
