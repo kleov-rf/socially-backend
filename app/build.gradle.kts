@@ -64,6 +64,8 @@ dependencies {
     testImplementation(libs.junit.platform.suite)
 
     testImplementation(libs.bundles.testcontainers)
+    testImplementation(libs.testcontainers.localstack)
+    testImplementation(libs.aws.s3)
 }
 
 tasks.named<org.springframework.boot.gradle.tasks.run.BootRun>("bootRun") {

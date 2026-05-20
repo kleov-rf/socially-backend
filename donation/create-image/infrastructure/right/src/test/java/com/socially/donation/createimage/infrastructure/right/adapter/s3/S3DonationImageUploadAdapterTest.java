@@ -38,7 +38,7 @@ class S3DonationImageUploadAdapterTest {
 
   private void stubMediaStorageProperties(String cdnBaseUrl) {
     when(mediaStorageProperties.s3())
-        .thenReturn(new MediaStorageProperties.S3(BUCKET, "us-east-1", null));
+        .thenReturn(new MediaStorageProperties.S3(BUCKET, "us-east-1", null, null, null));
     when(mediaStorageProperties.cdn()).thenReturn(new MediaStorageProperties.Cdn(cdnBaseUrl));
     when(mediaStorageProperties.presign())
         .thenReturn(new MediaStorageProperties.Presign(PRESIGN_DURATION));

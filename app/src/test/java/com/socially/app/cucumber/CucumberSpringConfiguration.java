@@ -22,12 +22,22 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import org.testcontainers.localstack.LocalStackContainer;
 import org.testcontainers.postgresql.PostgreSQLContainer;
+import org.testcontainers.utility.DockerImageName;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
 
 @CucumberContextConfiguration
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(CucumberSpringConfiguration.TestConfig.class)
 public class CucumberSpringConfiguration {
+
+  static final String MEDIA_BUCKET = "socially-media";
+  static final String MEDIA_REGION = "us-east-1";
 
   static final HttpServer oauthServer = createOauthServer();
 
@@ -37,15 +47,22 @@ public class CucumberSpringConfiguration {
           .withUsername("postgres")
           .withPassword("postgres");
 
+  static final LocalStackContainer localstack =
+      new LocalStackContainer(DockerImageName.parse("localstack/localstack:3.0"))
+          .withServices("s3");
+
   static {
     postgres.start();
+    localstack.start();
     oauthServer.start();
+    createMediaBucket();
     Runtime.getRuntime().addShutdownHook(new Thread(postgres::stop));
+    Runtime.getRuntime().addShutdownHook(new Thread(localstack::stop));
     Runtime.getRuntime().addShutdownHook(new Thread(() -> oauthServer.stop(0)));
   }
 
   @DynamicPropertySource
-  static void configureDatasource(DynamicPropertyRegistry registry) {
+  static void configureProperties(DynamicPropertyRegistry registry) {
     registry.add(
         "spring.security.oauth2.resourceserver.jwt.issuer-uri", () -> CucumberOAuthJwt.TEST_ISSUER);
     registry.add("auth.oauth.use-ministack", () -> "false");
@@ -62,6 +79,31 @@ public class CucumberSpringConfiguration {
         () -> "{\"client_secret\":\"test-backend-secret\"}");
     registry.add("auth.redirect-uri", () -> "http://localhost:5173/auth/callback/google");
     registry.add("auth.cookies.secure", () -> "false");
+
+    registry.add("media.storage.s3.bucket", () -> MEDIA_BUCKET);
+    registry.add("media.storage.s3.region", () -> MEDIA_REGION);
+    registry.add("media.storage.s3.endpoint-url", () -> localstack.getEndpoint().toString());
+    registry.add(
+        "media.storage.cdn.base-url",
+        () -> localstack.getEndpoint().toString() + "/" + MEDIA_BUCKET);
+    registry.add("media.storage.presign.duration", () -> "PT15M");
+  }
+
+  private static void createMediaBucket() {
+    try (S3Client s3Client = createS3Client()) {
+      s3Client.createBucket(CreateBucketRequest.builder().bucket(MEDIA_BUCKET).build());
+    }
+  }
+
+  private static S3Client createS3Client() {
+    return S3Client.builder()
+        .endpointOverride(localstack.getEndpoint())
+        .region(Region.of(localstack.getRegion()))
+        .credentialsProvider(
+            StaticCredentialsProvider.create(
+                AwsBasicCredentials.create(localstack.getAccessKey(), localstack.getSecretKey())))
+        .forcePathStyle(true)
+        .build();
   }
 
   private static HttpServer createOauthServer() {

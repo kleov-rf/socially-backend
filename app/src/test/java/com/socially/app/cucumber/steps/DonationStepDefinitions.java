@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.socially.app.cucumber.CucumberDonationContext;
 import com.socially.app.cucumber.CucumberOAuthJwt;
 import com.socially.donation.create.infrastructure.left.adapter.http.create.input.CreateDonationLocationRequest;
 import com.socially.donation.create.infrastructure.left.adapter.http.create.input.CreateDonationRequest;
@@ -42,6 +43,8 @@ public class DonationStepDefinitions {
   @Autowired private ObjectMapper objectMapper;
 
   @Autowired private JdbcTemplate jdbcTemplate;
+
+  @Autowired private CucumberDonationContext donationContext;
 
   private String id;
   private String title;
@@ -86,6 +89,7 @@ public class DonationStepDefinitions {
 
   @Before("@donation and @auth")
   public void resetAuthDonationScenarioState() {
+    jdbcTemplate.execute("DELETE FROM donation_images");
     jdbcTemplate.execute("DELETE FROM donations");
     firstDonationId = null;
     secondDonationId = null;
@@ -100,6 +104,7 @@ public class DonationStepDefinitions {
   }
 
   private void resetDonationData() {
+    jdbcTemplate.execute("DELETE FROM donation_images");
     jdbcTemplate.execute("DELETE FROM donations");
     jdbcTemplate.execute("DELETE FROM donors");
     jdbcTemplate.execute("DELETE FROM federated_identities");
@@ -109,6 +114,7 @@ public class DonationStepDefinitions {
   @Given("I have a donation with random id, title {string} and description {string}")
   public void iHaveADonationWithRandomIdTitleAndDescription(String title, String description) {
     this.id = UUID.randomUUID().toString();
+    donationContext.setCurrentDonationId(this.id);
     this.title = title;
     this.description = description;
     this.expectedLocation = DEFAULT_LOCATION;
@@ -331,6 +337,15 @@ public class DonationStepDefinitions {
   @And("I select donation {int} as current donation id")
   public void iSelectDonationAsCurrentDonationId(int donationNumber) {
     id = expectedDonationId(donationNumber);
+    donationContext.setCurrentDonationId(id);
+  }
+
+  public void captureMvcResult(MvcResult result) {
+    this.mvcResult = result;
+  }
+
+  public MvcResult getMvcResult() {
+    return mvcResult;
   }
 
   @And("I create {int} additional donations for pagination")

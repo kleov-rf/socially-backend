@@ -6,7 +6,10 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3Configuration;
@@ -23,7 +26,7 @@ public class DonationImageS3Configuration {
     var builder =
         S3Client.builder()
             .region(Region.of(mediaStorageProperties.s3().region()))
-            .credentialsProvider(DefaultCredentialsProvider.create());
+            .credentialsProvider(credentialsProvider(mediaStorageProperties));
 
     if (StringUtils.hasText(mediaStorageProperties.s3().endpointUrl())) {
       builder
@@ -41,7 +44,7 @@ public class DonationImageS3Configuration {
     var builder =
         S3Presigner.builder()
             .region(Region.of(mediaStorageProperties.s3().region()))
-            .credentialsProvider(DefaultCredentialsProvider.create());
+            .credentialsProvider(credentialsProvider(mediaStorageProperties));
 
     if (StringUtils.hasText(mediaStorageProperties.s3().endpointUrl())) {
       builder
@@ -50,6 +53,25 @@ public class DonationImageS3Configuration {
     }
 
     return builder.build();
+  }
+
+  private static AwsCredentialsProvider credentialsProvider(
+      MediaStorageProperties mediaStorageProperties) {
+    if (!StringUtils.hasText(mediaStorageProperties.s3().endpointUrl())) {
+      return DefaultCredentialsProvider.create();
+    }
+
+    String accessKeyId =
+        StringUtils.hasText(mediaStorageProperties.s3().accessKeyId())
+            ? mediaStorageProperties.s3().accessKeyId()
+            : "test";
+    String secretAccessKey =
+        StringUtils.hasText(mediaStorageProperties.s3().secretAccessKey())
+            ? mediaStorageProperties.s3().secretAccessKey()
+            : "test";
+
+    return StaticCredentialsProvider.create(
+        AwsBasicCredentials.create(accessKeyId, secretAccessKey));
   }
 
   public static void validateS3Properties(MediaStorageProperties mediaStorageProperties) {
