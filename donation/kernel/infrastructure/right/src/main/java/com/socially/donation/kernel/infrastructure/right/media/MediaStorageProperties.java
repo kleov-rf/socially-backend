@@ -1,4 +1,4 @@
-package com.socially.donation.createimage.infrastructure.right.config;
+package com.socially.donation.kernel.infrastructure.right.media;
 
 import java.time.Duration;
 import org.springframework.boot.context.properties.ConfigurationProperties;

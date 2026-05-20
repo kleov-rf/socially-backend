@@ -21,6 +21,7 @@ repositories {
 
 dependencies {
     implementation(project(":donation:create-image:domain"))
+    implementation(project(":donation:kernel:infrastructure:right"))
 
     implementation(libs.spring.boot.starter)
     implementation(libs.aws.s3)

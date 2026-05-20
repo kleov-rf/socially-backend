@@ -3,7 +3,8 @@ package com.socially.donation.createimage.infrastructure.right.adapter.s3;
 import com.socially.donation.createimage.domain.model.PresignedDonationImageUpload;
 import com.socially.donation.createimage.domain.model.PresignedDonationImageUploadRequest;
 import com.socially.donation.createimage.domain.port.right.DonationImageUploadPort;
-import com.socially.donation.createimage.infrastructure.right.config.MediaStorageProperties;
+import com.socially.donation.kernel.infrastructure.right.media.MediaStorageProperties;
+import com.socially.donation.kernel.infrastructure.right.media.MediaUrlBuilder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

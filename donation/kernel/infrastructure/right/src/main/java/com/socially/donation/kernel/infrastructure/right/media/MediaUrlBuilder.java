@@ -1,4 +1,4 @@
-package com.socially.donation.createimage.infrastructure.right.adapter.s3;
+package com.socially.donation.kernel.infrastructure.right.media;
 
 import org.springframework.util.StringUtils;
 
@@ -6,7 +6,7 @@ public final class MediaUrlBuilder {
 
   private MediaUrlBuilder() {}
 
-  static String buildMediaUrl(String cdnBaseUrl, String storageObjectKey) {
+  public static String buildMediaUrl(String cdnBaseUrl, String storageObjectKey) {
     String normalizedBaseUrl =
         cdnBaseUrl.endsWith("/") ? cdnBaseUrl.substring(0, cdnBaseUrl.length() - 1) : cdnBaseUrl;
     String normalizedKey =
@@ -14,7 +14,7 @@ public final class MediaUrlBuilder {
     return normalizedBaseUrl + "/" + normalizedKey;
   }
 
-  static void validateCdnBaseUrl(String cdnBaseUrl) {
+  public static void validateCdnBaseUrl(String cdnBaseUrl) {
     if (!StringUtils.hasText(cdnBaseUrl)) {
       throw new IllegalStateException("media.storage.cdn.base-url must be configured");
     }

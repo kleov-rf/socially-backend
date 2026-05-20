@@ -1,13 +1,16 @@
-package com.socially.donation.createimage.infrastructure.right.adapter.s3;
+package com.socially.donation.kernel.infrastructure.right.media;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 class MediaUrlBuilderTest {
 
   private static final String CDN_BASE_URL = "https://cdn.example.com";

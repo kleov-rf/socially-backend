@@ -1,6 +1,7 @@
 package com.socially.donation.getbyid.application.output.mapper;
 
 import com.socially.donation.getbyid.application.output.DonationDto;
+import com.socially.donation.getbyid.application.output.DonationImageDto;
 import com.socially.donation.getbyid.application.output.DonationLocationDto;
 import com.socially.donation.getbyid.application.output.DonorSummaryDto;
 import com.socially.donation.kernel.domain.entity.Donation;
@@ -11,7 +12,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 public final class DonationDtoMapper {
-  public DonationDto fromDomain(Donation donation, Donor donor) {
+
+  public DonationDto fromDomain(Donation donation, Donor donor, List<DonationImageDto> images) {
     DonationLocation location = donation.location();
     return new DonationDto(
         donation.id(),
@@ -22,6 +24,6 @@ public final class DonationDtoMapper {
         donation.lastUpdatedAt(),
         new DonorSummaryDto(
             donor.id().value().toString(), donor.email(), donor.givenName(), donor.familyName()),
-        List.of());
+        images);
   }
 }

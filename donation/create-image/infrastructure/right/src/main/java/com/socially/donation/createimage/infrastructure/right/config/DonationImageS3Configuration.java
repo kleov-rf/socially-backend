@@ -1,5 +1,6 @@
 package com.socially.donation.createimage.infrastructure.right.config;
 
+import com.socially.donation.kernel.infrastructure.right.media.MediaStorageProperties;
 import java.net.URI;
 import java.util.Objects;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

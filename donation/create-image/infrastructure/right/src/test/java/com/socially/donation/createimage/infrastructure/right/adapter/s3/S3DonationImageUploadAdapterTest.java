@@ -8,7 +8,7 @@ import static org.mockito.Mockito.when;
 
 import com.socially.donation.createimage.domain.model.PresignedDonationImageUpload;
 import com.socially.donation.createimage.domain.model.PresignedDonationImageUploadRequest;
-import com.socially.donation.createimage.infrastructure.right.config.MediaStorageProperties;
+import com.socially.donation.kernel.infrastructure.right.media.MediaStorageProperties;
 import java.time.Duration;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
