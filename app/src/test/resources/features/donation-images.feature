@@ -28,3 +28,17 @@ Feature: Donation images
     Then the response status should be 201
     When I add a donation image with file name "photo.jpg" content type "image/jpeg" size 1024 and primary true as another user
     Then the response status should be 403
+
+  Scenario: Retrieve donation by id includes persisted image with media url
+    Given I have a donation with random id, title "GET Images Donation" and description "Donation with image for GET"
+    When I create the donation
+    Then the response status should be 201
+    When I add a donation image with file name "photo.jpg" content type "image/jpeg" size 1024 and primary true
+    Then the response status should be 201
+    And the donation image response should include image id upload url and media url
+    And the donation image should be persisted for the current donation
+    When I upload the donation image bytes to the presigned upload url
+    Then the presigned upload should succeed
+    When I retrieve the donation by id
+    Then the response status should be 200
+    And the donation response should include one image matching the created donation image

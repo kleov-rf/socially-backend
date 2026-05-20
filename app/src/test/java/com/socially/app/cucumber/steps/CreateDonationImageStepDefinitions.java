@@ -40,6 +40,7 @@ public class CreateDonationImageStepDefinitions {
 
   private String lastImageId;
   private String lastUploadUrl;
+  private String lastMediaUrl;
   private String lastContentType;
   private Long lastSizeBytes;
   private Boolean lastPrimary;
@@ -116,6 +117,26 @@ public class CreateDonationImageStepDefinitions {
     assertThat(lastPresignedUploadStatus).isEqualTo(200);
   }
 
+  @And("the donation response should include one image matching the created donation image")
+  public void theDonationResponseShouldIncludeOneImageMatchingTheCreatedDonationImage()
+      throws Exception {
+    JsonNode response =
+        objectMapper.readTree(
+            donationStepDefinitions.getMvcResult().getResponse().getContentAsString());
+    JsonNode images = response.get("images");
+
+    assertThat(images).isNotNull();
+    assertThat(images.isArray()).isTrue();
+    assertThat(images).hasSize(1);
+
+    JsonNode image = images.get(0);
+    assertThat(image.get("imageId").asText()).isEqualTo(lastImageId);
+    assertThat(image.get("mediaUrl").asText()).isEqualTo(lastMediaUrl);
+    assertThat(image.get("contentType").asText()).isEqualTo(lastContentType);
+    assertThat(image.get("sizeBytes").asLong()).isEqualTo(lastSizeBytes);
+    assertThat(image.get("primary").asBoolean()).isEqualTo(lastPrimary);
+  }
+
   private void iAddDonationImage(
       String fileName,
       String contentType,
@@ -149,6 +170,7 @@ public class CreateDonationImageStepDefinitions {
       JsonNode response = objectMapper.readTree(result.getResponse().getContentAsString());
       lastImageId = response.get("imageId").asText();
       lastUploadUrl = response.get("uploadUrl").asText();
+      lastMediaUrl = response.get("mediaUrl").asText();
     }
   }
 
