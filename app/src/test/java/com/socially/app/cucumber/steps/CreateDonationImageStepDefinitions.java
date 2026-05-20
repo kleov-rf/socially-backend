@@ -46,6 +46,10 @@ public class CreateDonationImageStepDefinitions {
   private Boolean lastPrimary;
   private Integer lastPresignedUploadStatus;
 
+  String getLastImageId() {
+    return lastImageId;
+  }
+
   @When(
       "I add a donation image with file name {string} content type {string} size {long} and primary {word}")
   public void iAddADonationImageWithFileNameContentTypeSizeAndPrimary(

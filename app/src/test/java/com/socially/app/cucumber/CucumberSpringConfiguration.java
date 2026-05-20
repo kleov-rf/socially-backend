@@ -36,7 +36,7 @@ import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
 @Import(CucumberSpringConfiguration.TestConfig.class)
 public class CucumberSpringConfiguration {
 
-  static final String MEDIA_BUCKET = "socially-media";
+  public static final String MEDIA_BUCKET = "socially-media";
   static final String MEDIA_REGION = "us-east-1";
 
   static final HttpServer oauthServer = createOauthServer();
@@ -93,6 +93,10 @@ public class CucumberSpringConfiguration {
     try (S3Client s3Client = createS3Client()) {
       s3Client.createBucket(CreateBucketRequest.builder().bucket(MEDIA_BUCKET).build());
     }
+  }
+
+  public static S3Client createTestS3Client() {
+    return createS3Client();
   }
 
   private static S3Client createS3Client() {
