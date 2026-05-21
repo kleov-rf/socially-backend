@@ -29,9 +29,10 @@ public class DonationImageS3Configuration {
             .region(Region.of(mediaStorageProperties.s3().region()))
             .credentialsProvider(credentialsProvider(mediaStorageProperties));
 
-    if (StringUtils.hasText(mediaStorageProperties.s3().endpointUrl())) {
+    String serverEndpoint = mediaStorageProperties.s3().endpointUrl();
+    if (StringUtils.hasText(serverEndpoint)) {
       builder
-          .endpointOverride(URI.create(mediaStorageProperties.s3().endpointUrl()))
+          .endpointOverride(URI.create(serverEndpoint))
           .serviceConfiguration(S3Configuration.builder().pathStyleAccessEnabled(true).build());
     }
 
@@ -39,7 +40,7 @@ public class DonationImageS3Configuration {
   }
 
   @Bean
-  public S3Presigner s3Presigner(S3Client s3Client, MediaStorageProperties mediaStorageProperties) {
+  public S3Presigner s3Presigner(MediaStorageProperties mediaStorageProperties) {
     validateS3Properties(mediaStorageProperties);
 
     var builder =
@@ -47,18 +48,27 @@ public class DonationImageS3Configuration {
             .region(Region.of(mediaStorageProperties.s3().region()))
             .credentialsProvider(credentialsProvider(mediaStorageProperties));
 
-    if (StringUtils.hasText(mediaStorageProperties.s3().endpointUrl())) {
+    String presignerEndpoint = resolvePresignerEndpointUrl(mediaStorageProperties.s3());
+    if (StringUtils.hasText(presignerEndpoint)) {
       builder
-          .endpointOverride(URI.create(mediaStorageProperties.s3().endpointUrl()))
+          .endpointOverride(URI.create(presignerEndpoint))
           .serviceConfiguration(S3Configuration.builder().pathStyleAccessEnabled(true).build());
     }
 
     return builder.build();
   }
 
+  static String resolvePresignerEndpointUrl(MediaStorageProperties.S3 s3) {
+    if (StringUtils.hasText(s3.publicEndpointUrl())) {
+      return s3.publicEndpointUrl();
+    }
+    return s3.endpointUrl();
+  }
+
   private static AwsCredentialsProvider credentialsProvider(
       MediaStorageProperties mediaStorageProperties) {
-    if (!StringUtils.hasText(mediaStorageProperties.s3().endpointUrl())) {
+    MediaStorageProperties.S3 s3 = mediaStorageProperties.s3();
+    if (!StringUtils.hasText(s3.endpointUrl()) && !StringUtils.hasText(s3.publicEndpointUrl())) {
       return DefaultCredentialsProvider.create();
     }
 

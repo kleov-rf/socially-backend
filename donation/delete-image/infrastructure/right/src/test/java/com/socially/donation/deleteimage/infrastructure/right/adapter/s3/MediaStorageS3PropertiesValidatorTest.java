@@ -25,7 +25,7 @@ class MediaStorageS3PropertiesValidatorTest {
   }
 
   private static MediaStorageProperties.S3 s3(String bucket, String region) {
-    return new MediaStorageProperties.S3(bucket, region, null, null, null);
+    return new MediaStorageProperties.S3(bucket, region, null, null, null, null);
   }
 
   @Test

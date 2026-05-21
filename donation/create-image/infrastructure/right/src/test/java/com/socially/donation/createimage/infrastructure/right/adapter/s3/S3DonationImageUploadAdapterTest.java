@@ -36,9 +36,12 @@ class S3DonationImageUploadAdapterTest {
     return new PresignedDonationImageUploadRequest(STORAGE_OBJECT_KEY, CONTENT_TYPE, SIZE_BYTES);
   }
 
+  private static MediaStorageProperties.S3 defaultS3() {
+    return new MediaStorageProperties.S3(BUCKET, "us-east-1", null, null, null, null);
+  }
+
   private void stubMediaStorageProperties(String cdnBaseUrl) {
-    when(mediaStorageProperties.s3())
-        .thenReturn(new MediaStorageProperties.S3(BUCKET, "us-east-1", null, null, null));
+    when(mediaStorageProperties.s3()).thenReturn(defaultS3());
     when(mediaStorageProperties.cdn()).thenReturn(new MediaStorageProperties.Cdn(cdnBaseUrl));
     when(mediaStorageProperties.presign())
         .thenReturn(new MediaStorageProperties.Presign(PRESIGN_DURATION));

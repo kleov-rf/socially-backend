@@ -27,9 +27,12 @@ class S3DonationImageStorageDeleteAdapterTest {
 
   @InjectMocks private S3DonationImageStorageDeleteAdapter adapter;
 
+  private static MediaStorageProperties.S3 s3(String bucket, String region) {
+    return new MediaStorageProperties.S3(bucket, region, null, null, null, null);
+  }
+
   private void givenValidS3Properties() {
-    when(mediaStorageProperties.s3())
-        .thenReturn(new MediaStorageProperties.S3(BUCKET, REGION, null, null, null));
+    when(mediaStorageProperties.s3()).thenReturn(s3(BUCKET, REGION));
   }
 
   @Test
@@ -43,8 +46,7 @@ class S3DonationImageStorageDeleteAdapterTest {
 
   @Test
   void deleteObject_should_not_call_deleter_when_s3_bucket_not_configured() {
-    when(mediaStorageProperties.s3())
-        .thenReturn(new MediaStorageProperties.S3("", REGION, null, null, null));
+    when(mediaStorageProperties.s3()).thenReturn(s3("", REGION));
 
     assertThrows(IllegalStateException.class, () -> adapter.deleteObject(STORAGE_OBJECT_KEY));
 

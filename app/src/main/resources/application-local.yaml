@@ -15,6 +15,7 @@ media:
       bucket: "${LOCAL_MEDIA_STORAGE_S3_BUCKET:socially-media}"
       region: "${LOCAL_MEDIA_STORAGE_S3_REGION:us-east-1}"
       endpoint-url: "${LOCAL_MEDIA_STORAGE_S3_ENDPOINT_URL:http://localhost:4566}"
+      public-endpoint-url: "${LOCAL_MEDIA_STORAGE_S3_PUBLIC_ENDPOINT_URL:}"
     cdn:
       base-url: "${LOCAL_MEDIA_STORAGE_CDN_BASE_URL:http://localhost:4566/socially-media}"
     presign:

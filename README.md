@@ -126,6 +126,8 @@ aws --endpoint-url http://localhost:4566 --region us-east-1 s3 mb s3://socially-
 
 (Default local credentials: **`test`** / **`test`**, same as **`AWS_ACCESS_KEY_ID`** / **`AWS_SECRET_ACCESS_KEY`** in `ministack-init.sh`.)
 
+**S3 in Docker Compose:** the backend container uses two endpoints (same pattern as Cognito `LOCAL_COGNITO_OAUTH_BASE_URL` vs `LOCAL_COGNITO_HOSTED_DOMAIN`): **`LOCAL_MEDIA_STORAGE_S3_ENDPOINT_URL=http://ministack:4566`** for server SDK calls (e.g. delete object), and **`LOCAL_MEDIA_STORAGE_S3_PUBLIC_ENDPOINT_URL=http://localhost:4566`** for presigned browser `PUT` URLs. **`./gradlew bootRun` on the host** keeps a single default `http://localhost:4566` for both. Recreate the backend container after changing these env vars.
+
 MiniStack does not register hosted-UI identity providers named `Google` or `COGNITO`. The **`local`** profile uses **`LOCAL_COGNITO_IDENTITY_PROVIDER`** (default empty) so authorize URLs omit `identity_provider`. For real Cognito, `application-dev.yaml` uses `Google`. Override with **`LOCAL_COGNITO_IDENTITY_PROVIDER`** if needed. Recreate the backend container after changing env.
 
 JWTs from MiniStack use an AWS-style `iss` claim while JWKS is loaded via `http://ministack:4566/...`. The emulator `JwtDecoder` is registered when **`auth.oauth.use-ministack=true`**, driven by **`LOCAL_COGNITO_USE_MINISTACK`** (defaults true in `application-local.yaml`). **`bootRun`** sets **`LOCAL_COGNITO_USE_MINISTACK=true`** when **`COGNITO_USE_MINISTACK=true`** is exported.

@@ -10,6 +10,7 @@ public record MediaStorageProperties(S3 s3, Cdn cdn, Presign presign) {
       String bucket,
       String region,
       String endpointUrl,
+      String publicEndpointUrl,
       String accessKeyId,
       String secretAccessKey) {}
 
