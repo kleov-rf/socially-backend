@@ -1,85 +1,158 @@
 # Socially Backend
 
-Spring Boot backend for Socially. The currently implemented bounded context is donation management, exposed through `/api/donations` with create, list, get-by-id, partial update, and delete operations.
+Spring Boot modular monolith for the Socially platform. HTTP APIs cover donations (including images and geo sorting), Google OAuth session flows, and the authenticated user profile. Persistence uses PostgreSQL, Flyway migrations, and optional S3-backed donation media.
 
 ## Current Scope
 
-Implemented in this repository today:
+### Donation
 
-- Donation write flows: create, partial update, delete.
-- Donation read flows: get by id and list.
-- Cursor pagination, configurable page size, sort order, and text query filtering on list endpoint.
-- Soft delete behavior (`deleted_at`) enforced across read and update operations.
-- Flyway-managed PostgreSQL schema evolution.
-- CI pipeline for security scan, code quality scan, image build, ECR push, and ECS deploy.
+- Create, partial update, soft delete, get by id, and cursor-paginated list.
+- Required **location** on create (`address`, `latitude`, `longitude`); optional location on patch.
+- List filters: text `query`; sort orders `newest_first`, `oldest_first`, **`nearest_first`** (requires `latitude` and `longitude`).
+- **Images:** presigned S3 `PUT` upload, CDN `mediaUrl` on get-by-id, delete image (DB row + S3 object).
+- Soft delete via `deleted_at` on donations.
 
-Not implemented in this repository today:
+### Auth
 
-- Additional business domains beyond donations.
-- Background jobs/message consumers/schedulers.
-- Public OpenAPI/Swagger contract generation.
+- `GET /api/auth/login/google` — redirect to Cognito Hosted UI / OAuth authorize.
+- `GET /api/auth/callback/google` — exchange code, set httpOnly refresh cookie, redirect to frontend.
+- `POST /api/auth/refresh` — refresh session from cookie (public).
+- `POST /api/auth/logout` — revoke refresh token (authenticated).
+
+### User
+
+- `GET /api/users/me` — current user profile (authenticated JWT).
+
+### Donor
+
+- Internal bounded context (no dedicated public HTTP controllers in `app`).
+- Donor records linked to federated users and donations; orchestrated from donation and auth flows via `infrastructure:right` adapters.
+
+### Not implemented in this repository today
+
+- Public OpenAPI/Swagger generation.
+- Background jobs, message consumers, or schedulers beyond request/response handling.
+- Additional product domains beyond donation, auth, user, and donor support described above.
+
+## Deployment Dependencies
+
+AWS deployments assume bootstrap and infrastructure are applied first. Local development substitutes MiniStack for Cognito, RDS, and S3 (see [Local development](#local-development)).
+
+| Layer | Repository | What the backend needs |
+|-------|------------|-------------------------|
+| Bootstrap | [`socially-terraform-bootstrap`](../socially-terraform-bootstrap/README.md) | SSM `/config/socially/backend/container/image-version`; Secrets Manager `DD_API_KEY`; auth secret containers |
+| Infrastructure | [`socially-infrastructure`](../socially-infrastructure/README.md) | ECS service, ECR, RDS, Cognito outputs, donation media S3 + CloudFront `/media` base URL |
+
+**Apply order:** bootstrap → infrastructure → backend image deploy (this repo CI).
+
+**ECS / `dev` profile environment (from infrastructure Terraform):**
+
+- Database: `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD`
+- Cognito JWT: `COGNITO_ISSUER_URL`, `COGNITO_USER_POOL_ID`, `COGNITO_REGION`, `COGNITO_HOSTED_DOMAIN`, `COGNITO_SPA_CLIENT_ID`, `COGNITO_BACKEND_CLIENT_ID`, `COGNITO_BACKEND_CLIENT_SECRET_JSON`
+- OAuth: `AUTH_REDIRECT_URI` (SPA callback when CloudFront is enabled)
+- Media: `MEDIA_STORAGE_S3_BUCKET`, `MEDIA_STORAGE_CDN_BASE_URL` (bound to `media.storage` in `application-dev.yaml`)
+- Profile: `SPRING_PROFILES_ACTIVE` = `dev` | `stg` | `prd`
+
+CI uses bootstrap OIDC roles `github-agent-ecr` and `github-agent-ecs` for image push and ECS deploy.
 
 ## Architecture
 
-The codebase is a modular monolith using hexagonal layering:
+Hexagonal (ports and adapters) per vertical slice:
 
-- `domain` modules: entities, value objects, core rules.
-- `application` modules: use cases and orchestration.
-- `infrastructure:left` modules: HTTP adapters/controllers.
-- `infrastructure:right` modules: persistence adapters.
-- `app` module: Spring Boot runtime assembly.
+- **domain** — entities, value objects, domain rules.
+- **application** — use cases (`*CommandHandler`, `*QueryHandler`).
+- **infrastructure:left** — HTTP controllers, request/response DTOs.
+- **infrastructure:right** — JPA, S3, Cognito, and other outbound adapters.
 
-Main module graph:
+**`app`** assembles Spring Boot and wires left adapters from each bounded context. Full module list: `settings.gradle.kts`.
 
 ```text
 app
-├── commons:observability
-├── donation:create:infrastructure:left
-├── donation:delete:infrastructure:left
-├── donation:get-by-id:infrastructure:left
-├── donation:update:infrastructure:left
-└── donation:find:infrastructure:left
+├── auth (login, callback, refresh, logout, kernel)
+├── user (me, create, federated-identity, update-profile, kernel)
+├── donor (create, find-by-id, find-by-user-id, kernel)
+├── donation (create, find, get-by-id, update, delete, create-image, delete-image, kernel)
+└── commons (observability)
 ```
 
-All declared Gradle modules are listed in `settings.gradle.kts`.
+Typical slice naming: `donation:create:application`, `donation:create:infrastructure:left`, etc.
 
 ## API Surface
 
-Base URL: `http://localhost:8080/api`
+Base URL: `http://localhost:8080/api` (local). Health: `http://localhost:8080/actuator/health`.
 
-### Endpoints
+### Donations
 
-- `POST /donations` -> creates a donation (`201`).
-- `GET /donations` -> lists donations (`200`) with optional query params:
-  - `cursor`
-  - `size` (`5`, `10`, `20`)
-  - `order` (`newest_first`, `oldest_first`)
-  - `query` (text filter)
-- `GET /donations/{id}` -> returns donation or `404`.
-- `PATCH /donations/{id}` -> partial update (title and/or description), returns `204` or `404`.
-- `DELETE /donations/{id}` -> delete operation, returns `204`.
+| Method | Path | Auth (see [Security](#security)) | Notes |
+|--------|------|----------------------------------|-------|
+| `POST` | `/donations` | JWT | Body: `id`, `title`, `description`, `location` (`address`, `latitude`, `longitude`). `201`. |
+| `GET` | `/donations` | Permit all | Query: `cursor`, `size` (`5`/`10`/`20`), `order` (`newest_first`, `oldest_first`, `nearest_first`), `query`, `latitude`, `longitude` (required for `nearest_first`). `200` + `items` and `page` metadata. |
+| `GET` | `/donations/{id}` | Permit all | `200` with `location`, `donor`, `images[]` (`imageId`, `mediaUrl`, `contentType`, `sizeBytes`, `primary`); `404` if missing or soft-deleted. |
+| `PATCH` | `/donations/{id}` | JWT | Partial `title`, `description`, `location`. `204` or `404`. |
+| `DELETE` | `/donations/{id}` | JWT | Soft delete. `204`. |
 
-### Request/response notes
+**List response page metadata:** `nextCursor`, `previousCursor`, `hasNext`, `hasPrevious`, `size`, `totalCount`.
 
-- Create request requires `id`, `title`, and `description`.
-- List response includes `items` plus `page` metadata:
-  - `nextCursor`, `previousCursor`, `hasNext`, `hasPrevious`, `size`, `totalCount`.
-- Delete is implemented as soft delete (`deleted_at`), validated by BDD scenarios.
+### Donation images
+
+| Method | Path | Auth | Notes |
+|--------|------|------|-------|
+| `POST` | `/donations/{donationId}/images` | Permit all | Body: `originalFileName`, `contentType`, `sizeBytes`, `primary`. `201` + `imageId`, `uploadUrl`, `mediaUrl`, etc. Client must **HTTP PUT** file bytes to `uploadUrl`. |
+| `DELETE` | `/donations/{donationId}/images/{imageId}` | Permit all | Removes DB row and S3 object. `204`. |
+
+### Auth
+
+| Method | Path | Auth | Notes |
+|--------|------|------|-------|
+| `GET` | `/auth/login/google` | Public | Redirect to OAuth / Hosted UI. |
+| `GET` | `/auth/callback/google` | Public | Query: `code`, `state`. Sets refresh cookie; redirects to app. |
+| `POST` | `/auth/refresh` | Public | Uses httpOnly refresh cookie. |
+| `POST` | `/auth/logout` | JWT | Revokes session. |
+
+### Users
+
+| Method | Path | Auth | Notes |
+|--------|------|------|-------|
+| `GET` | `/users/me` | JWT | Current user profile. |
+
+## Security
+
+Configured in `auth/kernel/infrastructure/left/SecurityConfiguration`. CSRF, form login, HTTP basic, and framework logout are disabled. OAuth2 resource server JWT is enabled when `spring.security.oauth2.resourceserver.jwt.issuer-uri` is set.
+
+| Path / method | Requirement |
+|---------------|-------------|
+| `GET /actuator/health` | Public |
+| `GET /api/auth/login/google` | Public |
+| `GET /api/auth/callback/google` | Public |
+| `POST /api/auth/refresh` | Public |
+| `POST /api/donations` | **Authenticated** (JWT) |
+| `PATCH /api/donations/*` | **Authenticated** |
+| `DELETE /api/donations/*` | **Authenticated** |
+| `GET /api/users/me` | **Authenticated** |
+| `POST /api/auth/logout` | **Authenticated** |
+| All other routes (`GET /api/donations`, `GET /api/donations/{id}`, image routes, etc.) | **Permit all** (no JWT required today) |
+
+Integration tests use mock JWT where scenarios require an authenticated principal (for example image upload ownership).
+
+**Profiles:**
+
+- **`local`** — MiniStack issuer/JWKS; see [Local AWS emulation (MiniStack)](#local-aws-emulation-ministack).
+- **`dev` / `stg` / `prd`** — real Cognito issuer from `COGNITO_ISSUER_URL`.
 
 ## Data and Runtime
 
-- Runtime framework: Spring Boot WebMVC + Validation + Actuator + Spring Data JPA.
-- Database: PostgreSQL (configured via `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD`).
-- Migrations: Flyway SQL scripts under `app/src/main/resources/db/migration`.
-- Health endpoint: `/actuator/health` (exposed through management config).
-- Production container includes Datadog Java agent (`dd-java-agent.jar`).
+- **Framework:** Spring Boot WebMVC, Validation, Actuator, Spring Data JPA, OAuth2 resource server.
+- **Database:** PostgreSQL (`DB_*` env vars).
+- **Migrations:** Flyway under `app/src/main/resources/db/migration` (including users, federated identities, donors, donation location, `donation_images`).
+- **Media:** `media.storage` (`s3`, `cdn.base-url`, `presign.duration`) — local overrides via `LOCAL_MEDIA_STORAGE_*` in `application-local.yaml`; AWS via `MEDIA_STORAGE_*` in `application-dev.yaml`.
+- **Production image:** Datadog Java agent (`dd-java-agent.jar`).
 
 ## Local Development
 
 ### Prerequisites
 
 - Java 25
-- Docker (required for local compose and integration tests)
+- Docker (Compose, MiniStack RDS, Testcontainers)
 
 ### Option 1: Run with Docker Compose
 
@@ -95,7 +168,7 @@ Services started:
 
 ### Local AWS emulation (MiniStack)
 
-This repository uses MiniStack (`ministackorg/ministack`) for local **Cognito**, **RDS PostgreSQL**, and **S3-compatible storage** (presigned donation image uploads), matching production-style provisioning (API + Secrets Manager) without real AWS credentials. MiniStack requires access to the host **Docker socket** to run RDS database containers.
+Local development uses MiniStack instead of the AWS ECS stack described in [Deployment dependencies](#deployment-dependencies). MiniStack (`ministackorg/ministack`) provides **Cognito**, **RDS PostgreSQL**, and **S3-compatible storage** (presigned donation image uploads) via API + Secrets Manager semantics without real AWS credentials. MiniStack requires access to the host **Docker socket** for RDS containers.
 
 Run:
 
@@ -164,11 +237,11 @@ The `bootRun` task defaults `spring.profiles.active` to **`local`**, seeds **`LO
 SPRING_PROFILES_ACTIVE=dev ./gradlew :app:bootRun
 ```
 
-Use this only when your shell provides the same Cognito-related variables as the target ECS task. For everyday workstation + MiniStack, keep **`local`** and run **`./scripts/start-local.sh`** (or export the same **`LOCAL_COGNITO_*`** variables **`start-local`** sets before `bootRun`).
+Use this only when your shell provides the same Cognito-related variables as the target ECS task (see [Deployment dependencies](#deployment-dependencies)). For everyday workstation + MiniStack, keep **`local`** and run **`./scripts/start-local.sh`** (or export the same **`LOCAL_COGNITO_*`** variables **`start-local`** sets before `bootRun`).
 
 In an IDE, set **VM options** `-Dspring.profiles.active=local` or the environment variable **`SPRING_PROFILES_ACTIVE=local`** on your run configuration when developing on your machine.
 
-`application.yaml` does not default a profile. **AWS:** Terraform sets `SPRING_PROFILES_ACTIVE` on ECS to `dev`, `stg`, or `prd`. **Machine:** use `local` (e.g. `docker-compose.yml` now sets `SPRING_PROFILES_ACTIVE: local`).
+`application.yaml` does not default a profile. **AWS:** Terraform sets `SPRING_PROFILES_ACTIVE` on ECS to `dev`, `stg`, or `prd`. **Machine:** use `local` (`docker-compose.yml` sets `SPRING_PROFILES_ACTIVE: local`).
 
 ### Build and format
 
@@ -200,31 +273,31 @@ Notes:
 
 Notes:
 
-- Runs Cucumber scenarios against PostgreSQL via Testcontainers.
-- Includes both `@auth` and non-auth integration scenarios in a single run.
-- Uses the **`test`** Spring profile by default; test-only config overlays from `app/src/test/resources/application.yaml`, not `local`.
-- Requires Docker available on the host.
+- Runs Cucumber scenarios against PostgreSQL via Testcontainers (and LocalStack for S3 in image scenarios).
+- Includes `@auth`, `@donation`, and donation-image tagged scenarios in a single run.
+- Uses the **`test`** Spring profile; overlays from `app/src/test/resources/application.yaml`, not `local`.
+- Requires Docker on the host.
 
 ## CI/CD
 
-Main workflow: `.github/workflows/cicd.yaml`
+Main workflow: [`.github/workflows/cicd.yaml`](.github/workflows/cicd.yaml)
 
-On push to `main` (or manual dispatch for `dev`) the pipeline runs:
+- **Triggers:** push to `main`; `workflow_dispatch` with `environment` input (currently `dev`).
+- **Permissions:** `id-token: write` for OIDC AWS authentication.
 
-1. Snyk scan (`_snyk-scan.yaml`)
-2. Sonar scan (`_sonar-scan.yaml`)
-3. Build JAR artifact (`_build-image.yaml`)
-4. Build/push Docker image to ECR (`_push-image.yaml`)
-5. Deploy new task definition to ECS and write deployed image tag to SSM (`_deploy-image.yaml`)
+**Pipeline:**
 
-Key deployment contracts:
+1. **Pre-checks** (parallel): Snyk (`_snyk-scan.yaml`), Sonar (`_sonar-scan.yaml`), integration tests (`_tests.yaml` — `testIntegration`).
+2. **Build** (`_build-image.yaml`) — JAR artifact for Docker image.
+3. **Push** (`_push-image.yaml`) — build and push image to ECR (`github-agent-ecr`).
+4. **Deploy** (`_deploy-image.yaml`) — new ECS task definition, deploy service, update SSM image tag (`github-agent-ecs`).
+
+**Deployment contracts:**
 
 - AWS region: `eu-south-2`
-- ECS cluster/service naming: `socially-<env>-cluster`, `socially-<env>-service`
-- SSM parameter updated on deploy: `/config/socially/backend/container/image-version`
-- **Cognito backend client:** the task sets `COGNITO_BACKEND_CLIENT_ID` from Terraform and injects **`COGNITO_BACKEND_CLIENT_SECRET_JSON`** (JSON credentials) from Secrets Manager.
-- **OAuth redirect:** when CloudFront is enabled, Terraform passes **`AUTH_REDIRECT_URI`** (same URL as the Cognito SPA callback) so the `dev` profile matches Hosted UI.
-- **Cognito Hosted UI:** **`COGNITO_HOSTED_DOMAIN`** is set to the Cognito auth domain base URL (`https://<prefix>.auth.<region>.amazoncognito.com`), bound as **`auth.oauth.hosted-domain`** in shared `application.yaml`.
+- ECS cluster/service: `socially-<env>-cluster`, `socially-<env>-service`
+- SSM parameter on deploy: `/config/socially/backend/container/image-version`
+- Task environment aligns with [Deployment dependencies](#deployment-dependencies) (Cognito, DB, media CDN, `AUTH_REDIRECT_URI` when infra enables CloudFront/auth).
 
 ## Repository Layout
 
@@ -232,13 +305,21 @@ Key deployment contracts:
 .
 ├── app/
 ├── commons/
+├── auth/
+├── user/
+├── donor/
 ├── donation/
 │   ├── kernel/
 │   ├── create/
+│   ├── create-image/
+│   ├── delete-image/
 │   ├── delete/
 │   ├── get-by-id/
 │   ├── update/
 │   └── find/
+├── scripts/
+│   ├── start-local.sh
+│   └── ministack-init.sh
 ├── .github/workflows/
 ├── Dockerfile
 ├── Dockerfile.dev
@@ -246,3 +327,13 @@ Key deployment contracts:
 ├── build.gradle.kts
 └── settings.gradle.kts
 ```
+
+## Troubleshooting
+
+- **Plan/boot fails on image version SSM:** apply [bootstrap](../socially-terraform-bootstrap/README.md) first.
+- **Presigned image PUT returns 404:** MiniStack bucket missing — see [Local AWS emulation (MiniStack)](#local-aws-emulation-ministack).
+- **List with `nearest_first` fails:** both `latitude` and `longitude` are required for that order.
+- **Auth / JWT validation errors locally:** verify issuer/JWKS quick checks above; confirm `LOCAL_COGNITO_USE_MINISTACK` / `auth.oauth.use-ministack` for MiniStack tokens.
+- **Auth against real AWS (`dev` profile on host):** ensure `COGNITO_ISSUER_URL` and secrets match [infrastructure](../socially-infrastructure/README.md); Google OAuth secret name must be `socially-dev/auth/google-oauth` (not variable default `socially/google-oauth`).
+- **ECS missing DB/Redis env:** infrastructure feature flags — see infra README.
+- **CI deploy skipped or failed:** check OIDC `AWS_ROLE_ARN` and bootstrap `github-agent-ecr` / `github-agent-ecs` roles.
