@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import com.socially.auth.kernel.domain.AuthResult;
 import com.socially.auth.kernel.domain.AuthUser;
 import com.socially.auth.kernel.domain.OAuthTokenResponse;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,7 +26,9 @@ class AuthResultMapperTest {
     OAuthTokenResponse tokenResponse =
         new OAuthTokenResponse("access-token-1", "id-token-1", "refresh-1", "Bearer", 3600L);
     AuthUser user =
-        new AuthUser("https://idp.example", "user-id-1", "user@example.com", "John", "Doe");
+        AuthUser.create("https://idp.example", "user-id-1", "user@example.com")
+            .withGivenName(Optional.of("John"))
+            .withFamilyName(Optional.of("Doe"));
     when(authUserMapper.fromIdToken("id-token-1")).thenReturn(user);
 
     sut.toAuthResult(tokenResponse);
@@ -37,8 +40,7 @@ class AuthResultMapperTest {
   void toAuthResult_should_return_result_with_received_access_token() {
     OAuthTokenResponse tokenResponse =
         new OAuthTokenResponse("access-token-1", "id-token-1", "refresh-1", "Bearer", 3600L);
-    when(authUserMapper.fromIdToken("id-token-1"))
-        .thenReturn(new AuthUser(null, null, null, null, null));
+    when(authUserMapper.fromIdToken("id-token-1")).thenReturn(AuthUser.create(null, null, null));
 
     AuthResult result = sut.toAuthResult(tokenResponse);
 
@@ -49,8 +51,7 @@ class AuthResultMapperTest {
   void toAuthResult_should_return_result_with_received_token_type() {
     OAuthTokenResponse tokenResponse =
         new OAuthTokenResponse("access-token-1", "id-token-1", "refresh-1", "JWT", 3600L);
-    when(authUserMapper.fromIdToken("id-token-1"))
-        .thenReturn(new AuthUser(null, null, null, null, null));
+    when(authUserMapper.fromIdToken("id-token-1")).thenReturn(AuthUser.create(null, null, null));
 
     AuthResult result = sut.toAuthResult(tokenResponse);
 
@@ -61,8 +62,7 @@ class AuthResultMapperTest {
   void toAuthResult_should_return_result_with_received_expires_in() {
     OAuthTokenResponse tokenResponse =
         new OAuthTokenResponse("access-token-1", "id-token-1", "refresh-1", "Bearer", 7200L);
-    when(authUserMapper.fromIdToken("id-token-1"))
-        .thenReturn(new AuthUser(null, null, null, null, null));
+    when(authUserMapper.fromIdToken("id-token-1")).thenReturn(AuthUser.create(null, null, null));
 
     AuthResult result = sut.toAuthResult(tokenResponse);
 
@@ -74,7 +74,9 @@ class AuthResultMapperTest {
     OAuthTokenResponse tokenResponse =
         new OAuthTokenResponse("access-token-1", "id-token-1", "refresh-1", "Bearer", 3600L);
     AuthUser user =
-        new AuthUser("https://idp.example", "user-id-1", "user@example.com", "John", "Doe");
+        AuthUser.create("https://idp.example", "user-id-1", "user@example.com")
+            .withGivenName(Optional.of("John"))
+            .withFamilyName(Optional.of("Doe"));
     when(authUserMapper.fromIdToken("id-token-1")).thenReturn(user);
 
     AuthResult result = sut.toAuthResult(tokenResponse);

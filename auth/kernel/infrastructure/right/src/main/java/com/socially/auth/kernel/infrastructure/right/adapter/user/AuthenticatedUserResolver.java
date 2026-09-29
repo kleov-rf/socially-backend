@@ -12,6 +12,7 @@ import com.socially.user.findbyfederatedidentity.application.port.left.FindUserB
 import com.socially.user.kernel.domain.entity.User;
 import com.socially.user.updateprofile.application.input.UpdateUserProfileCommand;
 import com.socially.user.updateprofile.application.port.left.UpdateUserProfileUseCase;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -52,13 +53,11 @@ public final class AuthenticatedUserResolver {
 
   private User updateExistingUser(User existing, AuthUser authUser) {
     updateUserProfileUseCase.execute(
-        new UpdateUserProfileCommand(
-            existing.id().value().toString(),
-            authUser.issuer(),
-            authUser.subject(),
-            authUser.email(),
-            authUser.givenName(),
-            authUser.familyName()));
+        UpdateUserProfileCommand.create(
+                existing.id().value().toString(), authUser.issuer(), authUser.subject())
+            .withEmail(Optional.of(authUser.email()))
+            .withGivenName(authUser.givenName())
+            .withFamilyName(authUser.familyName()));
     return requireUserByFederatedIdentity(authUser);
   }
 

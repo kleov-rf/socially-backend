@@ -17,6 +17,7 @@ import com.socially.auth.kernel.domain.AuthUser;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -47,8 +48,8 @@ class AuthUserMapperTest {
     assertNull(user.issuer());
     assertNull(user.subject());
     assertNull(user.email());
-    assertNull(user.givenName());
-    assertNull(user.familyName());
+    assertEquals(Optional.empty(), user.givenName());
+    assertEquals(Optional.empty(), user.familyName());
     verify(mapper, never()).readTree(any(byte[].class));
   }
 
@@ -126,7 +127,7 @@ class AuthUserMapperTest {
 
     AuthUser user = sut.fromIdToken(idToken);
 
-    assertEquals("John", user.givenName());
+    assertEquals(Optional.of("John"), user.givenName());
     verify(jsonPayloadClaims).text(same(payload), eq("given_name"));
   }
 
@@ -140,7 +141,7 @@ class AuthUserMapperTest {
 
     AuthUser user = sut.fromIdToken(idToken);
 
-    assertEquals("Doe", user.familyName());
+    assertEquals(Optional.of("Doe"), user.familyName());
     verify(jsonPayloadClaims).text(same(payload), eq("family_name"));
   }
 

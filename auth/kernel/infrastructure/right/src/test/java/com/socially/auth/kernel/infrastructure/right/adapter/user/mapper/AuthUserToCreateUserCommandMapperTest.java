@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.socially.auth.kernel.domain.AuthUser;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
 class AuthUserToCreateUserCommandMapperTest {
@@ -13,7 +14,9 @@ class AuthUserToCreateUserCommandMapperTest {
   @Test
   void toCommand_should_set_user_id() {
     AuthUser authUser =
-        new AuthUser("https://idp.example", "auth-sub-1", "john@example.com", "John", "Doe");
+        AuthUser.create("https://idp.example", "auth-sub-1", "john@example.com")
+            .withGivenName(Optional.of("John"))
+            .withFamilyName(Optional.of("Doe"));
 
     var command = sut.toCommand(authUser);
 
@@ -23,7 +26,9 @@ class AuthUserToCreateUserCommandMapperTest {
   @Test
   void toCommand_should_map_email() {
     AuthUser authUser =
-        new AuthUser("https://idp.example", "auth-sub-1", "john@example.com", "John", "Doe");
+        AuthUser.create("https://idp.example", "auth-sub-1", "john@example.com")
+            .withGivenName(Optional.of("John"))
+            .withFamilyName(Optional.of("Doe"));
 
     var command = sut.toCommand(authUser);
 
@@ -33,7 +38,9 @@ class AuthUserToCreateUserCommandMapperTest {
   @Test
   void toCommand_should_map_given_name() {
     AuthUser authUser =
-        new AuthUser("https://idp.example", "auth-sub-1", "john@example.com", "John", "Doe");
+        AuthUser.create("https://idp.example", "auth-sub-1", "john@example.com")
+            .withGivenName(Optional.of("John"))
+            .withFamilyName(Optional.of("Doe"));
 
     var command = sut.toCommand(authUser);
 
@@ -43,7 +50,9 @@ class AuthUserToCreateUserCommandMapperTest {
   @Test
   void toCommand_should_map_family_name() {
     AuthUser authUser =
-        new AuthUser("https://idp.example", "auth-sub-1", "john@example.com", "John", "Doe");
+        AuthUser.create("https://idp.example", "auth-sub-1", "john@example.com")
+            .withGivenName(Optional.of("John"))
+            .withFamilyName(Optional.of("Doe"));
 
     var command = sut.toCommand(authUser);
 

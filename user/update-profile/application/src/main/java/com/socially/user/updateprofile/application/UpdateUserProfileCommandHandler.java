@@ -22,18 +22,14 @@ public final class UpdateUserProfileCommandHandler implements UpdateUserProfileU
         command.userId().trim(),
         command.issuer().trim(),
         command.subject().trim(),
-        blankToNull(command.email()),
-        blankToNull(command.givenName()),
-        blankToNull(command.familyName()));
+        command.email().filter(StringUtils::hasText).map(String::trim),
+        command.givenName().filter(StringUtils::hasText).map(String::trim),
+        command.familyName().filter(StringUtils::hasText).map(String::trim));
   }
 
   private static void requireText(String value, String fieldName) {
     if (!StringUtils.hasText(value)) {
       throw new IllegalArgumentException(fieldName + " cannot be blank");
     }
-  }
-
-  private static String blankToNull(String value) {
-    return StringUtils.hasText(value) ? value.trim() : null;
   }
 }

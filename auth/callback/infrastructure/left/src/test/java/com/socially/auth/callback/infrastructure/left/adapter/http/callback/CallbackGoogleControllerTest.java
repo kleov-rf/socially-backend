@@ -22,6 +22,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -51,7 +52,9 @@ class CallbackGoogleControllerTest {
           "access-token",
           "Bearer",
           3600L,
-          new AuthUser("https://idp.example", "id-1", "user@example.com", "John", "Doe"));
+          AuthUser.create("https://idp.example", "id-1", "user@example.com")
+              .withGivenName(Optional.of("John"))
+              .withFamilyName(Optional.of("Doe")));
   private static final User USER =
       User.create(
           Id.from("550e8400-e29b-41d4-a716-446655440000"),

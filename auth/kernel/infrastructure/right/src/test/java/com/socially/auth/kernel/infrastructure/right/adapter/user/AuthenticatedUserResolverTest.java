@@ -36,7 +36,9 @@ class AuthenticatedUserResolverTest {
   private static final FindUserByFederatedIdentityQuery FEDERATED_QUERY =
       new FindUserByFederatedIdentityQuery("https://idp.example", "sub-1");
   private static final AuthUser AUTH_USER =
-      new AuthUser("https://idp.example", "sub-1", "user@example.com", "Jane", "Doe");
+      AuthUser.create("https://idp.example", "sub-1", "user@example.com")
+          .withGivenName(Optional.of("Jane"))
+          .withFamilyName(Optional.of("Doe"));
   private static final String CREATE_USER_ID = "660e8400-e29b-41d4-a716-446655440001";
   private static final CreateUserCommand CREATE_USER_COMMAND =
       new CreateUserCommand(CREATE_USER_ID, "user@example.com", "Jane", "Doe");
@@ -78,7 +80,10 @@ class AuthenticatedUserResolverTest {
 
   @Test
   void resolve_should_throw_when_auth_user_claims_validator_throws() {
-    AuthUser invalidUser = new AuthUser(null, "sub-1", "user@example.com", "Jane", "Doe");
+    AuthUser invalidUser =
+        AuthUser.create(null, "sub-1", "user@example.com")
+            .withGivenName(Optional.of("Jane"))
+            .withFamilyName(Optional.of("Doe"));
     org.mockito.Mockito.doThrow(
             new AuthBadRequestException("OIDC issuer and subject claims are required"))
         .when(authUserClaimsValidator)
@@ -124,13 +129,11 @@ class AuthenticatedUserResolverTest {
 
     verify(updateUserProfileUseCase)
         .execute(
-            new UpdateUserProfileCommand(
-                EXISTING_USER.id().value().toString(),
-                "https://idp.example",
-                "sub-1",
-                "user@example.com",
-                "Jane",
-                "Doe"));
+            UpdateUserProfileCommand.create(
+                    EXISTING_USER.id().value().toString(), "https://idp.example", "sub-1")
+                .withEmail(Optional.of("user@example.com"))
+                .withGivenName(Optional.of("Jane"))
+                .withFamilyName(Optional.of("Doe")));
   }
 
   @Test
@@ -235,13 +238,11 @@ class AuthenticatedUserResolverTest {
 
     verify(updateUserProfileUseCase)
         .execute(
-            new UpdateUserProfileCommand(
-                EXISTING_USER.id().value().toString(),
-                "https://idp.example",
-                "sub-1",
-                "user@example.com",
-                "Jane",
-                "Doe"));
+            UpdateUserProfileCommand.create(
+                    EXISTING_USER.id().value().toString(), "https://idp.example", "sub-1")
+                .withEmail(Optional.of("user@example.com"))
+                .withGivenName(Optional.of("Jane"))
+                .withFamilyName(Optional.of("Doe")));
   }
 
   @Test

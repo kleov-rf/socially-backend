@@ -21,6 +21,7 @@ import com.socially.user.kernel.domain.valueobject.Email;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -45,7 +46,9 @@ class CompleteOAuthCallbackCommandHandlerTest {
   private static final String STATE_COOKIE_NAME = "socially_oauth_state";
   private static final String PKCE_COOKIE_NAME = "socially_oauth_pkce";
   private static final AuthUser USER =
-      new AuthUser("https://idp.example", "user-id-1", "user@example.com", "John", "Doe");
+      AuthUser.create("https://idp.example", "user-id-1", "user@example.com")
+          .withGivenName(Optional.of("John"))
+          .withFamilyName(Optional.of("Doe"));
   private static final User RESOLVED_USER =
       User.create(
           Id.from("550e8400-e29b-41d4-a716-446655440000"),

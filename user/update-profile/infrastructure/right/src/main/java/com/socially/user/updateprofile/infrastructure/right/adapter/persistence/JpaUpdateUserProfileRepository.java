@@ -5,6 +5,7 @@ import com.socially.user.kernel.infrastructure.right.adapter.persistence.UserEnt
 import com.socially.user.kernel.infrastructure.right.adapter.persistence.entity.FederatedIdentityEntity;
 import com.socially.user.kernel.infrastructure.right.adapter.persistence.entity.UserEntity;
 import com.socially.user.updateprofile.domain.port.right.UpdateUserProfileRepository;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -21,9 +22,9 @@ public class JpaUpdateUserProfileRepository implements UpdateUserProfileReposito
       String userId,
       String issuer,
       String subject,
-      String email,
-      String givenName,
-      String familyName) {
+      Optional<String> email,
+      Optional<String> givenName,
+      Optional<String> familyName) {
     UUID userUuid = UUID.fromString(userId);
     UserEntity userEntity =
         userEntityRepository
@@ -33,9 +34,9 @@ public class JpaUpdateUserProfileRepository implements UpdateUserProfileReposito
     UserEntity updatedUser =
         UserEntity.create(
             userEntity.getId(),
-            email != null ? email : userEntity.getEmail(),
-            givenName != null ? givenName : userEntity.getGivenName(),
-            familyName != null ? familyName : userEntity.getFamilyName(),
+            email.orElse(userEntity.getEmail()),
+            givenName.orElse(userEntity.getGivenName()),
+            familyName.orElse(userEntity.getFamilyName()),
             userEntity.getCreatedAt());
     userEntityRepository.save(updatedUser);
 
@@ -54,7 +55,7 @@ public class JpaUpdateUserProfileRepository implements UpdateUserProfileReposito
             federatedIdentity.getUserId(),
             federatedIdentity.getIssuer(),
             federatedIdentity.getSubject(),
-            email != null ? email : federatedIdentity.getEmail(),
+            email.orElse(federatedIdentity.getEmail()),
             federatedIdentity.getCreatedAt());
     federatedIdentityEntityRepository.save(updatedFederatedIdentity);
   }

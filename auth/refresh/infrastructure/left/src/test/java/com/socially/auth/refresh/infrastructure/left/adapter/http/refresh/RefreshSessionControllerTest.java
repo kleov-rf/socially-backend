@@ -19,6 +19,7 @@ import com.socially.user.kernel.domain.valueobject.Email;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Instant;
 import java.util.Map;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -41,7 +42,10 @@ class RefreshSessionControllerTest {
 
   private static final AuthResult AUTH_RESULT =
       new AuthResult(
-          "at", "Bearer", 120L, new AuthUser("https://idp.example", "u1", "e@x.com", "N", null));
+          "at",
+          "Bearer",
+          120L,
+          AuthUser.create("https://idp.example", "u1", "e@x.com").withGivenName(Optional.of("N")));
   private static final User USER =
       User.create(
           Id.from("550e8400-e29b-41d4-a716-446655440000"),

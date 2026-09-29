@@ -20,6 +20,7 @@ import com.socially.user.kernel.domain.entity.User;
 import com.socially.user.kernel.domain.valueobject.Email;
 import java.time.Instant;
 import java.util.Map;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -38,7 +39,9 @@ class RefreshSessionCommandHandlerTest {
   @InjectMocks private RefreshSessionCommandHandler handler;
 
   private static final AuthUser AUTH_USER =
-      new AuthUser("https://idp.example", "auth-id", "e@x.com", "Jane", "Doe");
+      AuthUser.create("https://idp.example", "auth-id", "e@x.com")
+          .withGivenName(Optional.of("Jane"))
+          .withFamilyName(Optional.of("Doe"));
   private static final OAuthTokenResponse TOKEN_RESPONSE =
       new OAuthTokenResponse("access", "id-token", "refresh-2", "Bearer", 3600L);
   private static final AuthResult AUTH_RESULT =

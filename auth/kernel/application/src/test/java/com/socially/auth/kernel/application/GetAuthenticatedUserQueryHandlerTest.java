@@ -18,6 +18,7 @@ import com.socially.user.kernel.domain.valueobject.Email;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,7 +34,9 @@ class GetAuthenticatedUserQueryHandlerTest {
   private static final Instant EXPIRES_AT = Instant.parse("2024-01-01T01:00:00Z");
   private static final Instant CREATED_AT = Instant.parse("2024-06-01T12:00:00Z");
   private static final AuthUser EXPECTED_AUTH_USER =
-      new AuthUser("https://idp.example", "sub-99", "id-test@example.com", "Jane", "Doe");
+      AuthUser.create("https://idp.example", "sub-99", "id-test@example.com")
+          .withGivenName(Optional.of("Jane"))
+          .withFamilyName(Optional.of("Doe"));
 
   @Mock private AuthenticatedUserResolver authenticatedUserResolver;
   @Mock private AuthUserFromJwtMapper authUserFromJwtMapper;

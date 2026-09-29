@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verify;
 
 import com.socially.user.updateprofile.application.input.UpdateUserProfileCommand;
 import com.socially.user.updateprofile.domain.port.right.UpdateUserProfileRepository;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -25,8 +26,10 @@ class UpdateUserProfileCommandHandlerTest {
   @Test
   void execute_should_call_repository_update_profile_with_user_id_from_command() {
     var command =
-        new UpdateUserProfileCommand(
-            USER_ID, "https://idp.example", "sub-1", "user@example.com", "Jane", "Doe");
+        UpdateUserProfileCommand.create(USER_ID, "https://idp.example", "sub-1")
+            .withEmail(Optional.of("user@example.com"))
+            .withGivenName(Optional.of("Jane"))
+            .withFamilyName(Optional.of("Doe"));
 
     handler.execute(command);
 
@@ -36,17 +39,19 @@ class UpdateUserProfileCommandHandlerTest {
             userIdCaptor.capture(),
             org.mockito.ArgumentMatchers.eq("https://idp.example"),
             org.mockito.ArgumentMatchers.eq("sub-1"),
-            org.mockito.ArgumentMatchers.eq("user@example.com"),
-            org.mockito.ArgumentMatchers.eq("Jane"),
-            org.mockito.ArgumentMatchers.eq("Doe"));
+            org.mockito.ArgumentMatchers.eq(Optional.of("user@example.com")),
+            org.mockito.ArgumentMatchers.eq(Optional.of("Jane")),
+            org.mockito.ArgumentMatchers.eq(Optional.of("Doe")));
     assertEquals(USER_ID, userIdCaptor.getValue());
   }
 
   @Test
   void execute_should_call_repository_update_profile_with_issuer_from_command() {
     var command =
-        new UpdateUserProfileCommand(
-            USER_ID, "https://idp.example", "sub-1", "user@example.com", "Jane", "Doe");
+        UpdateUserProfileCommand.create(USER_ID, "https://idp.example", "sub-1")
+            .withEmail(Optional.of("user@example.com"))
+            .withGivenName(Optional.of("Jane"))
+            .withFamilyName(Optional.of("Doe"));
 
     handler.execute(command);
 
@@ -56,16 +61,19 @@ class UpdateUserProfileCommandHandlerTest {
             org.mockito.ArgumentMatchers.eq(USER_ID),
             issuerCaptor.capture(),
             org.mockito.ArgumentMatchers.eq("sub-1"),
-            org.mockito.ArgumentMatchers.eq("user@example.com"),
-            org.mockito.ArgumentMatchers.eq("Jane"),
-            org.mockito.ArgumentMatchers.eq("Doe"));
+            org.mockito.ArgumentMatchers.eq(Optional.of("user@example.com")),
+            org.mockito.ArgumentMatchers.eq(Optional.of("Jane")),
+            org.mockito.ArgumentMatchers.eq(Optional.of("Doe")));
     assertEquals("https://idp.example", issuerCaptor.getValue());
   }
 
   @Test
-  void execute_should_pass_null_profile_fields_when_command_values_are_blank() {
+  void execute_should_pass_empty_profile_fields_when_command_values_are_blank() {
     var command =
-        new UpdateUserProfileCommand(USER_ID, "https://idp.example", "sub-1", "  ", " ", " ");
+        UpdateUserProfileCommand.create(USER_ID, "https://idp.example", "sub-1")
+            .withEmail(Optional.of("  "))
+            .withGivenName(Optional.of(" "))
+            .withFamilyName(Optional.of(" "));
 
     handler.execute(command);
 
@@ -74,16 +82,14 @@ class UpdateUserProfileCommandHandlerTest {
             org.mockito.ArgumentMatchers.eq(USER_ID),
             org.mockito.ArgumentMatchers.eq("https://idp.example"),
             org.mockito.ArgumentMatchers.eq("sub-1"),
-            org.mockito.ArgumentMatchers.isNull(),
-            org.mockito.ArgumentMatchers.isNull(),
-            org.mockito.ArgumentMatchers.isNull());
+            org.mockito.ArgumentMatchers.eq(Optional.empty()),
+            org.mockito.ArgumentMatchers.eq(Optional.empty()),
+            org.mockito.ArgumentMatchers.eq(Optional.empty()));
   }
 
   @Test
   void execute_should_throw_exception_when_user_id_is_blank() {
-    var command =
-        new UpdateUserProfileCommand(
-            "   ", "https://idp.example", "sub-1", "a@b.com", "Jane", "Doe");
+    var command = UpdateUserProfileCommand.create("   ", "https://idp.example", "sub-1");
 
     IllegalArgumentException exception =
         assertThrows(IllegalArgumentException.class, () -> handler.execute(command));
@@ -93,7 +99,7 @@ class UpdateUserProfileCommandHandlerTest {
 
   @Test
   void execute_should_throw_exception_when_issuer_is_blank() {
-    var command = new UpdateUserProfileCommand(USER_ID, "   ", "sub-1", "a@b.com", "Jane", "Doe");
+    var command = UpdateUserProfileCommand.create(USER_ID, "   ", "sub-1");
 
     IllegalArgumentException exception =
         assertThrows(IllegalArgumentException.class, () -> handler.execute(command));
@@ -103,9 +109,7 @@ class UpdateUserProfileCommandHandlerTest {
 
   @Test
   void execute_should_throw_exception_when_subject_is_blank() {
-    var command =
-        new UpdateUserProfileCommand(
-            USER_ID, "https://idp.example", "   ", "a@b.com", "Jane", "Doe");
+    var command = UpdateUserProfileCommand.create(USER_ID, "https://idp.example", "   ");
 
     IllegalArgumentException exception =
         assertThrows(IllegalArgumentException.class, () -> handler.execute(command));

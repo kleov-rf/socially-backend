@@ -12,7 +12,7 @@ public class AuthUserToCreateUserCommandMapper {
     return new CreateUserCommand(
         Id.generate().value().toString(),
         authUser.email(),
-        authUser.givenName(),
-        authUser.familyName());
+        authUser.givenName().orElse(null),
+        authUser.familyName().orElse(null));
   }
 }

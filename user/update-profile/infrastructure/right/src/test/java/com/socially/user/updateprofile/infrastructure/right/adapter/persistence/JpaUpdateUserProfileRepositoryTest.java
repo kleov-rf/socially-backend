@@ -50,7 +50,12 @@ class JpaUpdateUserProfileRepositoryTest {
         .thenReturn(federatedIdentity);
 
     repository.updateProfile(
-        USER_ID, "https://idp.example", "sub-1", "new@example.com", "Janet", "Smith");
+        USER_ID,
+        "https://idp.example",
+        "sub-1",
+        Optional.of("new@example.com"),
+        Optional.of("Janet"),
+        Optional.of("Smith"));
 
     verify(userEntityRepository).findById(userUuid);
   }
@@ -76,7 +81,12 @@ class JpaUpdateUserProfileRepositoryTest {
         .thenReturn(federatedIdentity);
 
     repository.updateProfile(
-        USER_ID, "https://idp.example", "sub-1", "new@example.com", null, null);
+        USER_ID,
+        "https://idp.example",
+        "sub-1",
+        Optional.of("new@example.com"),
+        Optional.empty(),
+        Optional.empty());
 
     ArgumentCaptor<UserEntity> userCaptor = ArgumentCaptor.forClass(UserEntity.class);
     verify(userEntityRepository).save(userCaptor.capture());
@@ -104,7 +114,12 @@ class JpaUpdateUserProfileRepositoryTest {
         .thenReturn(federatedIdentity);
 
     repository.updateProfile(
-        USER_ID, "https://idp.example", "sub-1", "new@example.com", null, null);
+        USER_ID,
+        "https://idp.example",
+        "sub-1",
+        Optional.of("new@example.com"),
+        Optional.empty(),
+        Optional.empty());
 
     verify(federatedIdentityEntityRepository)
         .findByIssuerAndSubject("https://idp.example", "sub-1");
@@ -131,7 +146,12 @@ class JpaUpdateUserProfileRepositoryTest {
         .thenReturn(federatedIdentity);
 
     repository.updateProfile(
-        USER_ID, "https://idp.example", "sub-1", "new@example.com", null, null);
+        USER_ID,
+        "https://idp.example",
+        "sub-1",
+        Optional.of("new@example.com"),
+        Optional.empty(),
+        Optional.empty());
 
     ArgumentCaptor<FederatedIdentityEntity> federatedCaptor =
         ArgumentCaptor.forClass(FederatedIdentityEntity.class);

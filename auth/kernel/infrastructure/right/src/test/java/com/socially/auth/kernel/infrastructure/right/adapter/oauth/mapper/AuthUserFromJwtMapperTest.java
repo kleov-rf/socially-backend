@@ -10,6 +10,7 @@ import com.socially.auth.kernel.domain.AuthUser;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -62,7 +63,7 @@ class AuthUserFromJwtMapperTest {
 
     AuthUser authUser = sut.fromJwt(jwt);
 
-    assertEquals("Jane", authUser.givenName());
+    assertEquals(Optional.of("Jane"), authUser.givenName());
   }
 
   @Test
@@ -71,7 +72,7 @@ class AuthUserFromJwtMapperTest {
 
     AuthUser authUser = sut.fromJwt(jwt);
 
-    assertEquals("Doe", authUser.familyName());
+    assertEquals(Optional.of("Doe"), authUser.familyName());
   }
 
   @Test
