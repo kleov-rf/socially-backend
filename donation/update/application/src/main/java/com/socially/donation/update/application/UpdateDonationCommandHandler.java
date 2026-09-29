@@ -9,12 +9,10 @@ import com.socially.donation.kernel.domain.valueobject.Description;
 import com.socially.donation.kernel.domain.valueobject.DonationLocation;
 import com.socially.donation.kernel.domain.valueobject.Title;
 import com.socially.donation.update.application.input.UpdateDonationCommand;
-import com.socially.donation.update.application.input.UpdateDonationLocationCommand;
 import com.socially.donation.update.application.port.left.UpdateDonationUseCase;
 import com.socially.donation.update.domain.port.right.UpdateDonationRepository;
 import java.time.Clock;
 import java.time.Instant;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -37,28 +35,41 @@ public final class UpdateDonationCommandHandler implements UpdateDonationUseCase
 
     assertDonationOwnedByPrincipalUseCase.execute(donation, command.principal());
 
-    Instant now = null;
-    if (Objects.nonNull(command.title())) {
-      now = nowOrRead(now);
-      donation = donation.withTitle(Title.from(command.title()), now);
-    }
-    if (Objects.nonNull(command.description())) {
-      now = nowOrRead(now);
-      donation = donation.withDescription(Description.from(command.description()), now);
-    }
-    UpdateDonationLocationCommand location = command.location();
-    if (Objects.nonNull(location)) {
-      now = nowOrRead(now);
-      donation =
-          donation.withLocation(
-              DonationLocation.from(location.address(), location.latitude(), location.longitude()),
-              now);
-    }
+    Donation updated = applyUpdates(donation, command);
 
-    updateDonationRepository.update(donation);
+    updateDonationRepository.update(updated);
   }
 
-  private Instant nowOrRead(Instant cached) {
-    return cached == null ? clock.instant() : cached;
+  private Donation applyUpdates(Donation donation, UpdateDonationCommand command) {
+    if (hasNoUpdates(command)) {
+      return donation;
+    }
+
+    Instant now = clock.instant();
+
+    Donation withTitle =
+        command.title().map(title -> donation.withTitle(Title.from(title), now)).orElse(donation);
+
+    Donation withDescription =
+        command
+            .description()
+            .map(description -> withTitle.withDescription(Description.from(description), now))
+            .orElse(withTitle);
+
+    return command
+        .location()
+        .map(
+            location ->
+                withDescription.withLocation(
+                    DonationLocation.from(
+                        location.address(), location.latitude(), location.longitude()),
+                    now))
+        .orElse(withDescription);
+  }
+
+  private boolean hasNoUpdates(UpdateDonationCommand command) {
+    return command.title().isEmpty()
+        && command.description().isEmpty()
+        && command.location().isEmpty();
   }
 }
