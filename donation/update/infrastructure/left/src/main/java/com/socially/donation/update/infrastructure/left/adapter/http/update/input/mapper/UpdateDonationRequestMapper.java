@@ -20,7 +20,9 @@ public class UpdateDonationRequestMapper {
                     new UpdateDonationLocationCommand(
                         location.address(), location.latitude(), location.longitude()));
 
-    return new UpdateDonationCommand(
-        id, request.title(), request.description(), locationCommand, principal);
+    return UpdateDonationCommand.create(id, principal)
+        .withTitle(request.title())
+        .withDescription(request.description())
+        .withLocation(locationCommand);
   }
 }

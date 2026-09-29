@@ -25,30 +25,21 @@ class UpdateDonationRequestMapperTest {
 
   @Test
   void toCommand_should_map_donation_id() {
-    var command =
-        mapper.toCommand(
-            "id-123",
-            new UpdateDonationRequest(Optional.empty(), Optional.empty(), Optional.empty()),
-            principal);
+    var command = mapper.toCommand("id-123", UpdateDonationRequest.create(), principal);
 
     assertEquals("id-123", command.id());
   }
 
   @Test
   void toCommand_should_map_principal() {
-    var command =
-        mapper.toCommand(
-            "id-123",
-            new UpdateDonationRequest(Optional.empty(), Optional.empty(), Optional.empty()),
-            principal);
+    var command = mapper.toCommand("id-123", UpdateDonationRequest.create(), principal);
 
     assertEquals(principal, command.principal());
   }
 
   @Test
   void toCommand_should_map_donation_title() {
-    var request =
-        new UpdateDonationRequest(Optional.of("Updated Title"), Optional.empty(), Optional.empty());
+    var request = UpdateDonationRequest.create().withTitle(Optional.of("Updated Title"));
 
     var command = mapper.toCommand("id-123", request, principal);
 
@@ -58,8 +49,7 @@ class UpdateDonationRequestMapperTest {
   @Test
   void toCommand_should_map_donation_title_when_title_not_updated() {
     var request =
-        new UpdateDonationRequest(
-            Optional.empty(), Optional.of("Updated Description"), Optional.empty());
+        UpdateDonationRequest.create().withDescription(Optional.of("Updated Description"));
 
     var command = mapper.toCommand("id-123", request, principal);
 
@@ -69,8 +59,7 @@ class UpdateDonationRequestMapperTest {
   @Test
   void toCommand_should_map_donation_description() {
     var request =
-        new UpdateDonationRequest(
-            Optional.empty(), Optional.of("Updated Description"), Optional.empty());
+        UpdateDonationRequest.create().withDescription(Optional.of("Updated Description"));
 
     var command = mapper.toCommand("id-123", request, principal);
 
@@ -79,8 +68,7 @@ class UpdateDonationRequestMapperTest {
 
   @Test
   void toCommand_should_map_donation_description_when_description_not_updated() {
-    var request =
-        new UpdateDonationRequest(Optional.of("Updated Title"), Optional.empty(), Optional.empty());
+    var request = UpdateDonationRequest.create().withTitle(Optional.of("Updated Title"));
 
     var command = mapper.toCommand("id-123", request, principal);
 
@@ -89,9 +77,7 @@ class UpdateDonationRequestMapperTest {
 
   @Test
   void toCommand_should_map_location_address() {
-    var request =
-        new UpdateDonationRequest(
-            Optional.empty(), Optional.empty(), Optional.of(LOCATION_REQUEST));
+    var request = UpdateDonationRequest.create().withLocation(Optional.of(LOCATION_REQUEST));
 
     var command = mapper.toCommand("id-123", request, principal);
 
@@ -102,9 +88,7 @@ class UpdateDonationRequestMapperTest {
 
   @Test
   void toCommand_should_map_location_latitude() {
-    var request =
-        new UpdateDonationRequest(
-            Optional.empty(), Optional.empty(), Optional.of(LOCATION_REQUEST));
+    var request = UpdateDonationRequest.create().withLocation(Optional.of(LOCATION_REQUEST));
 
     var command = mapper.toCommand("id-123", request, principal);
 
@@ -114,9 +98,7 @@ class UpdateDonationRequestMapperTest {
 
   @Test
   void toCommand_should_map_location_longitude() {
-    var request =
-        new UpdateDonationRequest(
-            Optional.empty(), Optional.empty(), Optional.of(LOCATION_REQUEST));
+    var request = UpdateDonationRequest.create().withLocation(Optional.of(LOCATION_REQUEST));
 
     var command = mapper.toCommand("id-123", request, principal);
 
@@ -126,8 +108,7 @@ class UpdateDonationRequestMapperTest {
 
   @Test
   void toCommand_should_map_location_as_empty_when_location_not_updated() {
-    var request =
-        new UpdateDonationRequest(Optional.of("Updated Title"), Optional.empty(), Optional.empty());
+    var request = UpdateDonationRequest.create().withTitle(Optional.of("Updated Title"));
 
     var command = mapper.toCommand("id-123", request, principal);
 

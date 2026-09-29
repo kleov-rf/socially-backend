@@ -56,12 +56,9 @@ class UpdateDonationCommandHandlerTest {
   @Test
   void execute_should_call_repository_find_by_id_with_correct_id() {
     var command =
-        new UpdateDonationCommand(
-            DONATION_ID,
-            Optional.of("Updated Title"),
-            Optional.of("Updated Description"),
-            Optional.empty(),
-            PRINCIPAL);
+        UpdateDonationCommand.create(DONATION_ID, PRINCIPAL)
+            .withTitle(Optional.of("Updated Title"))
+            .withDescription(Optional.of("Updated Description"));
     Donation existingDonation =
         Donation.create(
             Id.from(DONATION_ID),
@@ -84,12 +81,9 @@ class UpdateDonationCommandHandlerTest {
   @Test
   void execute_should_throw_if_donation_not_found() {
     var command =
-        new UpdateDonationCommand(
-            DONATION_ID,
-            Optional.of("Updated Title"),
-            Optional.of("Updated Description"),
-            Optional.empty(),
-            PRINCIPAL);
+        UpdateDonationCommand.create(DONATION_ID, PRINCIPAL)
+            .withTitle(Optional.of("Updated Title"))
+            .withDescription(Optional.of("Updated Description"));
     when(findDonationByIdRepository.findById(Id.from(DONATION_ID))).thenReturn(Optional.empty());
 
     DonationNotFoundException exception =
@@ -101,12 +95,9 @@ class UpdateDonationCommandHandlerTest {
   @Test
   void execute_should_call_assert_donation_owned_by_principal_with_donation_and_principal() {
     var command =
-        new UpdateDonationCommand(
-            DONATION_ID,
-            Optional.of("Updated Title"),
-            Optional.of("Updated Description"),
-            Optional.empty(),
-            PRINCIPAL);
+        UpdateDonationCommand.create(DONATION_ID, PRINCIPAL)
+            .withTitle(Optional.of("Updated Title"))
+            .withDescription(Optional.of("Updated Description"));
     Donation existingDonation =
         Donation.create(
             Id.from(DONATION_ID),
@@ -129,12 +120,9 @@ class UpdateDonationCommandHandlerTest {
   @Test
   void execute_should_not_call_update_when_ownership_assertion_fails() {
     var command =
-        new UpdateDonationCommand(
-            DONATION_ID,
-            Optional.of("Updated Title"),
-            Optional.of("Updated Description"),
-            Optional.empty(),
-            PRINCIPAL);
+        UpdateDonationCommand.create(DONATION_ID, PRINCIPAL)
+            .withTitle(Optional.of("Updated Title"))
+            .withDescription(Optional.of("Updated Description"));
     Donation existingDonation =
         Donation.create(
             Id.from(DONATION_ID),
@@ -159,12 +147,9 @@ class UpdateDonationCommandHandlerTest {
   @Test
   void execute_should_not_call_update_if_donation_not_found() {
     var command =
-        new UpdateDonationCommand(
-            DONATION_ID,
-            Optional.of("Updated Title"),
-            Optional.of("Updated Description"),
-            Optional.empty(),
-            PRINCIPAL);
+        UpdateDonationCommand.create(DONATION_ID, PRINCIPAL)
+            .withTitle(Optional.of("Updated Title"))
+            .withDescription(Optional.of("Updated Description"));
     when(findDonationByIdRepository.findById(Id.from(DONATION_ID))).thenReturn(Optional.empty());
 
     assertThrows(DonationNotFoundException.class, () -> handler.execute(command));
@@ -176,12 +161,9 @@ class UpdateDonationCommandHandlerTest {
   @Test
   void execute_should_call_repository_update_with_updated_donation_with_same_id() {
     var command =
-        new UpdateDonationCommand(
-            DONATION_ID,
-            Optional.of("Updated Title"),
-            Optional.of("Updated Description"),
-            Optional.empty(),
-            PRINCIPAL);
+        UpdateDonationCommand.create(DONATION_ID, PRINCIPAL)
+            .withTitle(Optional.of("Updated Title"))
+            .withDescription(Optional.of("Updated Description"));
     Donation existingDonation =
         Donation.create(
             Id.from(DONATION_ID),
@@ -205,12 +187,8 @@ class UpdateDonationCommandHandlerTest {
   @Test
   void execute_should_call_repository_update_with_updated_donation_when_title_has_been_updated() {
     var command =
-        new UpdateDonationCommand(
-            DONATION_ID,
-            Optional.of("Updated Title"),
-            Optional.empty(),
-            Optional.empty(),
-            PRINCIPAL);
+        UpdateDonationCommand.create(DONATION_ID, PRINCIPAL)
+            .withTitle(Optional.of("Updated Title"));
     Donation existingDonation =
         Donation.create(
             Id.from(DONATION_ID),
@@ -239,12 +217,8 @@ class UpdateDonationCommandHandlerTest {
   void
       execute_should_call_repository_update_with_updated_donation_when_description_has_been_updated() {
     var command =
-        new UpdateDonationCommand(
-            DONATION_ID,
-            Optional.empty(),
-            Optional.of("Updated Description"),
-            Optional.empty(),
-            PRINCIPAL);
+        UpdateDonationCommand.create(DONATION_ID, PRINCIPAL)
+            .withDescription(Optional.of("Updated Description"));
     Donation existingDonation =
         Donation.create(
             Id.from(DONATION_ID),
@@ -273,12 +247,9 @@ class UpdateDonationCommandHandlerTest {
   void
       execute_should_call_repository_update_with_updated_donation_when_title_and_description_have_been_updated() {
     var command =
-        new UpdateDonationCommand(
-            DONATION_ID,
-            Optional.of("Updated Title"),
-            Optional.of("Updated Description"),
-            Optional.empty(),
-            PRINCIPAL);
+        UpdateDonationCommand.create(DONATION_ID, PRINCIPAL)
+            .withTitle(Optional.of("Updated Title"))
+            .withDescription(Optional.of("Updated Description"));
     Donation existingDonation =
         Donation.create(
             Id.from(DONATION_ID),
@@ -309,12 +280,8 @@ class UpdateDonationCommandHandlerTest {
   void execute_should_update_location_when_location_is_provided() {
     var locationCommand = new UpdateDonationLocationCommand("Plaza Mayor 2, Madrid", 40.42, -3.71);
     var command =
-        new UpdateDonationCommand(
-            DONATION_ID,
-            Optional.empty(),
-            Optional.empty(),
-            Optional.of(locationCommand),
-            PRINCIPAL);
+        UpdateDonationCommand.create(DONATION_ID, PRINCIPAL)
+            .withLocation(Optional.of(locationCommand));
     Donation existingDonation =
         Donation.create(
             Id.from(DONATION_ID),
@@ -345,12 +312,8 @@ class UpdateDonationCommandHandlerTest {
   void execute_should_keep_title_and_description_when_only_location_is_updated() {
     var locationCommand = new UpdateDonationLocationCommand("Plaza Mayor 2, Madrid", 40.42, -3.71);
     var command =
-        new UpdateDonationCommand(
-            DONATION_ID,
-            Optional.empty(),
-            Optional.empty(),
-            Optional.of(locationCommand),
-            PRINCIPAL);
+        UpdateDonationCommand.create(DONATION_ID, PRINCIPAL)
+            .withLocation(Optional.of(locationCommand));
     Donation existingDonation =
         Donation.create(
             Id.from(DONATION_ID),
@@ -378,12 +341,8 @@ class UpdateDonationCommandHandlerTest {
   @Test
   void execute_should_keep_location_when_only_title_is_updated() {
     var command =
-        new UpdateDonationCommand(
-            DONATION_ID,
-            Optional.of("Updated Title"),
-            Optional.empty(),
-            Optional.empty(),
-            PRINCIPAL);
+        UpdateDonationCommand.create(DONATION_ID, PRINCIPAL)
+            .withTitle(Optional.of("Updated Title"));
     DonationLocation originalLocation =
         DonationLocation.from("Calle Mayor 1, Madrid", 40.4168, -3.7038);
     Donation existingDonation =
@@ -408,9 +367,7 @@ class UpdateDonationCommandHandlerTest {
 
   @Test
   void execute_should_not_call_clock_when_no_fields_are_provided() {
-    var command =
-        new UpdateDonationCommand(
-            DONATION_ID, Optional.empty(), Optional.empty(), Optional.empty(), PRINCIPAL);
+    var command = UpdateDonationCommand.create(DONATION_ID, PRINCIPAL);
     Donation existingDonation =
         Donation.create(
             Id.from(DONATION_ID),

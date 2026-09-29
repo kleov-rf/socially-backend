@@ -37,15 +37,13 @@ class UpdateDonationControllerTest {
   @Test
   void patch_should_pass_principal_in_command() {
     var request =
-        new UpdateDonationRequest(
-            Optional.of("Updated Title"), Optional.of("Updated Description"), Optional.empty());
+        UpdateDonationRequest.create()
+            .withTitle(Optional.of("Updated Title"))
+            .withDescription(Optional.of("Updated Description"));
     var command =
-        new UpdateDonationCommand(
-            DONATION_ID,
-            Optional.of("Updated Title"),
-            Optional.of("Updated Description"),
-            Optional.empty(),
-            principal);
+        UpdateDonationCommand.create(DONATION_ID, principal)
+            .withTitle(Optional.of("Updated Title"))
+            .withDescription(Optional.of("Updated Description"));
     when(updateDonationRequestMapper.toCommand(DONATION_ID, request, principal))
         .thenReturn(command);
 
@@ -61,15 +59,13 @@ class UpdateDonationControllerTest {
   @Test
   void patch_should_call_request_mapper_with_received_id_request_body_and_principal() {
     var request =
-        new UpdateDonationRequest(
-            Optional.of("Updated Title"), Optional.of("Updated Description"), Optional.empty());
+        UpdateDonationRequest.create()
+            .withTitle(Optional.of("Updated Title"))
+            .withDescription(Optional.of("Updated Description"));
     var command =
-        new UpdateDonationCommand(
-            DONATION_ID,
-            Optional.of("Updated Title"),
-            Optional.of("Updated Description"),
-            Optional.empty(),
-            principal);
+        UpdateDonationCommand.create(DONATION_ID, principal)
+            .withTitle(Optional.of("Updated Title"))
+            .withDescription(Optional.of("Updated Description"));
     when(updateDonationRequestMapper.toCommand(DONATION_ID, request, principal))
         .thenReturn(command);
 
@@ -81,15 +77,13 @@ class UpdateDonationControllerTest {
   @Test
   void patch_should_call_execute_with_mapped_command() {
     var request =
-        new UpdateDonationRequest(
-            Optional.of("Updated Title"), Optional.of("Updated Description"), Optional.empty());
+        UpdateDonationRequest.create()
+            .withTitle(Optional.of("Updated Title"))
+            .withDescription(Optional.of("Updated Description"));
     var mappedCommand =
-        new UpdateDonationCommand(
-            DONATION_ID,
-            Optional.of("Updated Title"),
-            Optional.of("Updated Description"),
-            Optional.empty(),
-            principal);
+        UpdateDonationCommand.create(DONATION_ID, principal)
+            .withTitle(Optional.of("Updated Title"))
+            .withDescription(Optional.of("Updated Description"));
     when(updateDonationRequestMapper.toCommand(DONATION_ID, request, principal))
         .thenReturn(mappedCommand);
 
@@ -101,15 +95,13 @@ class UpdateDonationControllerTest {
   @Test
   void patch_should_return_no_content() {
     var request =
-        new UpdateDonationRequest(
-            Optional.of("Updated Title"), Optional.of("Updated Description"), Optional.empty());
+        UpdateDonationRequest.create()
+            .withTitle(Optional.of("Updated Title"))
+            .withDescription(Optional.of("Updated Description"));
     var mappedCommand =
-        new UpdateDonationCommand(
-            DONATION_ID,
-            Optional.of("Updated Title"),
-            Optional.of("Updated Description"),
-            Optional.empty(),
-            principal);
+        UpdateDonationCommand.create(DONATION_ID, principal)
+            .withTitle(Optional.of("Updated Title"))
+            .withDescription(Optional.of("Updated Description"));
     when(updateDonationRequestMapper.toCommand(DONATION_ID, request, principal))
         .thenReturn(mappedCommand);
 
@@ -121,15 +113,13 @@ class UpdateDonationControllerTest {
   @Test
   void patch_should_propagate_donation_not_found_exception() {
     var request =
-        new UpdateDonationRequest(
-            Optional.of("Updated Title"), Optional.of("Updated Description"), Optional.empty());
+        UpdateDonationRequest.create()
+            .withTitle(Optional.of("Updated Title"))
+            .withDescription(Optional.of("Updated Description"));
     var mappedCommand =
-        new UpdateDonationCommand(
-            DONATION_ID,
-            Optional.of("Updated Title"),
-            Optional.of("Updated Description"),
-            Optional.empty(),
-            principal);
+        UpdateDonationCommand.create(DONATION_ID, principal)
+            .withTitle(Optional.of("Updated Title"))
+            .withDescription(Optional.of("Updated Description"));
     when(updateDonationRequestMapper.toCommand(DONATION_ID, request, principal))
         .thenReturn(mappedCommand);
     doThrow(new DonationNotFoundException(DONATION_ID))
@@ -143,15 +133,13 @@ class UpdateDonationControllerTest {
   @Test
   void patch_should_propagate_donation_forbidden_exception() {
     var request =
-        new UpdateDonationRequest(
-            Optional.of("Updated Title"), Optional.of("Updated Description"), Optional.empty());
+        UpdateDonationRequest.create()
+            .withTitle(Optional.of("Updated Title"))
+            .withDescription(Optional.of("Updated Description"));
     var mappedCommand =
-        new UpdateDonationCommand(
-            DONATION_ID,
-            Optional.of("Updated Title"),
-            Optional.of("Updated Description"),
-            Optional.empty(),
-            principal);
+        UpdateDonationCommand.create(DONATION_ID, principal)
+            .withTitle(Optional.of("Updated Title"))
+            .withDescription(Optional.of("Updated Description"));
     when(updateDonationRequestMapper.toCommand(DONATION_ID, request, principal))
         .thenReturn(mappedCommand);
     doThrow(new DonationForbiddenException(DONATION_ID))
