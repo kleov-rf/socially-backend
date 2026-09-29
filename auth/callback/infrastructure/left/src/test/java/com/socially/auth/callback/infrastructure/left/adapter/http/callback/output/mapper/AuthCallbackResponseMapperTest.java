@@ -4,15 +4,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.socially.auth.callback.infrastructure.left.adapter.http.callback.output.AuthCallbackResponse;
 import com.socially.auth.kernel.domain.AuthResult;
+import com.socially.auth.kernel.domain.AuthUser;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
 class AuthCallbackResponseMapperTest {
 
   private final AuthCallbackResponseMapper sut = new AuthCallbackResponseMapper();
+  private static final AuthUser AUTH_USER =
+      AuthUser.create("https://idp.example", "sub-1", "user@example.com");
 
   @Test
   void toResponse_should_map_access_token() {
-    AuthResult result = new AuthResult("test-access-token", null, null, null);
+    AuthResult result = AuthResult.create("test-access-token", "Bearer", AUTH_USER);
 
     AuthCallbackResponse response = sut.toResponse(result);
 
@@ -21,7 +25,7 @@ class AuthCallbackResponseMapperTest {
 
   @Test
   void toResponse_should_map_token_type() {
-    AuthResult result = new AuthResult(null, "Bearer", null, null);
+    AuthResult result = AuthResult.create("test-access-token", "Bearer", AUTH_USER);
 
     AuthCallbackResponse response = sut.toResponse(result);
 
@@ -30,7 +34,9 @@ class AuthCallbackResponseMapperTest {
 
   @Test
   void toResponse_should_map_expires_in() {
-    AuthResult result = new AuthResult(null, null, 3600L, null);
+    AuthResult result =
+        AuthResult.create("test-access-token", "Bearer", AUTH_USER)
+            .withExpiresIn(Optional.of(3600L));
 
     AuthCallbackResponse response = sut.toResponse(result);
 
@@ -39,7 +45,7 @@ class AuthCallbackResponseMapperTest {
 
   @Test
   void toResponse_should_map_expires_in_when_expires_in_is_not_present() {
-    AuthResult result = new AuthResult(null, null, null, null);
+    AuthResult result = AuthResult.create("test-access-token", "Bearer", AUTH_USER);
 
     AuthCallbackResponse response = sut.toResponse(result);
 

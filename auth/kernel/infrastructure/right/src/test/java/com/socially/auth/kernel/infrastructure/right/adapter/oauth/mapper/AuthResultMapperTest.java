@@ -66,7 +66,18 @@ class AuthResultMapperTest {
 
     AuthResult result = sut.toAuthResult(tokenResponse);
 
-    assertEquals(7200L, result.expiresIn());
+    assertEquals(Optional.of(7200L), result.expiresIn());
+  }
+
+  @Test
+  void toAuthResult_should_return_result_with_empty_expires_in_when_not_present() {
+    OAuthTokenResponse tokenResponse =
+        new OAuthTokenResponse("access-token-1", "id-token-1", "refresh-1", "Bearer", null);
+    when(authUserMapper.fromIdToken("id-token-1")).thenReturn(AuthUser.create(null, null, null));
+
+    AuthResult result = sut.toAuthResult(tokenResponse);
+
+    assertEquals(Optional.empty(), result.expiresIn());
   }
 
   @Test

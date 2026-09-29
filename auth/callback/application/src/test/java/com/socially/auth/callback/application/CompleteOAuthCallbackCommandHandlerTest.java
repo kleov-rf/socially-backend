@@ -59,7 +59,7 @@ class CompleteOAuthCallbackCommandHandlerTest {
   private static final OAuthTokenResponse TOKEN_RESPONSE =
       new OAuthTokenResponse("access-token-1", ID_TOKEN, "refresh-1", "Bearer", 3600L);
   private static final AuthResult AUTH_RESULT =
-      new AuthResult("access-token-1", "Bearer", 3600L, USER);
+      AuthResult.create("access-token-1", "Bearer", USER).withExpiresIn(Optional.of(3600L));
   private static final List<CookieInstruction> COOKIE_INSTRUCTIONS =
       List.of(new CookieInstruction("state", "", 0L), new CookieInstruction("pkce", "", 0L));
 

@@ -13,6 +13,7 @@ import com.socially.auth.refresh.application.port.left.RefreshSessionUseCase;
 import com.socially.auth.refresh.domain.port.right.RefreshTokenExchangeOAuthClient;
 import com.socially.user.kernel.domain.entity.User;
 import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -36,11 +37,12 @@ public class RefreshSessionCommandHandler implements RefreshSessionUseCase {
     OAuthTokenResponse tokenResponse =
         refreshTokenExchangeOAuthClient.exchangeRefreshToken(refreshToken);
 
-    CookieInstruction cookieInstruction =
+    Optional<CookieInstruction> cookieInstruction =
         refreshCookieInstructionsMapper.toCookieInstruction(tokenResponse);
     var authResult = decodeAuthResult(tokenResponse);
     User user = authenticatedUserResolver.resolveExisting(authResult.user());
-    return new RefreshSessionCommandResult(authResult, user, cookieInstruction);
+    return RefreshSessionCommandResult.create(authResult, user)
+        .withCookieInstruction(cookieInstruction);
   }
 
   private AuthResult decodeAuthResult(OAuthTokenResponse tokenResponse) {

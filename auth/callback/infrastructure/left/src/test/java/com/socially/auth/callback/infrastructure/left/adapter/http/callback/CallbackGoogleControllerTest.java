@@ -48,13 +48,13 @@ class CallbackGoogleControllerTest {
       new CallbackGoogleRequest("code-123", "state-123");
 
   private static final AuthResult AUTH_RESULT =
-      new AuthResult(
-          "access-token",
-          "Bearer",
-          3600L,
-          AuthUser.create("https://idp.example", "id-1", "user@example.com")
-              .withGivenName(Optional.of("John"))
-              .withFamilyName(Optional.of("Doe")));
+      AuthResult.create(
+              "access-token",
+              "Bearer",
+              AuthUser.create("https://idp.example", "id-1", "user@example.com")
+                  .withGivenName(Optional.of("John"))
+                  .withFamilyName(Optional.of("Doe")))
+          .withExpiresIn(Optional.of(3600L));
   private static final User USER =
       User.create(
           Id.from("550e8400-e29b-41d4-a716-446655440000"),

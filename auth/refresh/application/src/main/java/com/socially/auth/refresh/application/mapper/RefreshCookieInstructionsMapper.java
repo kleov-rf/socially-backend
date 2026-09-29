@@ -3,8 +3,8 @@ package com.socially.auth.refresh.application.mapper;
 import com.socially.auth.kernel.domain.CookieInstruction;
 import com.socially.auth.kernel.domain.OAuthTokenResponse;
 import com.socially.auth.kernel.domain.properties.AuthProperties;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -15,14 +15,14 @@ public class RefreshCookieInstructionsMapper {
 
   private final AuthProperties authProperties;
 
-  @Nullable
-  public CookieInstruction toCookieInstruction(OAuthTokenResponse tokenResponse) {
+  public Optional<CookieInstruction> toCookieInstruction(OAuthTokenResponse tokenResponse) {
     if (!StringUtils.hasText(tokenResponse.refreshToken())) {
-      return null;
+      return Optional.empty();
     }
-    return new CookieInstruction(
-        authProperties.refreshCookieName(),
-        tokenResponse.refreshToken(),
-        REFRESH_COOKIE_MAX_AGE_SECONDS);
+    return Optional.of(
+        new CookieInstruction(
+            authProperties.refreshCookieName(),
+            tokenResponse.refreshToken(),
+            REFRESH_COOKIE_MAX_AGE_SECONDS));
   }
 }

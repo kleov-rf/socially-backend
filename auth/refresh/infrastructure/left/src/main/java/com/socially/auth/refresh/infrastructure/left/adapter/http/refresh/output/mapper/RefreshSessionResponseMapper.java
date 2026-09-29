@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 public class RefreshSessionResponseMapper {
 
   public RefreshSessionResponse toResponse(AuthResult result) {
-    long expiresIn = result.expiresIn() == null ? 0L : result.expiresIn();
-    return new RefreshSessionResponse(result.accessToken(), result.tokenType(), expiresIn);
+    long expiresIn = result.expiresIn().orElse(0L);
+    return RefreshSessionResponse.create(result.accessToken(), result.tokenType(), expiresIn);
   }
 }

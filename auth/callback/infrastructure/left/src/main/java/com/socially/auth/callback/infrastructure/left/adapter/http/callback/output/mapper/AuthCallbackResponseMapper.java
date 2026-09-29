@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 public class AuthCallbackResponseMapper {
 
   public AuthCallbackResponse toResponse(AuthResult result) {
-    long expiresIn = result.expiresIn() == null ? 0L : result.expiresIn();
+    long expiresIn = result.expiresIn().orElse(0L);
     return new AuthCallbackResponse(result.accessToken(), result.tokenType(), expiresIn);
   }
 }

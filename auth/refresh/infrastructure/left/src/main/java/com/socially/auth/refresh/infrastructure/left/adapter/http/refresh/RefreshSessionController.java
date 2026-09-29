@@ -28,11 +28,13 @@ public class RefreshSessionController {
   public ResponseEntity<RefreshSessionResponse> refreshSession(HttpServletRequest request) {
     var commandResult = useCase.execute(requestCookiesMapper.toCookieMap(request));
     ResponseEntity.BodyBuilder responseBuilder = ResponseEntity.ok();
-    if (commandResult.cookieInstruction() != null) {
-      responseBuilder.header(
-          HttpHeaders.SET_COOKIE,
-          authSetCookieHeaderMapper.toSetCookieHeader(commandResult.cookieInstruction()));
-    }
+    commandResult
+        .cookieInstruction()
+        .ifPresent(
+            cookieInstruction ->
+                responseBuilder.header(
+                    HttpHeaders.SET_COOKIE,
+                    authSetCookieHeaderMapper.toSetCookieHeader(cookieInstruction)));
     return responseBuilder.body(
         refreshSessionResponseMapper.toResponse(commandResult.authResult()));
   }

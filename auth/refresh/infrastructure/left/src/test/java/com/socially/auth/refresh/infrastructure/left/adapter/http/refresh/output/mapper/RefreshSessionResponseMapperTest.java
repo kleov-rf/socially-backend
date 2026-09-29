@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.socially.auth.kernel.domain.AuthResult;
 import com.socially.auth.kernel.domain.AuthUser;
 import com.socially.auth.refresh.infrastructure.left.adapter.http.refresh.output.RefreshSessionResponse;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
 class RefreshSessionResponseMapperTest {
@@ -14,8 +15,9 @@ class RefreshSessionResponseMapperTest {
   @Test
   void toResponse_should_map_access_token() {
     AuthResult result =
-        new AuthResult(
-            "access-token", "Bearer", 60L, AuthUser.create("https://idp.example", "i", "e"));
+        AuthResult.create(
+                "access-token", "Bearer", AuthUser.create("https://idp.example", "i", "e"))
+            .withExpiresIn(Optional.of(60L));
 
     RefreshSessionResponse response = sut.toResponse(result);
 
@@ -25,7 +27,8 @@ class RefreshSessionResponseMapperTest {
   @Test
   void toResponse_should_map_token_type() {
     AuthResult result =
-        new AuthResult("a", "JWT", 60L, AuthUser.create("https://idp.example", "i", "e"));
+        AuthResult.create("a", "JWT", AuthUser.create("https://idp.example", "i", "e"))
+            .withExpiresIn(Optional.of(60L));
 
     RefreshSessionResponse response = sut.toResponse(result);
 
@@ -35,7 +38,8 @@ class RefreshSessionResponseMapperTest {
   @Test
   void toResponse_should_map_expires_in() {
     AuthResult result =
-        new AuthResult("a", "Bearer", 999L, AuthUser.create("https://idp.example", "i", "e"));
+        AuthResult.create("a", "Bearer", AuthUser.create("https://idp.example", "i", "e"))
+            .withExpiresIn(Optional.of(999L));
 
     RefreshSessionResponse response = sut.toResponse(result);
 
@@ -45,7 +49,7 @@ class RefreshSessionResponseMapperTest {
   @Test
   void toResponse_should_map_expires_in_when_expires_in_is_not_present() {
     AuthResult result =
-        new AuthResult("a", "Bearer", null, AuthUser.create("https://idp.example", "i", "e"));
+        AuthResult.create("a", "Bearer", AuthUser.create("https://idp.example", "i", "e"));
 
     RefreshSessionResponse response = sut.toResponse(result);
 

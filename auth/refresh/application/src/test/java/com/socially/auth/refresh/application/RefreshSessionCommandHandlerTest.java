@@ -45,7 +45,7 @@ class RefreshSessionCommandHandlerTest {
   private static final OAuthTokenResponse TOKEN_RESPONSE =
       new OAuthTokenResponse("access", "id-token", "refresh-2", "Bearer", 3600L);
   private static final AuthResult AUTH_RESULT =
-      new AuthResult("access", "Bearer", 3600L, AUTH_USER);
+      AuthResult.create("access", "Bearer", AUTH_USER).withExpiresIn(Optional.of(3600L));
   private static final User RESOLVED_USER =
       User.create(
           Id.from("550e8400-e29b-41d4-a716-446655440111"),
@@ -108,7 +108,7 @@ class RefreshSessionCommandHandlerTest {
     when(refreshTokenExchangeOAuthClient.exchangeRefreshToken("refresh-2"))
         .thenReturn(TOKEN_RESPONSE);
     when(refreshCookieInstructionsMapper.toCookieInstruction(TOKEN_RESPONSE))
-        .thenReturn(COOKIE_INSTRUCTION);
+        .thenReturn(Optional.of(COOKIE_INSTRUCTION));
     when(authResultMapper.toAuthResult(TOKEN_RESPONSE)).thenReturn(AUTH_RESULT);
     when(authenticatedUserResolver.resolveExisting(AUTH_USER))
         .thenThrow(new AuthUnauthorizedException("User not found"));
@@ -129,7 +129,7 @@ class RefreshSessionCommandHandlerTest {
 
     assertEquals(AUTH_RESULT, result.authResult());
     assertEquals(RESOLVED_USER, result.user());
-    assertEquals(COOKIE_INSTRUCTION, result.cookieInstruction());
+    assertEquals(Optional.of(COOKIE_INSTRUCTION), result.cookieInstruction());
   }
 
   @Test
@@ -138,7 +138,7 @@ class RefreshSessionCommandHandlerTest {
     when(refreshTokenExchangeOAuthClient.exchangeRefreshToken("refresh-2"))
         .thenReturn(TOKEN_RESPONSE);
     when(refreshCookieInstructionsMapper.toCookieInstruction(TOKEN_RESPONSE))
-        .thenReturn(COOKIE_INSTRUCTION);
+        .thenReturn(Optional.of(COOKIE_INSTRUCTION));
     when(authResultMapper.toAuthResult(TOKEN_RESPONSE))
         .thenThrow(new IllegalArgumentException("invalid id token"));
 
@@ -155,7 +155,7 @@ class RefreshSessionCommandHandlerTest {
     when(refreshTokenExchangeOAuthClient.exchangeRefreshToken("refresh-2"))
         .thenReturn(TOKEN_RESPONSE);
     when(refreshCookieInstructionsMapper.toCookieInstruction(TOKEN_RESPONSE))
-        .thenReturn(COOKIE_INSTRUCTION);
+        .thenReturn(Optional.of(COOKIE_INSTRUCTION));
     when(authResultMapper.toAuthResult(TOKEN_RESPONSE)).thenReturn(AUTH_RESULT);
     when(authenticatedUserResolver.resolveExisting(AUTH_USER)).thenReturn(RESOLVED_USER);
   }
