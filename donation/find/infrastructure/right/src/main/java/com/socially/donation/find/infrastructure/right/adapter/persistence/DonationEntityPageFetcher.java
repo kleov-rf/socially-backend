@@ -1,11 +1,9 @@
 package com.socially.donation.find.infrastructure.right.adapter.persistence;
 
 import com.socially.donation.find.domain.pagination.PageOrder;
-import com.socially.donation.find.domain.proximity.ProximityReference;
 import com.socially.donation.kernel.infrastructure.right.adapter.persistence.DonationEntityRepository;
 import com.socially.donation.kernel.infrastructure.right.adapter.persistence.entity.DonationEntity;
 import java.util.List;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +14,7 @@ public class DonationEntityPageFetcher implements PageFetcher {
 
   @Override
   public List<DonationEntity> fetch(FetchCriteria criteria) {
-    if (Objects.isNull(criteria.paginationCriteria().cursor())) {
+    if (criteria.paginationCriteria().cursor().isEmpty()) {
       return fetchInitialPage(criteria);
     }
     if (criteria.previousCursorRequest()) {
@@ -30,39 +28,51 @@ public class DonationEntityPageFetcher implements PageFetcher {
       return fetchInitialNearestPage(criteria);
     }
 
-    if (Objects.isNull(criteria.searchPattern())) {
-      return switch (criteria.paginationCriteria().order()) {
-        case OLDEST_FIRST ->
-            entityRepository.findByOrderByCreatedAtAscIdAsc(criteria.pageRequest());
-        case NEWEST_FIRST ->
-            entityRepository.findByOrderByCreatedAtDescIdDesc(criteria.pageRequest());
-        case NEAREST_FIRST -> throw new IllegalStateException("Unreachable");
-      };
-    }
-
-    return switch (criteria.paginationCriteria().order()) {
-      case OLDEST_FIRST ->
-          entityRepository.findBySearchPatternOrderByCreatedAtAscIdAsc(
-              criteria.searchPattern(), criteria.pageRequest());
-      case NEWEST_FIRST ->
-          entityRepository.findBySearchPatternOrderByCreatedAtDescIdDesc(
-              criteria.searchPattern(), criteria.pageRequest());
-      case NEAREST_FIRST -> throw new IllegalStateException("Unreachable");
-    };
+    return criteria
+        .searchPattern()
+        .map(
+            pattern ->
+                switch (criteria.paginationCriteria().order()) {
+                  case OLDEST_FIRST ->
+                      entityRepository.findBySearchPatternOrderByCreatedAtAscIdAsc(
+                          pattern, criteria.pageRequest());
+                  case NEWEST_FIRST ->
+                      entityRepository.findBySearchPatternOrderByCreatedAtDescIdDesc(
+                          pattern, criteria.pageRequest());
+                  case NEAREST_FIRST -> throw new IllegalStateException("Unreachable");
+                })
+        .orElseGet(
+            () ->
+                switch (criteria.paginationCriteria().order()) {
+                  case OLDEST_FIRST ->
+                      entityRepository.findByOrderByCreatedAtAscIdAsc(criteria.pageRequest());
+                  case NEWEST_FIRST ->
+                      entityRepository.findByOrderByCreatedAtDescIdDesc(criteria.pageRequest());
+                  case NEAREST_FIRST -> throw new IllegalStateException("Unreachable");
+                });
   }
 
   private List<DonationEntity> fetchInitialNearestPage(FetchCriteria criteria) {
-    ProximityReference reference = criteria.proximityReference();
-    if (Objects.isNull(criteria.searchPattern())) {
-      return entityRepository.findNearestFirst(
-          reference.latitude(), reference.longitude(), criteria.pageRequest());
-    }
-
-    return entityRepository.findNearestFirstBySearchPattern(
-        criteria.searchPattern(),
-        reference.latitude(),
-        reference.longitude(),
-        criteria.pageRequest());
+    return criteria
+        .proximityReference()
+        .map(
+            reference ->
+                criteria
+                    .searchPattern()
+                    .map(
+                        pattern ->
+                            entityRepository.findNearestFirstBySearchPattern(
+                                pattern,
+                                reference.latitude(),
+                                reference.longitude(),
+                                criteria.pageRequest()))
+                    .orElseGet(
+                        () ->
+                            entityRepository.findNearestFirst(
+                                reference.latitude(),
+                                reference.longitude(),
+                                criteria.pageRequest())))
+        .orElseGet(List::of);
   }
 
   private List<DonationEntity> fetchPreviousPage(FetchCriteria criteria) {
@@ -70,54 +80,73 @@ public class DonationEntityPageFetcher implements PageFetcher {
       return fetchPreviousNearestPage(criteria);
     }
 
-    if (Objects.isNull(criteria.searchPattern())) {
-      return switch (criteria.paginationCriteria().order()) {
-        case OLDEST_FIRST ->
-            entityRepository.findPreviousPageForOldestFirst(
-                criteria.boundary().createdAt(), criteria.boundary().id(), criteria.pageRequest());
-        case NEWEST_FIRST ->
-            entityRepository.findPreviousPage(
-                criteria.boundary().createdAt(), criteria.boundary().id(), criteria.pageRequest());
-        case NEAREST_FIRST -> throw new IllegalStateException("Unreachable");
-      };
-    }
-    return switch (criteria.paginationCriteria().order()) {
-      case OLDEST_FIRST ->
-          entityRepository.findPreviousPageForOldestFirstBySearchPattern(
-              criteria.searchPattern(),
-              criteria.boundary().createdAt(),
-              criteria.boundary().id(),
-              criteria.pageRequest());
-      case NEWEST_FIRST ->
-          entityRepository.findPreviousPageBySearchPattern(
-              criteria.searchPattern(),
-              criteria.boundary().createdAt(),
-              criteria.boundary().id(),
-              criteria.pageRequest());
-      case NEAREST_FIRST -> throw new IllegalStateException("Unreachable");
-    };
+    return criteria
+        .boundary()
+        .map(
+            boundary ->
+                criteria
+                    .searchPattern()
+                    .map(
+                        pattern ->
+                            switch (criteria.paginationCriteria().order()) {
+                              case OLDEST_FIRST ->
+                                  entityRepository.findPreviousPageForOldestFirstBySearchPattern(
+                                      pattern,
+                                      boundary.createdAt(),
+                                      boundary.id(),
+                                      criteria.pageRequest());
+                              case NEWEST_FIRST ->
+                                  entityRepository.findPreviousPageBySearchPattern(
+                                      pattern,
+                                      boundary.createdAt(),
+                                      boundary.id(),
+                                      criteria.pageRequest());
+                              case NEAREST_FIRST -> throw new IllegalStateException("Unreachable");
+                            })
+                    .orElseGet(
+                        () ->
+                            switch (criteria.paginationCriteria().order()) {
+                              case OLDEST_FIRST ->
+                                  entityRepository.findPreviousPageForOldestFirst(
+                                      boundary.createdAt(), boundary.id(), criteria.pageRequest());
+                              case NEWEST_FIRST ->
+                                  entityRepository.findPreviousPage(
+                                      boundary.createdAt(), boundary.id(), criteria.pageRequest());
+                              case NEAREST_FIRST -> throw new IllegalStateException("Unreachable");
+                            }))
+        .orElseGet(List::of);
   }
 
   private List<DonationEntity> fetchPreviousNearestPage(FetchCriteria criteria) {
-    ProximityReference reference = criteria.proximityReference();
-    ProximityKeysetCursor boundary = criteria.proximityBoundary();
-
-    if (Objects.isNull(criteria.searchPattern())) {
-      return entityRepository.findPreviousNearestFirstPage(
-          reference.latitude(),
-          reference.longitude(),
-          boundary.distanceMeters(),
-          boundary.id(),
-          criteria.pageRequest());
-    }
-
-    return entityRepository.findPreviousNearestFirstPageBySearchPattern(
-        criteria.searchPattern(),
-        reference.latitude(),
-        reference.longitude(),
-        boundary.distanceMeters(),
-        boundary.id(),
-        criteria.pageRequest());
+    return criteria
+        .proximityReference()
+        .flatMap(
+            reference ->
+                criteria
+                    .proximityBoundary()
+                    .map(
+                        boundary ->
+                            criteria
+                                .searchPattern()
+                                .map(
+                                    pattern ->
+                                        entityRepository
+                                            .findPreviousNearestFirstPageBySearchPattern(
+                                                pattern,
+                                                reference.latitude(),
+                                                reference.longitude(),
+                                                boundary.distanceMeters(),
+                                                boundary.id(),
+                                                criteria.pageRequest()))
+                                .orElseGet(
+                                    () ->
+                                        entityRepository.findPreviousNearestFirstPage(
+                                            reference.latitude(),
+                                            reference.longitude(),
+                                            boundary.distanceMeters(),
+                                            boundary.id(),
+                                            criteria.pageRequest()))))
+        .orElseGet(List::of);
   }
 
   private List<DonationEntity> fetchNextPage(FetchCriteria criteria) {
@@ -125,53 +154,71 @@ public class DonationEntityPageFetcher implements PageFetcher {
       return fetchNextNearestPage(criteria);
     }
 
-    if (Objects.isNull(criteria.searchPattern())) {
-      return switch (criteria.paginationCriteria().order()) {
-        case OLDEST_FIRST ->
-            entityRepository.findNextPageForOldestFirst(
-                criteria.boundary().createdAt(), criteria.boundary().id(), criteria.pageRequest());
-        case NEWEST_FIRST ->
-            entityRepository.findNextPage(
-                criteria.boundary().createdAt(), criteria.boundary().id(), criteria.pageRequest());
-        case NEAREST_FIRST -> throw new IllegalStateException("Unreachable");
-      };
-    }
-    return switch (criteria.paginationCriteria().order()) {
-      case OLDEST_FIRST ->
-          entityRepository.findNextPageForOldestFirstBySearchPattern(
-              criteria.searchPattern(),
-              criteria.boundary().createdAt(),
-              criteria.boundary().id(),
-              criteria.pageRequest());
-      case NEWEST_FIRST ->
-          entityRepository.findNextPageBySearchPattern(
-              criteria.searchPattern(),
-              criteria.boundary().createdAt(),
-              criteria.boundary().id(),
-              criteria.pageRequest());
-      case NEAREST_FIRST -> throw new IllegalStateException("Unreachable");
-    };
+    return criteria
+        .boundary()
+        .map(
+            boundary ->
+                criteria
+                    .searchPattern()
+                    .map(
+                        pattern ->
+                            switch (criteria.paginationCriteria().order()) {
+                              case OLDEST_FIRST ->
+                                  entityRepository.findNextPageForOldestFirstBySearchPattern(
+                                      pattern,
+                                      boundary.createdAt(),
+                                      boundary.id(),
+                                      criteria.pageRequest());
+                              case NEWEST_FIRST ->
+                                  entityRepository.findNextPageBySearchPattern(
+                                      pattern,
+                                      boundary.createdAt(),
+                                      boundary.id(),
+                                      criteria.pageRequest());
+                              case NEAREST_FIRST -> throw new IllegalStateException("Unreachable");
+                            })
+                    .orElseGet(
+                        () ->
+                            switch (criteria.paginationCriteria().order()) {
+                              case OLDEST_FIRST ->
+                                  entityRepository.findNextPageForOldestFirst(
+                                      boundary.createdAt(), boundary.id(), criteria.pageRequest());
+                              case NEWEST_FIRST ->
+                                  entityRepository.findNextPage(
+                                      boundary.createdAt(), boundary.id(), criteria.pageRequest());
+                              case NEAREST_FIRST -> throw new IllegalStateException("Unreachable");
+                            }))
+        .orElseGet(List::of);
   }
 
   private List<DonationEntity> fetchNextNearestPage(FetchCriteria criteria) {
-    ProximityReference reference = criteria.proximityReference();
-    ProximityKeysetCursor boundary = criteria.proximityBoundary();
-
-    if (Objects.isNull(criteria.searchPattern())) {
-      return entityRepository.findNextNearestFirstPage(
-          reference.latitude(),
-          reference.longitude(),
-          boundary.distanceMeters(),
-          boundary.id(),
-          criteria.pageRequest());
-    }
-
-    return entityRepository.findNextNearestFirstPageBySearchPattern(
-        criteria.searchPattern(),
-        reference.latitude(),
-        reference.longitude(),
-        boundary.distanceMeters(),
-        boundary.id(),
-        criteria.pageRequest());
+    return criteria
+        .proximityReference()
+        .flatMap(
+            reference ->
+                criteria
+                    .proximityBoundary()
+                    .map(
+                        boundary ->
+                            criteria
+                                .searchPattern()
+                                .map(
+                                    pattern ->
+                                        entityRepository.findNextNearestFirstPageBySearchPattern(
+                                            pattern,
+                                            reference.latitude(),
+                                            reference.longitude(),
+                                            boundary.distanceMeters(),
+                                            boundary.id(),
+                                            criteria.pageRequest()))
+                                .orElseGet(
+                                    () ->
+                                        entityRepository.findNextNearestFirstPage(
+                                            reference.latitude(),
+                                            reference.longitude(),
+                                            boundary.distanceMeters(),
+                                            boundary.id(),
+                                            criteria.pageRequest()))))
+        .orElseGet(List::of);
   }
 }

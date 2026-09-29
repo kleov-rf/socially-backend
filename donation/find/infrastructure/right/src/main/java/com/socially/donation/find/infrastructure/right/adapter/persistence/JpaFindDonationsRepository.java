@@ -12,7 +12,7 @@ import com.socially.donation.kernel.infrastructure.right.adapter.persistence.Don
 import com.socially.donation.kernel.infrastructure.right.adapter.persistence.entity.DonationEntity;
 import com.socially.donation.kernel.infrastructure.right.adapter.persistence.mapper.DonationEntityMapper;
 import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
@@ -35,32 +35,34 @@ public class JpaFindDonationsRepository implements FindDonationsRepository {
   public Page<Donation> find(
       PaginationCriteria paginationCriteria,
       FilterCriteria filterCriteria,
-      ProximityReference proximityReference) {
-    String searchPattern = searchPatternNormalizer.toSearchPattern(filterCriteria);
+      Optional<ProximityReference> proximityReference) {
+    Optional<String> searchPattern = searchPatternNormalizer.toSearchPattern(filterCriteria);
 
-    KeysetCursor dateBoundary = null;
-    ProximityKeysetCursor proximityBoundary = null;
-    if (Objects.nonNull(paginationCriteria.cursor())) {
+    Optional<KeysetCursor> dateBoundary = Optional.empty();
+    Optional<ProximityKeysetCursor> proximityBoundary = Optional.empty();
+    if (paginationCriteria.cursor().isPresent()) {
+      String cursor = paginationCriteria.cursor().get();
       if (paginationCriteria.order() == PageOrder.NEAREST_FIRST) {
-        proximityBoundary = proximityCursorCodec.decode(paginationCriteria.cursor());
+        proximityBoundary = Optional.of(proximityCursorCodec.decode(cursor));
       } else {
-        dateBoundary = cursorCodec.decode(paginationCriteria.cursor());
+        dateBoundary = Optional.of(cursorCodec.decode(cursor));
       }
     }
 
     boolean isPreviousCursorRequest =
-        Objects.nonNull(paginationCriteria.cursor()) && isPreviousCursor(paginationCriteria);
+        paginationCriteria.cursor().isPresent() && isPreviousCursor(paginationCriteria);
 
-    List<DonationEntity> entities =
-        entityPageFetcher.fetch(
-            new FetchCriteria(
+    FetchCriteria fetchCriteria =
+        FetchCriteria.create(
                 paginationCriteria,
-                searchPattern,
-                dateBoundary,
-                proximityBoundary,
-                proximityReference,
                 isPreviousCursorRequest,
-                PageRequest.of(0, paginationCriteria.size() + 1)));
+                PageRequest.of(0, paginationCriteria.size() + 1))
+            .withSearchPattern(searchPattern)
+            .withBoundary(dateBoundary)
+            .withProximityBoundary(proximityBoundary)
+            .withProximityReference(proximityReference);
+
+    List<DonationEntity> entities = entityPageFetcher.fetch(fetchCriteria);
 
     PageSlice pageSlice =
         pageSlicer.slice(entities, paginationCriteria.size(), isPreviousCursorRequest);
@@ -76,19 +78,15 @@ public class JpaFindDonationsRepository implements FindDonationsRepository {
             proximityCursorCodec,
             distanceCalculator);
 
-    long totalCount;
-    if (Objects.isNull(searchPattern)) {
-      totalCount = entityRepository.countByDeletedAtIsNull();
-    } else {
-      totalCount = entityRepository.countBySearchPattern(searchPattern);
-    }
+    long totalCount =
+        searchPattern
+            .map(entityRepository::countBySearchPattern)
+            .orElseGet(entityRepository::countByDeletedAtIsNull);
 
     Metadata metadata =
-        Metadata.create(
-            cursorMetadata.nextCursor(),
-            cursorMetadata.previousCursor(),
-            paginationCriteria.size(),
-            totalCount);
+        Metadata.create(paginationCriteria.size(), totalCount)
+            .withNextCursor(cursorMetadata.nextCursor())
+            .withPreviousCursor(cursorMetadata.previousCursor());
 
     List<Donation> donations = pageSlice.entities().stream().map(entityMapper::toDomain).toList();
 
@@ -96,9 +94,13 @@ public class JpaFindDonationsRepository implements FindDonationsRepository {
   }
 
   private boolean isPreviousCursor(PaginationCriteria paginationCriteria) {
-    if (paginationCriteria.order() == PageOrder.NEAREST_FIRST) {
-      return proximityCursorCodec.isPreviousCursor(paginationCriteria.cursor());
-    }
-    return cursorCodec.isPreviousCursor(paginationCriteria.cursor());
+    return paginationCriteria
+        .cursor()
+        .map(
+            cursor ->
+                paginationCriteria.order() == PageOrder.NEAREST_FIRST
+                    ? proximityCursorCodec.isPreviousCursor(cursor)
+                    : cursorCodec.isPreviousCursor(cursor))
+        .orElse(false);
   }
 }

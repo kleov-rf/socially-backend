@@ -28,7 +28,6 @@ dependencies {
     implementation(project(":donor:kernel:domain"))
 
     implementation(libs.spring.context)
-    compileOnly(libs.jakarta.validation.api)
 
     compileOnly(libs.lombok)
     annotationProcessor(libs.lombok)

@@ -15,6 +15,7 @@ import com.socially.donation.kernel.domain.valueobject.Description;
 import com.socially.donation.kernel.domain.valueobject.Title;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -66,7 +67,7 @@ class PageResponseMapperTest {
 
     var result = mapper.toResponse(givenPage(donationDto));
 
-    assertEquals(NEXT_CURSOR, result.page().nextCursor());
+    assertEquals(Optional.of(NEXT_CURSOR), result.page().nextCursor());
   }
 
   @Test
@@ -86,7 +87,7 @@ class PageResponseMapperTest {
 
     var result = mapper.toResponse(givenPage(donationDto));
 
-    assertEquals(PREVIOUS_CURSOR, result.page().previousCursor());
+    assertEquals(Optional.of(PREVIOUS_CURSOR), result.page().previousCursor());
   }
 
   @Test
@@ -142,6 +143,8 @@ class PageResponseMapperTest {
   private Page<FindDonationDto> givenPage(FindDonationDto donationDto) {
     return Page.create(
         List.of(donationDto),
-        Metadata.create(NEXT_CURSOR, PREVIOUS_CURSOR, PAGE_SIZE, TOTAL_COUNT));
+        Metadata.create(PAGE_SIZE, TOTAL_COUNT)
+            .withNextCursor(Optional.of(NEXT_CURSOR))
+            .withPreviousCursor(Optional.of(PREVIOUS_CURSOR)));
   }
 }

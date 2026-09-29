@@ -9,6 +9,7 @@ import com.socially.donation.find.infrastructure.left.adapter.http.find.input.ma
 import com.socially.donation.find.infrastructure.left.adapter.http.find.output.FindDonationResponse;
 import com.socially.donation.find.infrastructure.left.adapter.http.find.output.PageResponse;
 import com.socially.donation.find.infrastructure.left.adapter.http.find.output.mapper.PageResponseMapper;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,12 +29,12 @@ public class FindDonationsController {
 
   @GetMapping
   public ResponseEntity<PageResponse<FindDonationResponse>> find(
-      @RequestParam(required = false) String cursor,
-      @RequestParam(required = false) Integer size,
-      @RequestParam(required = false) String order,
-      @RequestParam(required = false) String query,
-      @RequestParam(required = false) Double latitude,
-      @RequestParam(required = false) Double longitude) {
+      @RequestParam(required = false) Optional<String> cursor,
+      @RequestParam(required = false) Optional<Integer> size,
+      @RequestParam(required = false) Optional<String> order,
+      @RequestParam(required = false) Optional<String> query,
+      @RequestParam(required = false) Optional<Double> latitude,
+      @RequestParam(required = false) Optional<Double> longitude) {
     FindDonationsQuery queryModel =
         queryMapper.toQuery(cursor, size, order, query, latitude, longitude);
 

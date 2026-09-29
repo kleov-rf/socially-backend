@@ -5,15 +5,16 @@ import com.socially.donation.find.domain.pagination.PaginationCriteria;
 import com.socially.donation.find.domain.proximity.ProximityReference;
 import com.socially.donation.kernel.infrastructure.right.adapter.persistence.entity.DonationEntity;
 import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
 import org.springframework.stereotype.Component;
 
 @Component
 public class CursorMetadataBuilder {
+
   public CursorMetadata build(
       List<DonationEntity> pageEntities,
       PaginationCriteria paginationCriteria,
-      ProximityReference proximityReference,
+      Optional<ProximityReference> proximityReference,
       boolean previousCursorRequest,
       boolean overflowItemsExist,
       KeysetCursorCodec dateCursorCodec,
@@ -44,32 +45,32 @@ public class CursorMetadataBuilder {
       boolean previousCursorRequest,
       boolean overflowItemsExist,
       KeysetCursorCodec cursorCodec) {
-    String nextCursor =
+    Optional<String> nextCursor =
         buildDateNextCursor(
             pageEntities,
             paginationCriteria,
             previousCursorRequest,
             overflowItemsExist,
             cursorCodec);
-    String previousCursor =
+    Optional<String> previousCursor =
         buildDatePreviousCursor(
             pageEntities,
             paginationCriteria,
             previousCursorRequest,
             overflowItemsExist,
             cursorCodec);
-    return new CursorMetadata(nextCursor, previousCursor);
+    return CursorMetadata.create().withNextCursor(nextCursor).withPreviousCursor(previousCursor);
   }
 
   private CursorMetadata buildProximityCursors(
       List<DonationEntity> pageEntities,
       PaginationCriteria paginationCriteria,
-      ProximityReference proximityReference,
+      Optional<ProximityReference> proximityReference,
       boolean previousCursorRequest,
       boolean overflowItemsExist,
       ProximityKeysetCursorCodec proximityCursorCodec,
       HaversineDistanceCalculator distanceCalculator) {
-    String nextCursor =
+    Optional<String> nextCursor =
         buildProximityNextCursor(
             pageEntities,
             paginationCriteria,
@@ -78,7 +79,7 @@ public class CursorMetadataBuilder {
             overflowItemsExist,
             proximityCursorCodec,
             distanceCalculator);
-    String previousCursor =
+    Optional<String> previousCursor =
         buildProximityPreviousCursor(
             pageEntities,
             paginationCriteria,
@@ -87,90 +88,96 @@ public class CursorMetadataBuilder {
             overflowItemsExist,
             proximityCursorCodec,
             distanceCalculator);
-    return new CursorMetadata(nextCursor, previousCursor);
+    return CursorMetadata.create().withNextCursor(nextCursor).withPreviousCursor(previousCursor);
   }
 
-  private String buildDateNextCursor(
+  private Optional<String> buildDateNextCursor(
       List<DonationEntity> pageEntities,
       PaginationCriteria paginationCriteria,
       boolean isPreviousCursorRequest,
       boolean overflowItemsExist,
       KeysetCursorCodec cursorCodec) {
     if (pageEntities.isEmpty()) {
-      return null;
+      return Optional.empty();
     }
     if (!isPreviousCursorRequest && !overflowItemsExist) {
-      return null;
+      return Optional.empty();
     }
-    if (isPreviousCursorRequest && Objects.isNull(paginationCriteria.cursor())) {
-      return null;
+    if (isPreviousCursorRequest && paginationCriteria.cursor().isEmpty()) {
+      return Optional.empty();
     }
 
     DonationEntity lastEntity = pageEntities.getLast();
-    return cursorCodec.encode(lastEntity.getCreatedAt(), lastEntity.getId());
+    return Optional.of(cursorCodec.encode(lastEntity.getCreatedAt(), lastEntity.getId()));
   }
 
-  private String buildDatePreviousCursor(
+  private Optional<String> buildDatePreviousCursor(
       List<DonationEntity> pageEntities,
       PaginationCriteria paginationCriteria,
       boolean previousCursorRequest,
       boolean overflowItemsExist,
       KeysetCursorCodec cursorCodec) {
-    if (Objects.isNull(paginationCriteria.cursor()) || pageEntities.isEmpty()) {
-      return null;
+    if (paginationCriteria.cursor().isEmpty() || pageEntities.isEmpty()) {
+      return Optional.empty();
     }
     if (previousCursorRequest && !overflowItemsExist) {
-      return null;
+      return Optional.empty();
     }
 
     DonationEntity firstEntity = pageEntities.getFirst();
-    return cursorCodec.encodePrevious(firstEntity.getCreatedAt(), firstEntity.getId());
+    return Optional.of(cursorCodec.encodePrevious(firstEntity.getCreatedAt(), firstEntity.getId()));
   }
 
-  private String buildProximityNextCursor(
+  private Optional<String> buildProximityNextCursor(
       List<DonationEntity> pageEntities,
       PaginationCriteria paginationCriteria,
-      ProximityReference proximityReference,
+      Optional<ProximityReference> proximityReference,
       boolean isPreviousCursorRequest,
       boolean overflowItemsExist,
       ProximityKeysetCursorCodec proximityCursorCodec,
       HaversineDistanceCalculator distanceCalculator) {
     if (pageEntities.isEmpty()) {
-      return null;
+      return Optional.empty();
     }
     if (!isPreviousCursorRequest && !overflowItemsExist) {
-      return null;
+      return Optional.empty();
     }
-    if (isPreviousCursorRequest && Objects.isNull(paginationCriteria.cursor())) {
-      return null;
+    if (isPreviousCursorRequest && paginationCriteria.cursor().isEmpty()) {
+      return Optional.empty();
+    }
+    if (proximityReference.isEmpty()) {
+      return Optional.empty();
     }
 
+    ProximityReference reference = proximityReference.get();
     DonationEntity lastEntity = pageEntities.getLast();
     double distanceMeters =
-        distanceCalculator.distanceMeters(
-            proximityReference.latitude(), proximityReference.longitude(), lastEntity);
-    return proximityCursorCodec.encode(distanceMeters, lastEntity.getId());
+        distanceCalculator.distanceMeters(reference.latitude(), reference.longitude(), lastEntity);
+    return Optional.of(proximityCursorCodec.encode(distanceMeters, lastEntity.getId()));
   }
 
-  private String buildProximityPreviousCursor(
+  private Optional<String> buildProximityPreviousCursor(
       List<DonationEntity> pageEntities,
       PaginationCriteria paginationCriteria,
-      ProximityReference proximityReference,
+      Optional<ProximityReference> proximityReference,
       boolean previousCursorRequest,
       boolean overflowItemsExist,
       ProximityKeysetCursorCodec proximityCursorCodec,
       HaversineDistanceCalculator distanceCalculator) {
-    if (Objects.isNull(paginationCriteria.cursor()) || pageEntities.isEmpty()) {
-      return null;
+    if (paginationCriteria.cursor().isEmpty() || pageEntities.isEmpty()) {
+      return Optional.empty();
     }
     if (previousCursorRequest && !overflowItemsExist) {
-      return null;
+      return Optional.empty();
+    }
+    if (proximityReference.isEmpty()) {
+      return Optional.empty();
     }
 
+    ProximityReference reference = proximityReference.get();
     DonationEntity firstEntity = pageEntities.getFirst();
     double distanceMeters =
-        distanceCalculator.distanceMeters(
-            proximityReference.latitude(), proximityReference.longitude(), firstEntity);
-    return proximityCursorCodec.encodePrevious(distanceMeters, firstEntity.getId());
+        distanceCalculator.distanceMeters(reference.latitude(), reference.longitude(), firstEntity);
+    return Optional.of(proximityCursorCodec.encodePrevious(distanceMeters, firstEntity.getId()));
   }
 }

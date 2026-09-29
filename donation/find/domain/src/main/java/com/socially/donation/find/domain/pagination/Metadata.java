@@ -1,24 +1,26 @@
 package com.socially.donation.find.domain.pagination;
 
-import java.util.Objects;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
+import java.util.Optional;
+import org.jspecify.annotations.NullMarked;
 
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class Metadata {
-  private final String nextCursor;
-  private final String previousCursor;
-  private final int size;
-  private final long totalCount;
+@NullMarked
+public record Metadata(
+    int size, long totalCount, Optional<String> nextCursor, Optional<String> previousCursor) {
 
-  public static Metadata create(
-      String nextCursor, String previousCursor, Integer size, Long totalCount) {
+  public static Metadata create(int size, long totalCount) {
     validate(size, totalCount);
-    return new Metadata(
-        normalizeCursor(nextCursor), normalizeCursor(previousCursor), size, totalCount);
+    return new Metadata(size, totalCount, Optional.empty(), Optional.empty());
   }
 
-  private static void validate(Integer size, Long totalCount) {
+  public Metadata withNextCursor(Optional<String> nextCursor) {
+    return new Metadata(size, totalCount, normalizeCursor(nextCursor), previousCursor);
+  }
+
+  public Metadata withPreviousCursor(Optional<String> previousCursor) {
+    return new Metadata(size, totalCount, nextCursor, normalizeCursor(previousCursor));
+  }
+
+  private static void validate(int size, long totalCount) {
     if (size <= 0) {
       throw new IllegalArgumentException("Size must be greater than zero");
     }
@@ -28,34 +30,15 @@ public final class Metadata {
     }
   }
 
-  private static String normalizeCursor(String cursor) {
-    if (cursor == null || cursor.isBlank()) {
-      return null;
-    }
-    return cursor;
-  }
-
-  public String nextCursor() {
-    return nextCursor;
-  }
-
-  public String previousCursor() {
-    return previousCursor;
+  private static Optional<String> normalizeCursor(Optional<String> cursor) {
+    return cursor.map(String::trim).filter(s -> !s.isBlank());
   }
 
   public boolean hasNext() {
-    return Objects.nonNull(nextCursor);
+    return nextCursor.isPresent();
   }
 
   public boolean hasPrevious() {
-    return Objects.nonNull(previousCursor);
-  }
-
-  public int size() {
-    return size;
-  }
-
-  public long totalCount() {
-    return totalCount;
+    return previousCursor.isPresent();
   }
 }

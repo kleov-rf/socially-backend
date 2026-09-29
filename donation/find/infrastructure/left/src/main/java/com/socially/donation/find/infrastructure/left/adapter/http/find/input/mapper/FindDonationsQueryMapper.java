@@ -7,38 +7,51 @@ import com.socially.donation.find.domain.pagination.PageOrder;
 import com.socially.donation.find.domain.pagination.PageSize;
 import com.socially.donation.find.domain.pagination.PaginationCriteria;
 import com.socially.donation.find.domain.proximity.ProximityReference;
-import java.util.Objects;
+import java.util.Optional;
 import org.springframework.stereotype.Component;
 
 @Component
 public class FindDonationsQueryMapper {
+
   public FindDonationsQuery toQuery(
-      String cursor, Integer size, String order, String query, Double latitude, Double longitude) {
-    PageOrder resolvedOrder = PageOrder.fromValue(order);
-    PageSize resolvedSize =
-        size == null ? PaginationCriteria.DEFAULT_SIZE : PageSize.fromValue(size);
+      Optional<String> cursor,
+      Optional<Integer> size,
+      Optional<String> order,
+      Optional<String> query,
+      Optional<Double> latitude,
+      Optional<Double> longitude) {
+    PageOrder resolvedOrder =
+        order.map(PageOrder::fromValue).orElse(PaginationCriteria.DEFAULT_ORDER);
+    PageSize resolvedSize = size.map(PageSize::fromValue).orElse(PaginationCriteria.DEFAULT_SIZE);
     PaginationCriteria paginationCriteria =
-        PaginationCriteria.create(cursor, resolvedSize, resolvedOrder);
+        PaginationCriteria.create(resolvedSize, resolvedOrder).withCursor(cursor);
 
-    FilterCriteria filterCriteria = FilterCriteria.create(query);
+    FilterCriteria filterCriteria = FilterCriteria.create().withQuery(query);
 
-    ProximityReference proximityReference =
+    Optional<ProximityReference> proximityReference =
         resolveProximityReference(resolvedOrder, latitude, longitude);
 
-    return new FindDonationsQuery(paginationCriteria, filterCriteria, proximityReference);
+    return FindDonationsQuery.create(paginationCriteria, filterCriteria)
+        .withProximityReference(proximityReference);
   }
 
-  private ProximityReference resolveProximityReference(
-      PageOrder order, Double latitude, Double longitude) {
+  private Optional<ProximityReference> resolveProximityReference(
+      PageOrder order, Optional<Double> latitude, Optional<Double> longitude) {
     if (order != PageOrder.NEAREST_FIRST) {
-      return null;
+      return Optional.empty();
     }
 
-    if (Objects.isNull(latitude) || Objects.isNull(longitude)) {
-      throw new FindDonationsBadRequestException(
-          "latitude and longitude are required when order is nearest_first");
-    }
+    double lat =
+        latitude.orElseThrow(
+            () ->
+                new FindDonationsBadRequestException(
+                    "latitude and longitude are required when order is nearest_first"));
+    double lon =
+        longitude.orElseThrow(
+            () ->
+                new FindDonationsBadRequestException(
+                    "latitude and longitude are required when order is nearest_first"));
 
-    return ProximityReference.from(latitude, longitude);
+    return Optional.of(ProximityReference.create(lat, lon));
   }
 }

@@ -19,13 +19,13 @@ public class PageResponseMapper {
         page.items().stream().map(donationResponseMapper::toResponse).toList();
 
     MetadataResponse metadata =
-        new MetadataResponse(
-            page.metadata().nextCursor(),
-            page.metadata().previousCursor(),
-            page.metadata().hasNext(),
-            page.metadata().hasPrevious(),
-            page.metadata().size(),
-            page.metadata().totalCount());
+        MetadataResponse.create(
+                page.metadata().hasNext(),
+                page.metadata().hasPrevious(),
+                page.metadata().size(),
+                page.metadata().totalCount())
+            .withNextCursor(page.metadata().nextCursor())
+            .withPreviousCursor(page.metadata().previousCursor());
 
     return new PageResponse<>(items, metadata);
   }

@@ -1,30 +1,20 @@
 package com.socially.donation.find.domain.filter;
 
-import java.util.Objects;
-import lombok.EqualsAndHashCode;
-import lombok.RequiredArgsConstructor;
+import java.util.Optional;
+import org.jspecify.annotations.NullMarked;
 
-@EqualsAndHashCode
-@RequiredArgsConstructor(access = lombok.AccessLevel.PRIVATE)
-public final class FilterCriteria {
-  private final String query;
+@NullMarked
+public record FilterCriteria(Optional<String> query) {
 
-  public static FilterCriteria create(String query) {
+  public static FilterCriteria create() {
+    return new FilterCriteria(Optional.empty());
+  }
+
+  public FilterCriteria withQuery(Optional<String> query) {
     return new FilterCriteria(normalizeQuery(query));
   }
 
-  private static String normalizeQuery(String query) {
-    if (Objects.isNull(query)) {
-      return null;
-    }
-    String trimmed = query.trim();
-    if (trimmed.isBlank()) {
-      return null;
-    }
-    return trimmed;
-  }
-
-  public String query() {
-    return query;
+  private static Optional<String> normalizeQuery(Optional<String> query) {
+    return query.map(String::trim).filter(s -> !s.isBlank());
   }
 }

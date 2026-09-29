@@ -22,6 +22,7 @@ import com.socially.donation.kernel.infrastructure.right.adapter.persistence.ent
 import com.socially.donation.kernel.infrastructure.right.adapter.persistence.mapper.DonationEntityMapper;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -37,7 +38,7 @@ class JpaFindDonationsRepositoryTest {
   private static final DonationLocation DEFAULT_LOCATION =
       DonationLocation.from("Calle Mayor 1, Madrid", 40.4168, -3.7038);
   private static final ProximityReference PROXIMITY_REFERENCE =
-      ProximityReference.from(40.4168, -3.7038);
+      ProximityReference.create(40.4168, -3.7038);
   private static final ProximityKeysetCursor PROXIMITY_BOUNDARY =
       new ProximityKeysetCursor(1000.0, Id.from(DONATION_ID).value());
 
@@ -56,11 +57,11 @@ class JpaFindDonationsRepositoryTest {
   @Test
   void find_should_call_unfiltered_count_when_search_pattern_is_null() {
     PaginationCriteria paginationCriteria =
-        PaginationCriteria.create(null, PageSize.FIVE_ITEMS, PaginationCriteria.DEFAULT_ORDER);
-    FilterCriteria filterCriteria = FilterCriteria.create(null);
-    stubFindPipeline(paginationCriteria, filterCriteria, null, List.of(), false);
+        PaginationCriteria.create(PageSize.FIVE_ITEMS, PaginationCriteria.DEFAULT_ORDER);
+    FilterCriteria filterCriteria = FilterCriteria.create();
+    stubFindPipeline(paginationCriteria, filterCriteria, Optional.empty(), List.of(), false);
 
-    sut.find(paginationCriteria, filterCriteria, null);
+    sut.find(paginationCriteria, filterCriteria, Optional.empty());
 
     verify(entityRepository).countByDeletedAtIsNull();
   }
@@ -68,11 +69,11 @@ class JpaFindDonationsRepositoryTest {
   @Test
   void find_should_not_call_filtered_count_when_search_pattern_is_null() {
     PaginationCriteria paginationCriteria =
-        PaginationCriteria.create(null, PageSize.FIVE_ITEMS, PaginationCriteria.DEFAULT_ORDER);
-    FilterCriteria filterCriteria = FilterCriteria.create(null);
-    stubFindPipeline(paginationCriteria, filterCriteria, null, List.of(), false);
+        PaginationCriteria.create(PageSize.FIVE_ITEMS, PaginationCriteria.DEFAULT_ORDER);
+    FilterCriteria filterCriteria = FilterCriteria.create();
+    stubFindPipeline(paginationCriteria, filterCriteria, Optional.empty(), List.of(), false);
 
-    sut.find(paginationCriteria, filterCriteria, null);
+    sut.find(paginationCriteria, filterCriteria, Optional.empty());
 
     verify(entityRepository, never()).countBySearchPattern(any());
   }
@@ -80,14 +81,20 @@ class JpaFindDonationsRepositoryTest {
   @Test
   void find_should_return_unfiltered_total_count_when_search_pattern_is_null() {
     PaginationCriteria paginationCriteria =
-        PaginationCriteria.create(null, PageSize.FIVE_ITEMS, PaginationCriteria.DEFAULT_ORDER);
-    FilterCriteria filterCriteria = FilterCriteria.create(null);
+        PaginationCriteria.create(PageSize.FIVE_ITEMS, PaginationCriteria.DEFAULT_ORDER);
+    FilterCriteria filterCriteria = FilterCriteria.create();
     DonationEntity entity = donationEntity(DONATION_ID, "Title", "Description", CREATED_AT);
     Donation mappedDonation = mappedDonation(entity);
     stubFindPipeline(
-        paginationCriteria, filterCriteria, null, List.of(entity), false, mappedDonation, 50L);
+        paginationCriteria,
+        filterCriteria,
+        Optional.empty(),
+        List.of(entity),
+        false,
+        mappedDonation,
+        50L);
 
-    Page<Donation> result = sut.find(paginationCriteria, filterCriteria, null);
+    Page<Donation> result = sut.find(paginationCriteria, filterCriteria, Optional.empty());
 
     assertEquals(50L, result.metadata().totalCount());
   }
@@ -95,14 +102,20 @@ class JpaFindDonationsRepositoryTest {
   @Test
   void find_should_return_mapped_items_when_search_pattern_is_null() {
     PaginationCriteria paginationCriteria =
-        PaginationCriteria.create(null, PageSize.FIVE_ITEMS, PaginationCriteria.DEFAULT_ORDER);
-    FilterCriteria filterCriteria = FilterCriteria.create(null);
+        PaginationCriteria.create(PageSize.FIVE_ITEMS, PaginationCriteria.DEFAULT_ORDER);
+    FilterCriteria filterCriteria = FilterCriteria.create();
     DonationEntity entity = donationEntity(DONATION_ID, "Title", "Description", CREATED_AT);
     Donation mappedDonation = mappedDonation(entity);
     stubFindPipeline(
-        paginationCriteria, filterCriteria, null, List.of(entity), false, mappedDonation, 50L);
+        paginationCriteria,
+        filterCriteria,
+        Optional.empty(),
+        List.of(entity),
+        false,
+        mappedDonation,
+        50L);
 
-    Page<Donation> result = sut.find(paginationCriteria, filterCriteria, null);
+    Page<Donation> result = sut.find(paginationCriteria, filterCriteria, Optional.empty());
 
     assertEquals(List.of(mappedDonation), result.items());
   }
@@ -110,11 +123,11 @@ class JpaFindDonationsRepositoryTest {
   @Test
   void find_should_call_filtered_count_when_search_pattern_is_present() {
     PaginationCriteria paginationCriteria =
-        PaginationCriteria.create(null, PageSize.FIVE_ITEMS, PaginationCriteria.DEFAULT_ORDER);
-    FilterCriteria filterCriteria = FilterCriteria.create("school");
-    stubFindPipeline(paginationCriteria, filterCriteria, null, List.of(), false);
+        PaginationCriteria.create(PageSize.FIVE_ITEMS, PaginationCriteria.DEFAULT_ORDER);
+    FilterCriteria filterCriteria = FilterCriteria.create().withQuery(Optional.of("school"));
+    stubFindPipeline(paginationCriteria, filterCriteria, Optional.empty(), List.of(), false);
 
-    sut.find(paginationCriteria, filterCriteria, null);
+    sut.find(paginationCriteria, filterCriteria, Optional.empty());
 
     verify(entityRepository).countBySearchPattern("%school%");
   }
@@ -122,11 +135,11 @@ class JpaFindDonationsRepositoryTest {
   @Test
   void find_should_not_call_unfiltered_count_when_search_pattern_is_present() {
     PaginationCriteria paginationCriteria =
-        PaginationCriteria.create(null, PageSize.FIVE_ITEMS, PaginationCriteria.DEFAULT_ORDER);
-    FilterCriteria filterCriteria = FilterCriteria.create("school");
-    stubFindPipeline(paginationCriteria, filterCriteria, null, List.of(), false);
+        PaginationCriteria.create(PageSize.FIVE_ITEMS, PaginationCriteria.DEFAULT_ORDER);
+    FilterCriteria filterCriteria = FilterCriteria.create().withQuery(Optional.of("school"));
+    stubFindPipeline(paginationCriteria, filterCriteria, Optional.empty(), List.of(), false);
 
-    sut.find(paginationCriteria, filterCriteria, null);
+    sut.find(paginationCriteria, filterCriteria, Optional.empty());
 
     verify(entityRepository, never()).countByDeletedAtIsNull();
   }
@@ -134,11 +147,12 @@ class JpaFindDonationsRepositoryTest {
   @Test
   void find_should_return_filtered_total_count_when_search_pattern_is_present() {
     PaginationCriteria paginationCriteria =
-        PaginationCriteria.create(null, PageSize.FIVE_ITEMS, PaginationCriteria.DEFAULT_ORDER);
-    FilterCriteria filterCriteria = FilterCriteria.create("school");
-    stubFindPipeline(paginationCriteria, filterCriteria, null, List.of(), false, null, 10L);
+        PaginationCriteria.create(PageSize.FIVE_ITEMS, PaginationCriteria.DEFAULT_ORDER);
+    FilterCriteria filterCriteria = FilterCriteria.create().withQuery(Optional.of("school"));
+    stubFindPipeline(
+        paginationCriteria, filterCriteria, Optional.empty(), List.of(), false, null, 10L);
 
-    Page<Donation> result = sut.find(paginationCriteria, filterCriteria, null);
+    Page<Donation> result = sut.find(paginationCriteria, filterCriteria, Optional.empty());
 
     assertEquals(10L, result.metadata().totalCount());
   }
@@ -146,15 +160,15 @@ class JpaFindDonationsRepositoryTest {
   @Test
   void find_should_decode_date_cursor_when_order_is_not_nearest_first() {
     PaginationCriteria paginationCriteria =
-        PaginationCriteria.create(
-            "previous-cursor", PageSize.FIVE_ITEMS, PaginationCriteria.DEFAULT_ORDER);
-    FilterCriteria filterCriteria = FilterCriteria.create(null);
+        PaginationCriteria.create(PageSize.FIVE_ITEMS, PaginationCriteria.DEFAULT_ORDER)
+            .withCursor(Optional.of("previous-cursor"));
+    FilterCriteria filterCriteria = FilterCriteria.create();
     KeysetCursor boundary = new KeysetCursor(CREATED_AT, Id.from(DONATION_ID).value());
-    stubFindPipeline(paginationCriteria, filterCriteria, null, List.of(), true);
+    stubFindPipeline(paginationCriteria, filterCriteria, Optional.empty(), List.of(), true);
     when(cursorCodec.isPreviousCursor("previous-cursor")).thenReturn(true);
     when(cursorCodec.decode("previous-cursor")).thenReturn(boundary);
 
-    sut.find(paginationCriteria, filterCriteria, null);
+    sut.find(paginationCriteria, filterCriteria, Optional.empty());
 
     verify(cursorCodec).decode("previous-cursor");
   }
@@ -162,33 +176,33 @@ class JpaFindDonationsRepositoryTest {
   @Test
   void find_should_propagate_date_boundary_to_fetcher() {
     PaginationCriteria paginationCriteria =
-        PaginationCriteria.create(
-            "previous-cursor", PageSize.FIVE_ITEMS, PaginationCriteria.DEFAULT_ORDER);
-    FilterCriteria filterCriteria = FilterCriteria.create(null);
+        PaginationCriteria.create(PageSize.FIVE_ITEMS, PaginationCriteria.DEFAULT_ORDER)
+            .withCursor(Optional.of("previous-cursor"));
+    FilterCriteria filterCriteria = FilterCriteria.create();
     KeysetCursor boundary = new KeysetCursor(CREATED_AT, Id.from(DONATION_ID).value());
-    stubFindPipeline(paginationCriteria, filterCriteria, null, List.of(), true);
+    stubFindPipeline(paginationCriteria, filterCriteria, Optional.empty(), List.of(), true);
     when(cursorCodec.isPreviousCursor("previous-cursor")).thenReturn(true);
     when(cursorCodec.decode("previous-cursor")).thenReturn(boundary);
 
-    sut.find(paginationCriteria, filterCriteria, null);
+    sut.find(paginationCriteria, filterCriteria, Optional.empty());
 
     ArgumentCaptor<FetchCriteria> criteriaCaptor = ArgumentCaptor.forClass(FetchCriteria.class);
     verify(entityPageFetcher).fetch(criteriaCaptor.capture());
-    assertEquals(boundary, criteriaCaptor.getValue().boundary());
+    assertEquals(Optional.of(boundary), criteriaCaptor.getValue().boundary());
   }
 
   @Test
   void find_should_propagate_previous_request_to_fetcher() {
     PaginationCriteria paginationCriteria =
-        PaginationCriteria.create(
-            "previous-cursor", PageSize.FIVE_ITEMS, PaginationCriteria.DEFAULT_ORDER);
-    FilterCriteria filterCriteria = FilterCriteria.create(null);
+        PaginationCriteria.create(PageSize.FIVE_ITEMS, PaginationCriteria.DEFAULT_ORDER)
+            .withCursor(Optional.of("previous-cursor"));
+    FilterCriteria filterCriteria = FilterCriteria.create();
     KeysetCursor boundary = new KeysetCursor(CREATED_AT, Id.from(DONATION_ID).value());
-    stubFindPipeline(paginationCriteria, filterCriteria, null, List.of(), true);
+    stubFindPipeline(paginationCriteria, filterCriteria, Optional.empty(), List.of(), true);
     when(cursorCodec.isPreviousCursor("previous-cursor")).thenReturn(true);
     when(cursorCodec.decode("previous-cursor")).thenReturn(boundary);
 
-    sut.find(paginationCriteria, filterCriteria, null);
+    sut.find(paginationCriteria, filterCriteria, Optional.empty());
 
     ArgumentCaptor<FetchCriteria> criteriaCaptor = ArgumentCaptor.forClass(FetchCriteria.class);
     verify(entityPageFetcher).fetch(criteriaCaptor.capture());
@@ -198,13 +212,15 @@ class JpaFindDonationsRepositoryTest {
   @Test
   void find_should_decode_proximity_cursor_when_order_is_nearest_first() {
     PaginationCriteria paginationCriteria =
-        PaginationCriteria.create("cursor", PageSize.FIVE_ITEMS, PageOrder.NEAREST_FIRST);
-    FilterCriteria filterCriteria = FilterCriteria.create(null);
-    stubFindPipeline(paginationCriteria, filterCriteria, PROXIMITY_REFERENCE, List.of(), false);
+        PaginationCriteria.create(PageSize.FIVE_ITEMS, PageOrder.NEAREST_FIRST)
+            .withCursor(Optional.of("cursor"));
+    FilterCriteria filterCriteria = FilterCriteria.create();
+    stubFindPipeline(
+        paginationCriteria, filterCriteria, Optional.of(PROXIMITY_REFERENCE), List.of(), false);
     when(proximityCursorCodec.isPreviousCursor("cursor")).thenReturn(false);
     when(proximityCursorCodec.decode("cursor")).thenReturn(PROXIMITY_BOUNDARY);
 
-    sut.find(paginationCriteria, filterCriteria, PROXIMITY_REFERENCE);
+    sut.find(paginationCriteria, filterCriteria, Optional.of(PROXIMITY_REFERENCE));
 
     verify(proximityCursorCodec).decode("cursor");
   }
@@ -212,13 +228,15 @@ class JpaFindDonationsRepositoryTest {
   @Test
   void find_should_not_decode_date_cursor_when_order_is_nearest_first() {
     PaginationCriteria paginationCriteria =
-        PaginationCriteria.create("cursor", PageSize.FIVE_ITEMS, PageOrder.NEAREST_FIRST);
-    FilterCriteria filterCriteria = FilterCriteria.create(null);
-    stubFindPipeline(paginationCriteria, filterCriteria, PROXIMITY_REFERENCE, List.of(), false);
+        PaginationCriteria.create(PageSize.FIVE_ITEMS, PageOrder.NEAREST_FIRST)
+            .withCursor(Optional.of("cursor"));
+    FilterCriteria filterCriteria = FilterCriteria.create();
+    stubFindPipeline(
+        paginationCriteria, filterCriteria, Optional.of(PROXIMITY_REFERENCE), List.of(), false);
     when(proximityCursorCodec.isPreviousCursor("cursor")).thenReturn(false);
     when(proximityCursorCodec.decode("cursor")).thenReturn(PROXIMITY_BOUNDARY);
 
-    sut.find(paginationCriteria, filterCriteria, PROXIMITY_REFERENCE);
+    sut.find(paginationCriteria, filterCriteria, Optional.of(PROXIMITY_REFERENCE));
 
     verify(cursorCodec, never()).decode(any());
   }
@@ -226,85 +244,98 @@ class JpaFindDonationsRepositoryTest {
   @Test
   void find_should_propagate_proximity_boundary_to_fetcher() {
     PaginationCriteria paginationCriteria =
-        PaginationCriteria.create("cursor", PageSize.FIVE_ITEMS, PageOrder.NEAREST_FIRST);
-    FilterCriteria filterCriteria = FilterCriteria.create(null);
-    stubFindPipeline(paginationCriteria, filterCriteria, PROXIMITY_REFERENCE, List.of(), false);
+        PaginationCriteria.create(PageSize.FIVE_ITEMS, PageOrder.NEAREST_FIRST)
+            .withCursor(Optional.of("cursor"));
+    FilterCriteria filterCriteria = FilterCriteria.create();
+    stubFindPipeline(
+        paginationCriteria, filterCriteria, Optional.of(PROXIMITY_REFERENCE), List.of(), false);
     when(proximityCursorCodec.isPreviousCursor("cursor")).thenReturn(false);
     when(proximityCursorCodec.decode("cursor")).thenReturn(PROXIMITY_BOUNDARY);
 
-    sut.find(paginationCriteria, filterCriteria, PROXIMITY_REFERENCE);
+    sut.find(paginationCriteria, filterCriteria, Optional.of(PROXIMITY_REFERENCE));
 
     ArgumentCaptor<FetchCriteria> criteriaCaptor = ArgumentCaptor.forClass(FetchCriteria.class);
     verify(entityPageFetcher).fetch(criteriaCaptor.capture());
-    assertEquals(PROXIMITY_BOUNDARY, criteriaCaptor.getValue().proximityBoundary());
+    assertEquals(Optional.of(PROXIMITY_BOUNDARY), criteriaCaptor.getValue().proximityBoundary());
   }
 
   @Test
   void find_should_propagate_proximity_reference_to_fetcher() {
     PaginationCriteria paginationCriteria =
-        PaginationCriteria.create("cursor", PageSize.FIVE_ITEMS, PageOrder.NEAREST_FIRST);
-    FilterCriteria filterCriteria = FilterCriteria.create(null);
-    stubFindPipeline(paginationCriteria, filterCriteria, PROXIMITY_REFERENCE, List.of(), false);
+        PaginationCriteria.create(PageSize.FIVE_ITEMS, PageOrder.NEAREST_FIRST)
+            .withCursor(Optional.of("cursor"));
+    FilterCriteria filterCriteria = FilterCriteria.create();
+    stubFindPipeline(
+        paginationCriteria, filterCriteria, Optional.of(PROXIMITY_REFERENCE), List.of(), false);
     when(proximityCursorCodec.isPreviousCursor("cursor")).thenReturn(false);
     when(proximityCursorCodec.decode("cursor")).thenReturn(PROXIMITY_BOUNDARY);
 
-    sut.find(paginationCriteria, filterCriteria, PROXIMITY_REFERENCE);
+    sut.find(paginationCriteria, filterCriteria, Optional.of(PROXIMITY_REFERENCE));
 
     ArgumentCaptor<FetchCriteria> criteriaCaptor = ArgumentCaptor.forClass(FetchCriteria.class);
     verify(entityPageFetcher).fetch(criteriaCaptor.capture());
-    assertEquals(PROXIMITY_REFERENCE, criteriaCaptor.getValue().proximityReference());
+    assertEquals(Optional.of(PROXIMITY_REFERENCE), criteriaCaptor.getValue().proximityReference());
   }
 
   @Test
   void find_should_return_next_cursor_from_metadata_builder() {
     PaginationCriteria paginationCriteria =
-        PaginationCriteria.create("cursor", PageSize.FIVE_ITEMS, PaginationCriteria.DEFAULT_ORDER);
-    FilterCriteria filterCriteria = FilterCriteria.create("school");
+        PaginationCriteria.create(PageSize.FIVE_ITEMS, PaginationCriteria.DEFAULT_ORDER)
+            .withCursor(Optional.of("cursor"));
+    FilterCriteria filterCriteria = FilterCriteria.create().withQuery(Optional.of("school"));
     stubFindPipelineWithMetadata(
         paginationCriteria,
         filterCriteria,
-        null,
+        Optional.empty(),
         List.of(),
         false,
-        new CursorMetadata("next", "previous"));
+        CursorMetadata.create()
+            .withNextCursor(Optional.of("next"))
+            .withPreviousCursor(Optional.of("previous")));
 
-    Page<Donation> result = sut.find(paginationCriteria, filterCriteria, null);
+    Page<Donation> result = sut.find(paginationCriteria, filterCriteria, Optional.empty());
 
-    assertEquals("next", result.metadata().nextCursor());
+    assertEquals(Optional.of("next"), result.metadata().nextCursor());
   }
 
   @Test
   void find_should_return_previous_cursor_from_metadata_builder() {
     PaginationCriteria paginationCriteria =
-        PaginationCriteria.create("cursor", PageSize.FIVE_ITEMS, PaginationCriteria.DEFAULT_ORDER);
-    FilterCriteria filterCriteria = FilterCriteria.create("school");
+        PaginationCriteria.create(PageSize.FIVE_ITEMS, PaginationCriteria.DEFAULT_ORDER)
+            .withCursor(Optional.of("cursor"));
+    FilterCriteria filterCriteria = FilterCriteria.create().withQuery(Optional.of("school"));
     stubFindPipelineWithMetadata(
         paginationCriteria,
         filterCriteria,
-        null,
+        Optional.empty(),
         List.of(),
         false,
-        new CursorMetadata("next", "previous"));
+        CursorMetadata.create()
+            .withNextCursor(Optional.of("next"))
+            .withPreviousCursor(Optional.of("previous")));
 
-    Page<Donation> result = sut.find(paginationCriteria, filterCriteria, null);
+    Page<Donation> result = sut.find(paginationCriteria, filterCriteria, Optional.empty());
 
-    assertEquals("previous", result.metadata().previousCursor());
+    assertEquals(Optional.of("previous"), result.metadata().previousCursor());
   }
 
   @Test
   void find_should_return_empty_items_when_fetcher_returns_no_entities() {
     PaginationCriteria paginationCriteria =
-        PaginationCriteria.create("cursor", PageSize.FIVE_ITEMS, PaginationCriteria.DEFAULT_ORDER);
-    FilterCriteria filterCriteria = FilterCriteria.create("school");
+        PaginationCriteria.create(PageSize.FIVE_ITEMS, PaginationCriteria.DEFAULT_ORDER)
+            .withCursor(Optional.of("cursor"));
+    FilterCriteria filterCriteria = FilterCriteria.create().withQuery(Optional.of("school"));
     stubFindPipelineWithMetadata(
         paginationCriteria,
         filterCriteria,
-        null,
+        Optional.empty(),
         List.of(),
         false,
-        new CursorMetadata("next", "previous"));
+        CursorMetadata.create()
+            .withNextCursor(Optional.of("next"))
+            .withPreviousCursor(Optional.of("previous")));
 
-    Page<Donation> result = sut.find(paginationCriteria, filterCriteria, null);
+    Page<Donation> result = sut.find(paginationCriteria, filterCriteria, Optional.empty());
 
     assertEquals(List.of(), result.items());
   }
@@ -312,7 +343,7 @@ class JpaFindDonationsRepositoryTest {
   private void stubFindPipeline(
       PaginationCriteria paginationCriteria,
       FilterCriteria filterCriteria,
-      ProximityReference proximityReference,
+      Optional<ProximityReference> proximityReference,
       List<DonationEntity> entities,
       boolean previousCursorRequest) {
     stubFindPipeline(
@@ -328,18 +359,17 @@ class JpaFindDonationsRepositoryTest {
   private void stubFindPipeline(
       PaginationCriteria paginationCriteria,
       FilterCriteria filterCriteria,
-      ProximityReference proximityReference,
+      Optional<ProximityReference> proximityReference,
       List<DonationEntity> entities,
       boolean previousCursorRequest,
       Donation mappedDonation,
       long totalCount) {
-    String searchPattern =
-        filterCriteria.query() == null ? null : "%" + filterCriteria.query() + "%";
+    Optional<String> searchPattern = filterCriteria.query().map(q -> "%" + q + "%");
     when(searchPatternNormalizer.toSearchPattern(filterCriteria)).thenReturn(searchPattern);
-    if (searchPattern == null) {
+    if (searchPattern.isEmpty()) {
       when(entityRepository.countByDeletedAtIsNull()).thenReturn(totalCount);
     } else {
-      when(entityRepository.countBySearchPattern(searchPattern)).thenReturn(totalCount);
+      when(entityRepository.countBySearchPattern(searchPattern.get())).thenReturn(totalCount);
     }
     when(entityPageFetcher.fetch(any())).thenReturn(entities);
     when(pageSlicer.slice(entities, paginationCriteria.size(), previousCursorRequest))
@@ -353,7 +383,7 @@ class JpaFindDonationsRepositoryTest {
             cursorCodec,
             proximityCursorCodec,
             distanceCalculator))
-        .thenReturn(new CursorMetadata(null, null));
+        .thenReturn(CursorMetadata.create());
     if (mappedDonation != null && !entities.isEmpty()) {
       when(entityMapper.toDomain(entities.getFirst())).thenReturn(mappedDonation);
     }
@@ -362,11 +392,12 @@ class JpaFindDonationsRepositoryTest {
   private void stubFindPipelineWithMetadata(
       PaginationCriteria paginationCriteria,
       FilterCriteria filterCriteria,
-      ProximityReference proximityReference,
+      Optional<ProximityReference> proximityReference,
       List<DonationEntity> entities,
       boolean previousCursorRequest,
       CursorMetadata cursorMetadata) {
-    when(searchPatternNormalizer.toSearchPattern(filterCriteria)).thenReturn("%school%");
+    when(searchPatternNormalizer.toSearchPattern(filterCriteria))
+        .thenReturn(Optional.of("%school%"));
     when(entityRepository.countBySearchPattern("%school%")).thenReturn(100L);
     when(cursorCodec.isPreviousCursor("cursor")).thenReturn(false);
     when(cursorCodec.decode("cursor"))

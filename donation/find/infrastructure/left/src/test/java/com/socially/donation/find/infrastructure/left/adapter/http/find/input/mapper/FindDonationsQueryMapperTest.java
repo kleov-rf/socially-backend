@@ -1,7 +1,6 @@
 package com.socially.donation.find.infrastructure.left.adapter.http.find.input.mapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.socially.donation.find.application.input.FindDonationsQuery;
@@ -9,6 +8,7 @@ import com.socially.donation.find.domain.exception.FindDonationsBadRequestExcept
 import com.socially.donation.find.domain.pagination.PageOrder;
 import com.socially.donation.find.domain.pagination.PaginationCriteria;
 import com.socially.donation.find.domain.proximity.ProximityReference;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
 class FindDonationsQueryMapperTest {
@@ -16,8 +16,15 @@ class FindDonationsQueryMapperTest {
   private final FindDonationsQueryMapper mapper = new FindDonationsQueryMapper();
 
   @Test
-  void toQuery_should_use_default_size_when_size_is_null() {
-    FindDonationsQuery query = mapper.toQuery(null, null, null, null, null, null);
+  void toQuery_should_use_default_size_when_size_is_empty() {
+    FindDonationsQuery query =
+        mapper.toQuery(
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty());
 
     assertEquals(PaginationCriteria.DEFAULT_SIZE.value(), query.paginationCriteria().size());
   }
@@ -26,14 +33,26 @@ class FindDonationsQueryMapperTest {
   void toQuery_should_map_cursor() {
     FindDonationsQuery query =
         mapper.toQuery(
-            "next", PaginationCriteria.DEFAULT_SIZE.value(), "oldest_first", "school", null, null);
+            Optional.of("next"),
+            Optional.of(PaginationCriteria.DEFAULT_SIZE.value()),
+            Optional.of("oldest_first"),
+            Optional.of("school"),
+            Optional.empty(),
+            Optional.empty());
 
-    assertEquals("next", query.paginationCriteria().cursor());
+    assertEquals(Optional.of("next"), query.paginationCriteria().cursor());
   }
 
   @Test
   void toQuery_should_map_size() {
-    FindDonationsQuery query = mapper.toQuery("next", 10, "oldest_first", "school", null, null);
+    FindDonationsQuery query =
+        mapper.toQuery(
+            Optional.of("next"),
+            Optional.of(10),
+            Optional.of("oldest_first"),
+            Optional.of("school"),
+            Optional.empty(),
+            Optional.empty());
 
     assertEquals(10, query.paginationCriteria().size());
   }
@@ -42,7 +61,12 @@ class FindDonationsQueryMapperTest {
   void toQuery_should_map_order() {
     FindDonationsQuery query =
         mapper.toQuery(
-            "next", PaginationCriteria.DEFAULT_SIZE.value(), "oldest_first", "school", null, null);
+            Optional.of("next"),
+            Optional.of(PaginationCriteria.DEFAULT_SIZE.value()),
+            Optional.of("oldest_first"),
+            Optional.of("school"),
+            Optional.empty(),
+            Optional.empty());
 
     assertEquals(PageOrder.fromValue("oldest_first"), query.paginationCriteria().order());
   }
@@ -51,24 +75,40 @@ class FindDonationsQueryMapperTest {
   void toQuery_should_map_query() {
     FindDonationsQuery query =
         mapper.toQuery(
-            "next", PaginationCriteria.DEFAULT_SIZE.value(), "oldest_first", "school", null, null);
+            Optional.of("next"),
+            Optional.of(PaginationCriteria.DEFAULT_SIZE.value()),
+            Optional.of("oldest_first"),
+            Optional.of("school"),
+            Optional.empty(),
+            Optional.empty());
 
-    assertEquals("school", query.filterCriteria().query());
+    assertEquals(Optional.of("school"), query.filterCriteria().query());
   }
 
   @Test
-  void toQuery_should_normalize_blank_query_to_null() {
+  void toQuery_should_normalize_blank_query_to_empty() {
     FindDonationsQuery query =
         mapper.toQuery(
-            "next", PaginationCriteria.DEFAULT_SIZE.value(), "oldest_first", "   ", null, null);
+            Optional.of("next"),
+            Optional.of(PaginationCriteria.DEFAULT_SIZE.value()),
+            Optional.of("oldest_first"),
+            Optional.of("   "),
+            Optional.empty(),
+            Optional.empty());
 
-    assertNull(query.filterCriteria().query());
+    assertEquals(Optional.empty(), query.filterCriteria().query());
   }
 
   @Test
   void toQuery_should_map_order_to_nearest_first() {
     FindDonationsQuery query =
-        mapper.toQuery("next", 10, "nearest_first", "school", 40.4168, -3.7038);
+        mapper.toQuery(
+            Optional.of("next"),
+            Optional.of(10),
+            Optional.of("nearest_first"),
+            Optional.of("school"),
+            Optional.of(40.4168),
+            Optional.of(-3.7038));
 
     assertEquals(PageOrder.NEAREST_FIRST, query.paginationCriteria().order());
   }
@@ -76,17 +116,30 @@ class FindDonationsQueryMapperTest {
   @Test
   void toQuery_should_map_proximity_reference_when_order_is_nearest_first() {
     FindDonationsQuery query =
-        mapper.toQuery("next", 10, "nearest_first", "school", 40.4168, -3.7038);
+        mapper.toQuery(
+            Optional.of("next"),
+            Optional.of(10),
+            Optional.of("nearest_first"),
+            Optional.of("school"),
+            Optional.of(40.4168),
+            Optional.of(-3.7038));
 
-    assertEquals(ProximityReference.from(40.4168, -3.7038), query.proximityReference());
+    assertEquals(
+        Optional.of(ProximityReference.create(40.4168, -3.7038)), query.proximityReference());
   }
 
   @Test
-  void toQuery_should_set_proximity_reference_to_null_when_order_is_not_nearest_first() {
+  void toQuery_should_set_proximity_reference_to_empty_when_order_is_not_nearest_first() {
     FindDonationsQuery query =
-        mapper.toQuery("next", 10, "newest_first", "school", 40.4168, -3.7038);
+        mapper.toQuery(
+            Optional.of("next"),
+            Optional.of(10),
+            Optional.of("newest_first"),
+            Optional.of("school"),
+            Optional.of(40.4168),
+            Optional.of(-3.7038));
 
-    assertNull(query.proximityReference());
+    assertEquals(Optional.empty(), query.proximityReference());
   }
 
   @Test
@@ -94,7 +147,14 @@ class FindDonationsQueryMapperTest {
     FindDonationsBadRequestException exception =
         assertThrows(
             FindDonationsBadRequestException.class,
-            () -> mapper.toQuery("next", 10, "nearest_first", "school", null, null));
+            () ->
+                mapper.toQuery(
+                    Optional.of("next"),
+                    Optional.of(10),
+                    Optional.of("nearest_first"),
+                    Optional.of("school"),
+                    Optional.empty(),
+                    Optional.empty()));
 
     assertEquals(
         "latitude and longitude are required when order is nearest_first", exception.getMessage());
