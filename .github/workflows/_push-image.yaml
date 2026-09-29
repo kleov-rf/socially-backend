@@ -24,6 +24,7 @@ env:
 
 jobs:
   push:
+    if: false
     environment: ${{ inputs.environment }}
     runs-on: ubuntu-latest
     outputs:
