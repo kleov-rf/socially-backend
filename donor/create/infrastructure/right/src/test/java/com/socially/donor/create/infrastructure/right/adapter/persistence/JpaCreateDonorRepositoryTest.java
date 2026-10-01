@@ -10,6 +10,7 @@ import com.socially.donor.kernel.infrastructure.right.adapter.persistence.DonorE
 import com.socially.donor.kernel.infrastructure.right.adapter.persistence.entity.DonorEntity;
 import com.socially.donor.kernel.infrastructure.right.adapter.persistence.mapper.DonorEntityMapper;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,18 +31,16 @@ class JpaCreateDonorRepositoryTest {
   @InjectMocks private JpaCreateDonorRepository sut;
 
   private static Donor donor() {
-    return Donor.create(
-        Id.from(DONOR_ID), Id.from(USER_ID), "donor@example.com", "Jane", "Doe", CREATED_AT);
+    return Donor.create(Id.from(DONOR_ID), Id.from(USER_ID), "donor@example.com", CREATED_AT)
+        .withGivenName(Optional.of("Jane"))
+        .withFamilyName(Optional.of("Doe"));
   }
 
   private static DonorEntity mappedEntity() {
     return DonorEntity.create(
-        UUID.fromString(DONOR_ID),
-        UUID.fromString(USER_ID),
-        "donor@example.com",
-        "Jane",
-        "Doe",
-        CREATED_AT);
+            UUID.fromString(DONOR_ID), UUID.fromString(USER_ID), "donor@example.com", CREATED_AT)
+        .withGivenName(Optional.of("Jane"))
+        .withFamilyName(Optional.of("Doe"));
   }
 
   @Test

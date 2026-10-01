@@ -51,11 +51,11 @@ class CompleteOAuthCallbackCommandHandlerTest {
           .withFamilyName(Optional.of("Doe"));
   private static final User RESOLVED_USER =
       User.create(
-          Id.from("550e8400-e29b-41d4-a716-446655440000"),
-          Email.from("user@example.com"),
-          "John",
-          "Doe",
-          Instant.parse("2024-06-01T12:00:00Z"));
+              Id.from("550e8400-e29b-41d4-a716-446655440000"),
+              Email.from("user@example.com"),
+              Instant.parse("2024-06-01T12:00:00Z"))
+          .withGivenName(Optional.of("John"))
+          .withFamilyName(Optional.of("Doe"));
   private static final OAuthTokenResponse TOKEN_RESPONSE =
       new OAuthTokenResponse("access-token-1", ID_TOKEN, "refresh-1", "Bearer", 3600L);
   private static final AuthResult AUTH_RESULT =

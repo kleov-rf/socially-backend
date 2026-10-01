@@ -2,46 +2,39 @@ package com.socially.donor.kernel.domain.entity;
 
 import com.socially.commons.kernel.domain.valueobject.Id;
 import java.time.Instant;
-import lombok.EqualsAndHashCode;
-import lombok.RequiredArgsConstructor;
+import java.util.Optional;
+import org.jspecify.annotations.NullMarked;
 
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@RequiredArgsConstructor(access = lombok.AccessLevel.PRIVATE)
-public final class Donor {
+@NullMarked
+public record Donor(
+    Id id,
+    Id userId,
+    String email,
+    Instant createdAt,
+    Optional<String> givenName,
+    Optional<String> familyName) {
 
-  @EqualsAndHashCode.Include private final Id id;
-  private final Id userId;
-  private final String email;
-  private final String givenName;
-  private final String familyName;
-  private final Instant createdAt;
-
-  public static Donor create(
-      Id id, Id userId, String email, String givenName, String familyName, Instant createdAt) {
-    return new Donor(id, userId, email, givenName, familyName, createdAt);
+  public static Donor create(Id id, Id userId, String email, Instant createdAt) {
+    return new Donor(id, userId, email, createdAt, Optional.empty(), Optional.empty());
   }
 
-  public Id id() {
-    return id;
+  public Donor withGivenName(Optional<String> givenName) {
+    return new Donor(id, userId, email, createdAt, givenName, familyName);
   }
 
-  public Id userId() {
-    return userId;
+  public Donor withFamilyName(Optional<String> familyName) {
+    return new Donor(id, userId, email, createdAt, givenName, familyName);
   }
 
-  public String email() {
-    return email;
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof Donor other)) return false;
+    return id.equals(other.id);
   }
 
-  public String givenName() {
-    return givenName;
-  }
-
-  public String familyName() {
-    return familyName;
-  }
-
-  public Instant createdAt() {
-    return createdAt;
+  @Override
+  public int hashCode() {
+    return id.hashCode();
   }
 }

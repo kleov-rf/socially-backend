@@ -67,14 +67,17 @@ class JpaFindUserByFederatedIdentityRepositoryTest {
             "user@example.com",
             CREATED_AT);
     UserEntity userEntity =
-        UserEntity.create(userUuid, "user@example.com", "Jane", "Doe", CREATED_AT);
+        UserEntity.create(userUuid, "user@example.com", CREATED_AT)
+            .withGivenName(Optional.of("Jane"))
+            .withFamilyName(Optional.of("Doe"));
     when(federatedIdentityEntityRepository.findByIssuerAndSubject("https://idp.example", "sub-1"))
         .thenReturn(Optional.of(federatedIdentity));
     when(userEntityRepository.findById(userUuid)).thenReturn(Optional.of(userEntity));
     when(userEntityMapper.toDomain(userEntity))
         .thenReturn(
-            User.create(
-                Id.from(USER_ID), Email.from("user@example.com"), "Jane", "Doe", CREATED_AT));
+            User.create(Id.from(USER_ID), Email.from("user@example.com"), CREATED_AT)
+                .withGivenName(Optional.of("Jane"))
+                .withFamilyName(Optional.of("Doe")));
 
     repository.findByIssuerAndSubject("https://idp.example", "sub-1");
 
@@ -93,9 +96,13 @@ class JpaFindUserByFederatedIdentityRepositoryTest {
             "user@example.com",
             CREATED_AT);
     UserEntity userEntity =
-        UserEntity.create(userUuid, "user@example.com", "Jane", "Doe", CREATED_AT);
+        UserEntity.create(userUuid, "user@example.com", CREATED_AT)
+            .withGivenName(Optional.of("Jane"))
+            .withFamilyName(Optional.of("Doe"));
     User mappedUser =
-        User.create(Id.from(USER_ID), Email.from("user@example.com"), "Jane", "Doe", CREATED_AT);
+        User.create(Id.from(USER_ID), Email.from("user@example.com"), CREATED_AT)
+            .withGivenName(Optional.of("Jane"))
+            .withFamilyName(Optional.of("Doe"));
     when(federatedIdentityEntityRepository.findByIssuerAndSubject("https://idp.example", "sub-1"))
         .thenReturn(Optional.of(federatedIdentity));
     when(userEntityRepository.findById(userUuid)).thenReturn(Optional.of(userEntity));

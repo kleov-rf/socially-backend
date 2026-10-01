@@ -9,10 +9,8 @@ import org.springframework.stereotype.Component;
 public class AuthUserToCreateUserCommandMapper {
 
   public CreateUserCommand toCommand(AuthUser authUser) {
-    return new CreateUserCommand(
-        Id.generate().value().toString(),
-        authUser.email(),
-        authUser.givenName().orElse(null),
-        authUser.familyName().orElse(null));
+    return CreateUserCommand.create(Id.generate().value().toString(), authUser.email())
+        .withGivenName(authUser.givenName())
+        .withFamilyName(authUser.familyName());
   }
 }

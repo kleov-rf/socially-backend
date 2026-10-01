@@ -37,9 +37,21 @@ class CreateDonorCommandHandlerTest {
 
   @InjectMocks private CreateDonorCommandHandler handler;
 
+  private static CreateDonorCommand sampleCommand() {
+    return CreateDonorCommand.create(USER_ID, "donor@example.com")
+        .withGivenName(Optional.of("Jane"))
+        .withFamilyName(Optional.of("Doe"));
+  }
+
+  private static Donor sampleDonor() {
+    return Donor.create(Id.from(DONOR_ID), Id.from(USER_ID), "donor@example.com", CREATED_AT)
+        .withGivenName(Optional.of("Jane"))
+        .withFamilyName(Optional.of("Doe"));
+  }
+
   @Test
   void execute_should_call_find_donor_by_user_id_with_command_user_id() {
-    var command = new CreateDonorCommand(USER_ID, "donor@example.com", "Jane", "Doe");
+    var command = sampleCommand();
     when(findDonorByUserIdUseCase.execute(new FindDonorByUserIdQuery(USER_ID)))
         .thenReturn(Optional.empty());
 
@@ -50,10 +62,8 @@ class CreateDonorCommandHandlerTest {
 
   @Test
   void execute_should_not_call_repository_create_when_donor_already_exists() {
-    var command = new CreateDonorCommand(USER_ID, "donor@example.com", "Jane", "Doe");
-    Donor existingDonor =
-        Donor.create(
-            Id.from(DONOR_ID), Id.from(USER_ID), "donor@example.com", "Jane", "Doe", CREATED_AT);
+    var command = sampleCommand();
+    Donor existingDonor = sampleDonor();
     when(findDonorByUserIdUseCase.execute(new FindDonorByUserIdQuery(USER_ID)))
         .thenReturn(Optional.of(existingDonor));
 
@@ -64,10 +74,8 @@ class CreateDonorCommandHandlerTest {
 
   @Test
   void execute_should_not_call_command_mapper_when_donor_already_exists() {
-    var command = new CreateDonorCommand(USER_ID, "donor@example.com", "Jane", "Doe");
-    Donor existingDonor =
-        Donor.create(
-            Id.from(DONOR_ID), Id.from(USER_ID), "donor@example.com", "Jane", "Doe", CREATED_AT);
+    var command = sampleCommand();
+    Donor existingDonor = sampleDonor();
     when(findDonorByUserIdUseCase.execute(new FindDonorByUserIdQuery(USER_ID)))
         .thenReturn(Optional.of(existingDonor));
 
@@ -78,10 +86,8 @@ class CreateDonorCommandHandlerTest {
 
   @Test
   void execute_should_call_mapper_with_generated_donor_id() {
-    var command = new CreateDonorCommand(USER_ID, "donor@example.com", "Jane", "Doe");
-    Donor mappedDonor =
-        Donor.create(
-            Id.from(DONOR_ID), Id.from(USER_ID), "donor@example.com", "Jane", "Doe", CREATED_AT);
+    var command = sampleCommand();
+    Donor mappedDonor = sampleDonor();
     when(findDonorByUserIdUseCase.execute(new FindDonorByUserIdQuery(USER_ID)))
         .thenReturn(Optional.empty());
     when(clock.instant()).thenReturn(CREATED_AT);
@@ -97,10 +103,8 @@ class CreateDonorCommandHandlerTest {
 
   @Test
   void execute_should_call_mapper_with_received_command_and_clock_instant() {
-    var command = new CreateDonorCommand(USER_ID, "donor@example.com", "Jane", "Doe");
-    Donor mappedDonor =
-        Donor.create(
-            Id.from(DONOR_ID), Id.from(USER_ID), "donor@example.com", "Jane", "Doe", CREATED_AT);
+    var command = sampleCommand();
+    Donor mappedDonor = sampleDonor();
     when(findDonorByUserIdUseCase.execute(new FindDonorByUserIdQuery(USER_ID)))
         .thenReturn(Optional.empty());
     when(clock.instant()).thenReturn(CREATED_AT);
@@ -114,10 +118,8 @@ class CreateDonorCommandHandlerTest {
 
   @Test
   void execute_should_call_clock_instant() {
-    var command = new CreateDonorCommand(USER_ID, "donor@example.com", "Jane", "Doe");
-    Donor mappedDonor =
-        Donor.create(
-            Id.from(DONOR_ID), Id.from(USER_ID), "donor@example.com", "Jane", "Doe", CREATED_AT);
+    var command = sampleCommand();
+    Donor mappedDonor = sampleDonor();
     when(findDonorByUserIdUseCase.execute(new FindDonorByUserIdQuery(USER_ID)))
         .thenReturn(Optional.empty());
     when(clock.instant()).thenReturn(CREATED_AT);
@@ -131,10 +133,8 @@ class CreateDonorCommandHandlerTest {
 
   @Test
   void execute_should_call_repository_create_with_mapped_donor() {
-    var command = new CreateDonorCommand(USER_ID, "donor@example.com", "Jane", "Doe");
-    Donor mappedDonor =
-        Donor.create(
-            Id.from(DONOR_ID), Id.from(USER_ID), "donor@example.com", "Jane", "Doe", CREATED_AT);
+    var command = sampleCommand();
+    Donor mappedDonor = sampleDonor();
     when(findDonorByUserIdUseCase.execute(new FindDonorByUserIdQuery(USER_ID)))
         .thenReturn(Optional.empty());
     when(clock.instant()).thenReturn(CREATED_AT);

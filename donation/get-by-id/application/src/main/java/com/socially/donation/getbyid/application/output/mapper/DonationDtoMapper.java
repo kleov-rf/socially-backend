@@ -22,8 +22,9 @@ public final class DonationDtoMapper {
         new DonationLocationDto(location.address(), location.latitude(), location.longitude()),
         donation.createdAt(),
         donation.lastUpdatedAt(),
-        new DonorSummaryDto(
-            donor.id().value().toString(), donor.email(), donor.givenName(), donor.familyName()),
+        DonorSummaryDto.create(donor.id().value().toString(), donor.email())
+            .withGivenName(donor.givenName())
+            .withFamilyName(donor.familyName()),
         images);
   }
 }

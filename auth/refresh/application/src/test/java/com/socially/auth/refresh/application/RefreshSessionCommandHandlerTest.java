@@ -48,11 +48,11 @@ class RefreshSessionCommandHandlerTest {
       AuthResult.create("access", "Bearer", AUTH_USER).withExpiresIn(Optional.of(3600L));
   private static final User RESOLVED_USER =
       User.create(
-          Id.from("550e8400-e29b-41d4-a716-446655440111"),
-          Email.from("e@x.com"),
-          "Jane",
-          "Doe",
-          Instant.parse("2024-06-01T12:00:00Z"));
+              Id.from("550e8400-e29b-41d4-a716-446655440111"),
+              Email.from("e@x.com"),
+              Instant.parse("2024-06-01T12:00:00Z"))
+          .withGivenName(Optional.of("Jane"))
+          .withFamilyName(Optional.of("Doe"));
   private static final CookieInstruction COOKIE_INSTRUCTION =
       new CookieInstruction("socially_refresh_token", "refresh-2", 86_400L);
 

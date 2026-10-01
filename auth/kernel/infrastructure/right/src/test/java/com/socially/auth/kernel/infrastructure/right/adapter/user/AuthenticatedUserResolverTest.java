@@ -41,21 +41,27 @@ class AuthenticatedUserResolverTest {
           .withFamilyName(Optional.of("Doe"));
   private static final String CREATE_USER_ID = "660e8400-e29b-41d4-a716-446655440001";
   private static final CreateUserCommand CREATE_USER_COMMAND =
-      new CreateUserCommand(CREATE_USER_ID, "user@example.com", "Jane", "Doe");
+      CreateUserCommand.create(CREATE_USER_ID, "user@example.com")
+          .withGivenName(Optional.of("Jane"))
+          .withFamilyName(Optional.of("Doe"));
   private static final User EXISTING_USER =
       User.create(
-          Id.from("550e8400-e29b-41d4-a716-446655440000"),
-          Email.from("user@example.com"),
-          "Jane",
-          "Doe",
-          Instant.parse("2024-06-01T12:00:00Z"));
+              Id.from("550e8400-e29b-41d4-a716-446655440000"),
+              Email.from("user@example.com"),
+              Instant.parse("2024-06-01T12:00:00Z"))
+          .withGivenName(Optional.of("Jane"))
+          .withFamilyName(Optional.of("Doe"));
   private static final User REFETCHED_USER =
       User.create(
-          Id.from(CREATE_USER_ID),
-          Email.from("user@example.com"),
-          "Jane",
-          "Doe",
-          Instant.parse("2024-06-01T12:00:00Z"));
+              Id.from(CREATE_USER_ID),
+              Email.from("user@example.com"),
+              Instant.parse("2024-06-01T12:00:00Z"))
+          .withGivenName(Optional.of("Jane"))
+          .withFamilyName(Optional.of("Doe"));
+  private static final User UPDATED_USER =
+      User.create(EXISTING_USER.id(), Email.from("updated@example.com"), EXISTING_USER.createdAt())
+          .withGivenName(Optional.of("Janet"))
+          .withFamilyName(Optional.of("Doe"));
 
   @Mock private AuthUserClaimsValidator authUserClaimsValidator;
   @Mock private FindUserByFederatedIdentityUseCase findUserByFederatedIdentityUseCase;
@@ -96,16 +102,9 @@ class AuthenticatedUserResolverTest {
 
   @Test
   void resolve_should_call_find_by_federated_identity_with_auth_user_issuer_and_subject() {
-    User updatedUser =
-        User.create(
-            EXISTING_USER.id(),
-            Email.from("updated@example.com"),
-            "Janet",
-            "Doe",
-            EXISTING_USER.createdAt());
     when(findUserByFederatedIdentityUseCase.execute(FEDERATED_QUERY))
         .thenReturn(Optional.of(EXISTING_USER))
-        .thenReturn(Optional.of(updatedUser));
+        .thenReturn(Optional.of(UPDATED_USER));
 
     resolver.resolve(AUTH_USER);
 
@@ -114,16 +113,9 @@ class AuthenticatedUserResolverTest {
 
   @Test
   void resolve_should_call_update_user_profile_when_federated_identity_exists() {
-    User updatedUser =
-        User.create(
-            EXISTING_USER.id(),
-            Email.from("updated@example.com"),
-            "Janet",
-            "Doe",
-            EXISTING_USER.createdAt());
     when(findUserByFederatedIdentityUseCase.execute(FEDERATED_QUERY))
         .thenReturn(Optional.of(EXISTING_USER))
-        .thenReturn(Optional.of(updatedUser));
+        .thenReturn(Optional.of(UPDATED_USER));
 
     resolver.resolve(AUTH_USER);
 
@@ -138,34 +130,20 @@ class AuthenticatedUserResolverTest {
 
   @Test
   void resolve_should_return_refetched_user_when_federated_identity_exists() {
-    User updatedUser =
-        User.create(
-            EXISTING_USER.id(),
-            Email.from("updated@example.com"),
-            "Janet",
-            "Doe",
-            EXISTING_USER.createdAt());
     when(findUserByFederatedIdentityUseCase.execute(FEDERATED_QUERY))
         .thenReturn(Optional.of(EXISTING_USER))
-        .thenReturn(Optional.of(updatedUser));
+        .thenReturn(Optional.of(UPDATED_USER));
 
     User result = resolver.resolve(AUTH_USER);
 
-    assertEquals(updatedUser, result);
+    assertEquals(UPDATED_USER, result);
   }
 
   @Test
   void resolve_should_not_call_create_user_when_federated_identity_exists() {
-    User updatedUser =
-        User.create(
-            EXISTING_USER.id(),
-            Email.from("updated@example.com"),
-            "Janet",
-            "Doe",
-            EXISTING_USER.createdAt());
     when(findUserByFederatedIdentityUseCase.execute(FEDERATED_QUERY))
         .thenReturn(Optional.of(EXISTING_USER))
-        .thenReturn(Optional.of(updatedUser));
+        .thenReturn(Optional.of(UPDATED_USER));
 
     resolver.resolve(AUTH_USER);
 
@@ -223,16 +201,9 @@ class AuthenticatedUserResolverTest {
 
   @Test
   void resolveExisting_should_call_update_user_profile_when_federated_identity_exists() {
-    User updatedUser =
-        User.create(
-            EXISTING_USER.id(),
-            Email.from("updated@example.com"),
-            "Janet",
-            "Doe",
-            EXISTING_USER.createdAt());
     when(findUserByFederatedIdentityUseCase.execute(FEDERATED_QUERY))
         .thenReturn(Optional.of(EXISTING_USER))
-        .thenReturn(Optional.of(updatedUser));
+        .thenReturn(Optional.of(UPDATED_USER));
 
     resolver.resolveExisting(AUTH_USER);
 
@@ -247,16 +218,9 @@ class AuthenticatedUserResolverTest {
 
   @Test
   void resolveExisting_should_never_call_create_user() {
-    User updatedUser =
-        User.create(
-            EXISTING_USER.id(),
-            Email.from("updated@example.com"),
-            "Janet",
-            "Doe",
-            EXISTING_USER.createdAt());
     when(findUserByFederatedIdentityUseCase.execute(FEDERATED_QUERY))
         .thenReturn(Optional.of(EXISTING_USER))
-        .thenReturn(Optional.of(updatedUser));
+        .thenReturn(Optional.of(UPDATED_USER));
 
     resolver.resolveExisting(AUTH_USER);
 
@@ -266,19 +230,12 @@ class AuthenticatedUserResolverTest {
 
   @Test
   void resolveExisting_should_return_refetched_user_after_profile_update() {
-    User updatedUser =
-        User.create(
-            EXISTING_USER.id(),
-            Email.from("updated@example.com"),
-            "Janet",
-            "Doe",
-            EXISTING_USER.createdAt());
     when(findUserByFederatedIdentityUseCase.execute(FEDERATED_QUERY))
         .thenReturn(Optional.of(EXISTING_USER))
-        .thenReturn(Optional.of(updatedUser));
+        .thenReturn(Optional.of(UPDATED_USER));
 
     User result = resolver.resolveExisting(AUTH_USER);
 
-    assertEquals(updatedUser, result);
+    assertEquals(UPDATED_USER, result);
   }
 }

@@ -44,7 +44,7 @@ class AuthUserToCreateUserCommandMapperTest {
 
     var command = sut.toCommand(authUser);
 
-    assertEquals("John", command.givenName());
+    assertEquals(Optional.of("John"), command.givenName());
   }
 
   @Test
@@ -56,6 +56,6 @@ class AuthUserToCreateUserCommandMapperTest {
 
     var command = sut.toCommand(authUser);
 
-    assertEquals("Doe", command.familyName());
+    assertEquals(Optional.of("Doe"), command.familyName());
   }
 }

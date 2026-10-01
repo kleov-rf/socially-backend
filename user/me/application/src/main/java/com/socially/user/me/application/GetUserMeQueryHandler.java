@@ -24,6 +24,6 @@ public final class GetUserMeQueryHandler implements GetUserMeUseCase {
     User user = getAuthenticatedUserUseCase.execute(principal);
     Optional<Donor> donor =
         findDonorByUserIdUseCase.execute(new FindDonorByUserIdQuery(user.id().value().toString()));
-    return new UserMeQueryResult(user, donor);
+    return UserMeQueryResult.create(user).withDonor(donor);
   }
 }

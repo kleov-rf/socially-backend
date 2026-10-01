@@ -194,7 +194,9 @@ class FindDonationsControllerTest {
             Description.from("Test Description"),
             CREATED_AT,
             LAST_UPDATED_AT,
-            new FindDonorSummaryDto(DONOR_ID, "Jane", "Doe"));
+            FindDonorSummaryDto.create(DONOR_ID)
+                .withGivenName(Optional.of("Jane"))
+                .withFamilyName(Optional.of("Doe")));
     FindDonationsQuery query =
         FindDonationsQuery.create(
             PaginationCriteria.create(PageSize.TEN_ITEMS, PaginationCriteria.DEFAULT_ORDER)
@@ -225,7 +227,9 @@ class FindDonationsControllerTest {
                     "Test Description",
                     CREATED_AT,
                     LAST_UPDATED_AT,
-                    new FindDonorResponse(DONOR_ID, "Jane", "Doe"))),
+                    FindDonorResponse.create(DONOR_ID)
+                        .withGivenName(Optional.of("Jane"))
+                        .withFamilyName(Optional.of("Doe")))),
             MetadataResponse.create(true, true, 10, 100L)
                 .withNextCursor(Optional.of("next-cursor"))
                 .withPreviousCursor(Optional.of("previous-cursor")));

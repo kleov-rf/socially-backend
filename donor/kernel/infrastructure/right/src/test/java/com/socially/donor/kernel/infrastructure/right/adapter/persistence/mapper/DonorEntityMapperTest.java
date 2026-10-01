@@ -6,6 +6,7 @@ import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donor.kernel.domain.entity.Donor;
 import com.socially.donor.kernel.infrastructure.right.adapter.persistence.entity.DonorEntity;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,18 +23,19 @@ class DonorEntityMapperTest {
   private static final Instant CREATED_AT = Instant.parse("2024-06-01T12:00:00Z");
 
   private static final Donor DONOR =
-      Donor.create(
-          Id.from(DONOR_ID), Id.from(USER_ID), "donor@example.com", "Jane", "Doe", CREATED_AT);
+      Donor.create(Id.from(DONOR_ID), Id.from(USER_ID), "donor@example.com", CREATED_AT)
+          .withGivenName(Optional.of("Jane"))
+          .withFamilyName(Optional.of("Doe"));
 
   private static final Instant ENTITY_CREATED_AT = Instant.parse("2025-01-01T00:00:00Z");
   private static final DonorEntity ENTITY =
       DonorEntity.create(
-          UUID.fromString(DONOR_ID),
-          UUID.fromString(USER_ID),
-          "entity@example.com",
-          "EntityGiven",
-          "EntityFamily",
-          ENTITY_CREATED_AT);
+              UUID.fromString(DONOR_ID),
+              UUID.fromString(USER_ID),
+              "entity@example.com",
+              ENTITY_CREATED_AT)
+          .withGivenName(Optional.of("EntityGiven"))
+          .withFamilyName(Optional.of("EntityFamily"));
 
   @Test
   void toEntity_should_map_id() {
@@ -60,14 +62,14 @@ class DonorEntityMapperTest {
   void toEntity_should_map_given_name() {
     DonorEntity result = donorEntityMapper.toEntity(DONOR);
 
-    assertEquals("Jane", result.getGivenName());
+    assertEquals(Optional.of("Jane"), result.givenName());
   }
 
   @Test
   void toEntity_should_map_family_name() {
     DonorEntity result = donorEntityMapper.toEntity(DONOR);
 
-    assertEquals("Doe", result.getFamilyName());
+    assertEquals(Optional.of("Doe"), result.familyName());
   }
 
   @Test
@@ -102,14 +104,14 @@ class DonorEntityMapperTest {
   void toDomain_should_map_given_name() {
     Donor result = donorEntityMapper.toDomain(ENTITY);
 
-    assertEquals("EntityGiven", result.givenName());
+    assertEquals(Optional.of("EntityGiven"), result.givenName());
   }
 
   @Test
   void toDomain_should_map_family_name() {
     Donor result = donorEntityMapper.toDomain(ENTITY);
 
-    assertEquals("EntityFamily", result.familyName());
+    assertEquals(Optional.of("EntityFamily"), result.familyName());
   }
 
   @Test

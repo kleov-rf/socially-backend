@@ -42,12 +42,12 @@ class FindDonorByIdQueryHandlerTest {
     var query = new FindDonorByIdQuery(DONOR_ID);
     Donor foundDonor =
         Donor.create(
-            Id.from(DONOR_ID),
-            Id.from(USER_ID),
-            "user@example.com",
-            "Jane",
-            "Doe",
-            Instant.parse("2024-06-01T12:00:00Z"));
+                Id.from(DONOR_ID),
+                Id.from(USER_ID),
+                "user@example.com",
+                Instant.parse("2024-06-01T12:00:00Z"))
+            .withGivenName(Optional.of("Jane"))
+            .withFamilyName(Optional.of("Doe"));
     when(findDonorByIdRepository.findById(Id.from(DONOR_ID))).thenReturn(Optional.of(foundDonor));
 
     Optional<Donor> result = handler.execute(query);

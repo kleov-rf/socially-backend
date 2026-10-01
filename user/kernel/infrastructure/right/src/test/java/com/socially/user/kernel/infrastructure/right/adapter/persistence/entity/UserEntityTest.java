@@ -3,6 +3,7 @@ package com.socially.user.kernel.infrastructure.right.adapter.persistence.entity
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
@@ -16,35 +17,37 @@ class UserEntityTest {
 
   @Test
   void create_should_set_id() {
-    UserEntity result = UserEntity.create(ID, EMAIL, GIVEN_NAME, FAMILY_NAME, CREATED_AT);
+    UserEntity result = UserEntity.create(ID, EMAIL, CREATED_AT);
 
     assertEquals(ID, result.getId());
   }
 
   @Test
   void create_should_set_email() {
-    UserEntity result = UserEntity.create(ID, EMAIL, GIVEN_NAME, FAMILY_NAME, CREATED_AT);
+    UserEntity result = UserEntity.create(ID, EMAIL, CREATED_AT);
 
     assertEquals(EMAIL, result.getEmail());
   }
 
   @Test
-  void create_should_set_given_name() {
-    UserEntity result = UserEntity.create(ID, EMAIL, GIVEN_NAME, FAMILY_NAME, CREATED_AT);
+  void withGivenName_should_set_given_name() {
+    UserEntity result =
+        UserEntity.create(ID, EMAIL, CREATED_AT).withGivenName(Optional.of(GIVEN_NAME));
 
-    assertEquals(GIVEN_NAME, result.getGivenName());
+    assertEquals(Optional.of(GIVEN_NAME), result.givenName());
   }
 
   @Test
-  void create_should_set_family_name() {
-    UserEntity result = UserEntity.create(ID, EMAIL, GIVEN_NAME, FAMILY_NAME, CREATED_AT);
+  void withFamilyName_should_set_family_name() {
+    UserEntity result =
+        UserEntity.create(ID, EMAIL, CREATED_AT).withFamilyName(Optional.of(FAMILY_NAME));
 
-    assertEquals(FAMILY_NAME, result.getFamilyName());
+    assertEquals(Optional.of(FAMILY_NAME), result.familyName());
   }
 
   @Test
   void create_should_set_created_at() {
-    UserEntity result = UserEntity.create(ID, EMAIL, GIVEN_NAME, FAMILY_NAME, CREATED_AT);
+    UserEntity result = UserEntity.create(ID, EMAIL, CREATED_AT);
 
     assertEquals(CREATED_AT, result.getCreatedAt());
   }

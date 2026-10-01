@@ -33,11 +33,9 @@ public class JpaUpdateUserProfileRepository implements UpdateUserProfileReposito
 
     UserEntity updatedUser =
         UserEntity.create(
-            userEntity.getId(),
-            email.orElse(userEntity.getEmail()),
-            givenName.orElse(userEntity.getGivenName()),
-            familyName.orElse(userEntity.getFamilyName()),
-            userEntity.getCreatedAt());
+                userEntity.getId(), email.orElse(userEntity.getEmail()), userEntity.getCreatedAt())
+            .withGivenName(givenName.or(userEntity::givenName))
+            .withFamilyName(familyName.or(userEntity::familyName));
     userEntityRepository.save(updatedUser);
 
     FederatedIdentityEntity federatedIdentity =

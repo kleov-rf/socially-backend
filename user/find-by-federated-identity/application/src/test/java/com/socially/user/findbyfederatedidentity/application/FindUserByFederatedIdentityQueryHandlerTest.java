@@ -44,11 +44,11 @@ class FindUserByFederatedIdentityQueryHandlerTest {
     var query = new FindUserByFederatedIdentityQuery("https://idp.example", "sub-1");
     User foundUser =
         User.create(
-            Id.from("550e8400-e29b-41d4-a716-446655440000"),
-            Email.from("user@example.com"),
-            "Jane",
-            "Doe",
-            Instant.parse("2024-06-01T12:00:00Z"));
+                Id.from("550e8400-e29b-41d4-a716-446655440000"),
+                Email.from("user@example.com"),
+                Instant.parse("2024-06-01T12:00:00Z"))
+            .withGivenName(Optional.of("Jane"))
+            .withFamilyName(Optional.of("Doe"));
     when(findUserByFederatedIdentityRepository.findByIssuerAndSubject(
             "https://idp.example", "sub-1"))
         .thenReturn(Optional.of(foundUser));

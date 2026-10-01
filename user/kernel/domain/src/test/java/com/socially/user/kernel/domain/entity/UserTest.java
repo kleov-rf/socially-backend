@@ -1,10 +1,12 @@
 package com.socially.user.kernel.domain.entity;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.user.kernel.domain.valueobject.Email;
 import java.time.Instant;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
 class UserTest {
@@ -30,14 +32,14 @@ class UserTest {
   void create_should_set_given_name() {
     User user = sampleUser(USER_ID);
 
-    assertEquals("Jane", user.givenName());
+    assertEquals(Optional.of("Jane"), user.givenName());
   }
 
   @Test
   void create_should_set_family_name() {
     User user = sampleUser(USER_ID);
 
-    assertEquals("Doe", user.familyName());
+    assertEquals(Optional.of("Doe"), user.familyName());
   }
 
   @Test
@@ -52,13 +54,13 @@ class UserTest {
     User first = sampleUser(USER_ID);
     User second =
         User.create(
-            Id.from(USER_ID),
-            Email.from("different@example.com"),
-            "Another",
-            "Name",
-            Instant.parse("2024-06-02T12:00:00Z"));
+                Id.from(USER_ID),
+                Email.from("different@example.com"),
+                Instant.parse("2024-06-02T12:00:00Z"))
+            .withGivenName(Optional.of("Another"))
+            .withFamilyName(Optional.of("Name"));
 
-    org.junit.jupiter.api.Assertions.assertEquals(first, second);
+    assertEquals(first, second);
   }
 
   @Test
@@ -66,10 +68,12 @@ class UserTest {
     User first = sampleUser(USER_ID);
     User second = sampleUser(OTHER_USER_ID);
 
-    org.junit.jupiter.api.Assertions.assertNotEquals(first, second);
+    assertNotEquals(first, second);
   }
 
   private User sampleUser(String id) {
-    return User.create(Id.from(id), Email.from("user@example.com"), "Jane", "Doe", CREATED_AT);
+    return User.create(Id.from(id), Email.from("user@example.com"), CREATED_AT)
+        .withGivenName(Optional.of("Jane"))
+        .withFamilyName(Optional.of("Doe"));
   }
 }

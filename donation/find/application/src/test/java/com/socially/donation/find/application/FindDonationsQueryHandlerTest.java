@@ -115,7 +115,9 @@ class FindDonationsQueryHandlerTest {
             CREATED_AT,
             LAST_UPDATED_AT);
     Donor donor =
-        Donor.create(Id.from(DONOR_ID), Id.from(USER_ID), "a@b.com", "A", "B", CREATED_AT);
+        Donor.create(Id.from(DONOR_ID), Id.from(USER_ID), "a@b.com", CREATED_AT)
+            .withGivenName(Optional.of("A"))
+            .withFamilyName(Optional.of("B"));
     FindDonationsQuery query =
         FindDonationsQuery.create(
             PaginationCriteria.create(PageSize.TEN_ITEMS, PaginationCriteria.DEFAULT_ORDER),
@@ -150,7 +152,9 @@ class FindDonationsQueryHandlerTest {
             CREATED_AT,
             LAST_UPDATED_AT);
     Donor donor =
-        Donor.create(Id.from(DONOR_ID), Id.from(USER_ID), "a@b.com", "A", "B", CREATED_AT);
+        Donor.create(Id.from(DONOR_ID), Id.from(USER_ID), "a@b.com", CREATED_AT)
+            .withGivenName(Optional.of("A"))
+            .withFamilyName(Optional.of("B"));
     FindDonationsQuery query =
         FindDonationsQuery.create(
             PaginationCriteria.create(PageSize.TEN_ITEMS, PaginationCriteria.DEFAULT_ORDER),
@@ -214,7 +218,9 @@ class FindDonationsQueryHandlerTest {
             CREATED_AT,
             LAST_UPDATED_AT);
     Donor donor =
-        Donor.create(Id.from(DONOR_ID), Id.from(USER_ID), "a@b.com", "A", "B", CREATED_AT);
+        Donor.create(Id.from(DONOR_ID), Id.from(USER_ID), "a@b.com", CREATED_AT)
+            .withGivenName(Optional.of("A"))
+            .withFamilyName(Optional.of("B"));
     FindDonationDto mappedDto = mappedDto(donation, donor);
     FindDonationsQuery query =
         FindDonationsQuery.create(
@@ -290,7 +296,9 @@ class FindDonationsQueryHandlerTest {
             CREATED_AT,
             LAST_UPDATED_AT);
     Donor donor =
-        Donor.create(Id.from(DONOR_ID), Id.from(USER_ID), "a@b.com", "A", "B", CREATED_AT);
+        Donor.create(Id.from(DONOR_ID), Id.from(USER_ID), "a@b.com", CREATED_AT)
+            .withGivenName(Optional.of("A"))
+            .withFamilyName(Optional.of("B"));
     FindDonationDto mappedDto = mappedDto(donation, donor);
     FindDonationsQuery query =
         FindDonationsQuery.create(
@@ -317,6 +325,8 @@ class FindDonationsQueryHandlerTest {
         donation.description(),
         donation.createdAt(),
         donation.lastUpdatedAt(),
-        new FindDonorSummaryDto(DONOR_ID, donor.givenName(), donor.familyName()));
+        FindDonorSummaryDto.create(DONOR_ID)
+            .withGivenName(donor.givenName())
+            .withFamilyName(donor.familyName()));
   }
 }

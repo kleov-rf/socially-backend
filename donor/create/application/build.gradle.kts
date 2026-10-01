@@ -27,7 +27,6 @@ dependencies {
     implementation(project(":donor:find-by-user-id:application"))
 
     implementation(libs.spring.context)
-    compileOnly(libs.jakarta.validation.api)
 
     compileOnly(libs.lombok)
     annotationProcessor(libs.lombok)

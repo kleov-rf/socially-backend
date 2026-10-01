@@ -7,6 +7,7 @@ import com.socially.user.kernel.domain.entity.User;
 import com.socially.user.kernel.domain.valueobject.Email;
 import com.socially.user.kernel.infrastructure.right.adapter.persistence.entity.UserEntity;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,11 +22,14 @@ class UserEntityMapperTest {
   private static final String USER_ID = "550e8400-e29b-41d4-a716-446655440000";
   private static final Instant CREATED_AT = Instant.parse("2024-06-01T12:00:00Z");
   private static final User USER =
-      User.create(Id.from(USER_ID), Email.from("user@example.com"), "Jane", "Doe", CREATED_AT);
+      User.create(Id.from(USER_ID), Email.from("user@example.com"), CREATED_AT)
+          .withGivenName(Optional.of("Jane"))
+          .withFamilyName(Optional.of("Doe"));
 
   private static final UserEntity ENTITY =
-      UserEntity.create(
-          UUID.fromString(USER_ID), "entity@example.com", "John", "Smith", CREATED_AT);
+      UserEntity.create(UUID.fromString(USER_ID), "entity@example.com", CREATED_AT)
+          .withGivenName(Optional.of("John"))
+          .withFamilyName(Optional.of("Smith"));
 
   @Test
   void toEntity_should_map_id() {
@@ -45,14 +49,14 @@ class UserEntityMapperTest {
   void toEntity_should_map_given_name() {
     UserEntity result = userEntityMapper.toEntity(USER);
 
-    assertEquals("Jane", result.getGivenName());
+    assertEquals(Optional.of("Jane"), result.givenName());
   }
 
   @Test
   void toEntity_should_map_family_name() {
     UserEntity result = userEntityMapper.toEntity(USER);
 
-    assertEquals("Doe", result.getFamilyName());
+    assertEquals(Optional.of("Doe"), result.familyName());
   }
 
   @Test
@@ -80,14 +84,14 @@ class UserEntityMapperTest {
   void toDomain_should_map_given_name() {
     User result = userEntityMapper.toDomain(ENTITY);
 
-    assertEquals("John", result.givenName());
+    assertEquals(Optional.of("John"), result.givenName());
   }
 
   @Test
   void toDomain_should_map_family_name() {
     User result = userEntityMapper.toDomain(ENTITY);
 
-    assertEquals("Smith", result.familyName());
+    assertEquals(Optional.of("Smith"), result.familyName());
   }
 
   @Test

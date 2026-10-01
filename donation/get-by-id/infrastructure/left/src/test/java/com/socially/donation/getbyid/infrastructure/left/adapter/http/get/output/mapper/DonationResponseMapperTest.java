@@ -16,6 +16,7 @@ import com.socially.donation.kernel.domain.valueobject.Description;
 import com.socially.donation.kernel.domain.valueobject.Title;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -61,7 +62,9 @@ class DonationResponseMapperTest {
         LOCATION_DTO,
         CREATED_AT,
         LAST_UPDATED_AT,
-        new DonorSummaryDto(DONOR_ID, "donor@example.com", "Jane", "Doe"),
+        DonorSummaryDto.create(DONOR_ID, "donor@example.com")
+            .withGivenName(Optional.of("Jane"))
+            .withFamilyName(Optional.of("Doe")),
         EMPTY_IMAGES);
   }
 
@@ -73,7 +76,9 @@ class DonationResponseMapperTest {
         LOCATION_DTO,
         CREATED_AT,
         LAST_UPDATED_AT,
-        new DonorSummaryDto(DONOR_ID, "donor@example.com", "Jane", "Doe"),
+        DonorSummaryDto.create(DONOR_ID, "donor@example.com")
+            .withGivenName(Optional.of("Jane"))
+            .withFamilyName(Optional.of("Doe")),
         List.of(IMAGE_DTO));
   }
 
@@ -179,13 +184,13 @@ class DonationResponseMapperTest {
   void toResponse_should_map_donor_given_name() {
     DonationResponseDto response = mapper.toResponse(sampleDto());
 
-    assertEquals("Jane", response.donor().givenName());
+    assertEquals(Optional.of("Jane"), response.donor().givenName());
   }
 
   @Test
   void toResponse_should_map_donor_family_name() {
     DonationResponseDto response = mapper.toResponse(sampleDto());
 
-    assertEquals("Doe", response.donor().familyName());
+    assertEquals(Optional.of("Doe"), response.donor().familyName());
   }
 }

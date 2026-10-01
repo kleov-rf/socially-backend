@@ -14,7 +14,8 @@ public final class FindDonationResponseMapper {
         result.description().value(),
         result.createdAt(),
         result.lastUpdatedAt(),
-        new FindDonorResponse(
-            result.donor().id(), result.donor().givenName(), result.donor().familyName()));
+        FindDonorResponse.create(result.donor().id())
+            .withGivenName(result.donor().givenName())
+            .withFamilyName(result.donor().familyName()));
   }
 }

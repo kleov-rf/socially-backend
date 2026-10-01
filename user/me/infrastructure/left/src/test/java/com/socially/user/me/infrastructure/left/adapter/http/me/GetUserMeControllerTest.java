@@ -41,18 +41,15 @@ class GetUserMeControllerTest {
     Principal principal = () -> "ignored";
     User user =
         User.create(
-            Id.from("550e8400-e29b-41d4-a716-446655440000"),
-            Email.from("e@x.com"),
-            "N",
-            null,
-            CREATED_AT);
-    UserMeQueryResult result = new UserMeQueryResult(user, Optional.empty());
+                Id.from("550e8400-e29b-41d4-a716-446655440000"), Email.from("e@x.com"), CREATED_AT)
+            .withGivenName(Optional.of("N"));
+    UserMeQueryResult result = UserMeQueryResult.create(user);
     when(useCase.execute(principal)).thenReturn(result);
     when(userMeResponseMapper.toResponse(result))
         .thenReturn(
-            new UserMeResponse(
-                new UserMeUserDto("550e8400-e29b-41d4-a716-446655440000", "e@x.com", null),
-                new UserMeProfilesDto(null, null)));
+            UserMeResponse.create(
+                UserMeUserDto.create("550e8400-e29b-41d4-a716-446655440000", "e@x.com"),
+                UserMeProfilesDto.create()));
 
     sut.me(principal);
 
@@ -64,17 +61,14 @@ class GetUserMeControllerTest {
     Principal principal = () -> "ignored";
     User user =
         User.create(
-            Id.from("550e8400-e29b-41d4-a716-446655440001"),
-            Email.from("a@b.com"),
-            "Full",
-            null,
-            CREATED_AT);
-    UserMeQueryResult result = new UserMeQueryResult(user, Optional.empty());
+                Id.from("550e8400-e29b-41d4-a716-446655440001"), Email.from("a@b.com"), CREATED_AT)
+            .withGivenName(Optional.of("Full"));
+    UserMeQueryResult result = UserMeQueryResult.create(user);
     when(useCase.execute(principal)).thenReturn(result);
     UserMeResponse mapped =
-        new UserMeResponse(
-            new UserMeUserDto("550e8400-e29b-41d4-a716-446655440001", "a@b.com", null),
-            new UserMeProfilesDto(null, null));
+        UserMeResponse.create(
+            UserMeUserDto.create("550e8400-e29b-41d4-a716-446655440001", "a@b.com"),
+            UserMeProfilesDto.create());
     when(userMeResponseMapper.toResponse(same(result))).thenReturn(mapped);
 
     sut.me(principal);
@@ -87,18 +81,14 @@ class GetUserMeControllerTest {
     Principal principal = () -> "ignored";
     User user =
         User.create(
-            Id.from("550e8400-e29b-41d4-a716-446655440002"),
-            Email.from("e@x.com"),
-            null,
-            null,
-            CREATED_AT);
-    UserMeQueryResult result = new UserMeQueryResult(user, Optional.empty());
+            Id.from("550e8400-e29b-41d4-a716-446655440002"), Email.from("e@x.com"), CREATED_AT);
+    UserMeQueryResult result = UserMeQueryResult.create(user);
     when(useCase.execute(principal)).thenReturn(result);
     when(userMeResponseMapper.toResponse(result))
         .thenReturn(
-            new UserMeResponse(
-                new UserMeUserDto("550e8400-e29b-41d4-a716-446655440002", "e@x.com", null),
-                new UserMeProfilesDto(null, null)));
+            UserMeResponse.create(
+                UserMeUserDto.create("550e8400-e29b-41d4-a716-446655440002", "e@x.com"),
+                UserMeProfilesDto.create()));
 
     ResponseEntity<UserMeResponse> response = sut.me(principal);
 
@@ -110,20 +100,23 @@ class GetUserMeControllerTest {
     Principal principal = () -> "ignored";
     User user =
         User.create(
-            Id.from("550e8400-e29b-41d4-a716-446655440003"),
-            Email.from("user@example.com"),
-            "Jane",
-            "Doe",
-            CREATED_AT);
-    UserMeQueryResult result = new UserMeQueryResult(user, Optional.empty());
+                Id.from("550e8400-e29b-41d4-a716-446655440003"),
+                Email.from("user@example.com"),
+                CREATED_AT)
+            .withGivenName(Optional.of("Jane"))
+            .withFamilyName(Optional.of("Doe"));
+    UserMeQueryResult result = UserMeQueryResult.create(user);
     UserMeResponse mapped =
-        new UserMeResponse(
-            new UserMeUserDto(
-                "550e8400-e29b-41d4-a716-446655440003", "user@example.com", "Jane Doe"),
-            new UserMeProfilesDto(
-                new UserMeDonorProfileDto(
-                    "660e8400-e29b-41d4-a716-446655440099", "user@example.com", "Jane", "Doe"),
-                null));
+        UserMeResponse.create(
+            UserMeUserDto.create("550e8400-e29b-41d4-a716-446655440003", "user@example.com")
+                .withName(Optional.of("Jane Doe")),
+            UserMeProfilesDto.create()
+                .withDonor(
+                    Optional.of(
+                        UserMeDonorProfileDto.create(
+                                "660e8400-e29b-41d4-a716-446655440099", "user@example.com")
+                            .withGivenName(Optional.of("Jane"))
+                            .withFamilyName(Optional.of("Doe")))));
     when(useCase.execute(principal)).thenReturn(result);
     when(userMeResponseMapper.toResponse(result)).thenReturn(mapped);
 

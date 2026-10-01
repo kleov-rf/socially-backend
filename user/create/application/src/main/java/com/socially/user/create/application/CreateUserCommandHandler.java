@@ -26,10 +26,8 @@ public final class CreateUserCommandHandler implements CreateUserUseCase {
     userRepository.create(user);
 
     createDonorUseCase.execute(
-        new CreateDonorCommand(
-            user.id().value().toString(),
-            user.email().value(),
-            user.givenName(),
-            user.familyName()));
+        CreateDonorCommand.create(user.id().value().toString(), user.email().value())
+            .withGivenName(user.givenName())
+            .withFamilyName(user.familyName()));
   }
 }

@@ -9,6 +9,7 @@ import com.socially.user.me.infrastructure.left.adapter.http.me.output.UserMeRes
 import com.socially.user.me.infrastructure.left.adapter.http.me.output.UserMeUserDto;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -18,31 +19,26 @@ public class UserMeResponseMapper {
   public UserMeResponse toResponse(UserMeQueryResult result) {
     User user = result.user();
     UserMeUserDto userDto =
-        new UserMeUserDto(
-            user.id().value().toString(),
-            user.email().value(),
-            joinNames(user.givenName(), user.familyName()));
-    UserMeDonorProfileDto donorDto = result.donor().map(this::toDonorProfileDto).orElse(null);
-    UserMeProfilesDto profiles = new UserMeProfilesDto(donorDto, null);
-    return new UserMeResponse(userDto, profiles);
+        UserMeUserDto.create(user.id().value().toString(), user.email().value())
+            .withName(joinNames(user.givenName(), user.familyName()));
+    Optional<UserMeDonorProfileDto> donorDto = result.donor().map(this::toDonorProfileDto);
+    UserMeProfilesDto profiles = UserMeProfilesDto.create().withDonor(donorDto);
+    return UserMeResponse.create(userDto, profiles);
   }
 
   private UserMeDonorProfileDto toDonorProfileDto(Donor donor) {
-    return new UserMeDonorProfileDto(
-        donor.id().value().toString(), donor.email(), donor.givenName(), donor.familyName());
+    return UserMeDonorProfileDto.create(donor.id().value().toString(), donor.email())
+        .withGivenName(donor.givenName())
+        .withFamilyName(donor.familyName());
   }
 
-  private String joinNames(String givenName, String familyName) {
+  private Optional<String> joinNames(Optional<String> givenName, Optional<String> familyName) {
     List<String> values = new ArrayList<>();
-    if (StringUtils.hasText(givenName)) {
-      values.add(givenName);
-    }
-    if (StringUtils.hasText(familyName)) {
-      values.add(familyName);
-    }
+    givenName.filter(StringUtils::hasText).ifPresent(values::add);
+    familyName.filter(StringUtils::hasText).ifPresent(values::add);
     if (values.isEmpty()) {
-      return null;
+      return Optional.empty();
     }
-    return String.join(" ", values);
+    return Optional.of(String.join(" ", values));
   }
 }

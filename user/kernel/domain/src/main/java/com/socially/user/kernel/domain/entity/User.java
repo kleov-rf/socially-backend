@@ -3,41 +3,38 @@ package com.socially.user.kernel.domain.entity;
 import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.user.kernel.domain.valueobject.Email;
 import java.time.Instant;
-import lombok.EqualsAndHashCode;
-import lombok.RequiredArgsConstructor;
+import java.util.Optional;
+import org.jspecify.annotations.NullMarked;
 
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@RequiredArgsConstructor(access = lombok.AccessLevel.PRIVATE)
-public final class User {
+@NullMarked
+public record User(
+    Id id,
+    Email email,
+    Instant createdAt,
+    Optional<String> givenName,
+    Optional<String> familyName) {
 
-  @EqualsAndHashCode.Include private final Id id;
-  private final Email email;
-  private final String givenName;
-  private final String familyName;
-  private final Instant createdAt;
-
-  public static User create(
-      Id id, Email email, String givenName, String familyName, Instant createdAt) {
-    return new User(id, email, givenName, familyName, createdAt);
+  public static User create(Id id, Email email, Instant createdAt) {
+    return new User(id, email, createdAt, Optional.empty(), Optional.empty());
   }
 
-  public Id id() {
-    return id;
+  public User withGivenName(Optional<String> givenName) {
+    return new User(id, email, createdAt, givenName, familyName);
   }
 
-  public Email email() {
-    return email;
+  public User withFamilyName(Optional<String> familyName) {
+    return new User(id, email, createdAt, givenName, familyName);
   }
 
-  public String givenName() {
-    return givenName;
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof User other)) return false;
+    return id.equals(other.id);
   }
 
-  public String familyName() {
-    return familyName;
-  }
-
-  public Instant createdAt() {
-    return createdAt;
+  @Override
+  public int hashCode() {
+    return id.hashCode();
   }
 }

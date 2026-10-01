@@ -49,11 +49,10 @@ class RefreshSessionControllerTest {
           .withExpiresIn(Optional.of(120L));
   private static final User USER =
       User.create(
-          Id.from("550e8400-e29b-41d4-a716-446655440000"),
-          Email.from("e@x.com"),
-          "N",
-          null,
-          Instant.parse("2024-06-01T12:00:00Z"));
+              Id.from("550e8400-e29b-41d4-a716-446655440000"),
+              Email.from("e@x.com"),
+              Instant.parse("2024-06-01T12:00:00Z"))
+          .withGivenName(Optional.of("N"));
   private static final RefreshSessionResponse SESSION_RESPONSE =
       RefreshSessionResponse.create("at", "Bearer", 120L);
   private static final CookieInstruction COOKIE_INSTRUCTION =

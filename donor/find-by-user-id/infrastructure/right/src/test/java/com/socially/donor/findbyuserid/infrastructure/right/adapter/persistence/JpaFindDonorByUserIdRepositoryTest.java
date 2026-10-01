@@ -42,20 +42,20 @@ class JpaFindDonorByUserIdRepositoryTest {
     Id userId = Id.from("550e8400-e29b-41d4-a716-446655440010");
     DonorEntity donorEntity =
         DonorEntity.create(
-            UUID.fromString("550e8400-e29b-41d4-a716-446655440001"),
-            userId.value(),
-            "user@example.com",
-            "Jane",
-            "Doe",
-            Instant.parse("2024-06-01T12:00:00Z"));
+                UUID.fromString("550e8400-e29b-41d4-a716-446655440001"),
+                userId.value(),
+                "user@example.com",
+                Instant.parse("2024-06-01T12:00:00Z"))
+            .withGivenName(Optional.of("Jane"))
+            .withFamilyName(Optional.of("Doe"));
     Donor mappedDonor =
         Donor.create(
-            Id.from("550e8400-e29b-41d4-a716-446655440001"),
-            userId,
-            "user@example.com",
-            "Jane",
-            "Doe",
-            Instant.parse("2024-06-01T12:00:00Z"));
+                Id.from("550e8400-e29b-41d4-a716-446655440001"),
+                userId,
+                "user@example.com",
+                Instant.parse("2024-06-01T12:00:00Z"))
+            .withGivenName(Optional.of("Jane"))
+            .withFamilyName(Optional.of("Doe"));
     when(entityRepository.findByUserId(userId.value())).thenReturn(Optional.of(donorEntity));
     when(entityMapper.toDomain(donorEntity)).thenReturn(mappedDonor);
 
@@ -69,20 +69,20 @@ class JpaFindDonorByUserIdRepositoryTest {
     Id userId = Id.from("550e8400-e29b-41d4-a716-446655440010");
     DonorEntity donorEntity =
         DonorEntity.create(
-            UUID.fromString("550e8400-e29b-41d4-a716-446655440001"),
-            userId.value(),
-            "user@example.com",
-            "Jane",
-            "Doe",
-            Instant.parse("2024-06-01T12:00:00Z"));
+                UUID.fromString("550e8400-e29b-41d4-a716-446655440001"),
+                userId.value(),
+                "user@example.com",
+                Instant.parse("2024-06-01T12:00:00Z"))
+            .withGivenName(Optional.of("Jane"))
+            .withFamilyName(Optional.of("Doe"));
     Donor mappedDonor =
         Donor.create(
-            Id.from("550e8400-e29b-41d4-a716-446655440001"),
-            userId,
-            "user@example.com",
-            "Jane",
-            "Doe",
-            Instant.parse("2024-06-01T12:00:00Z"));
+                Id.from("550e8400-e29b-41d4-a716-446655440001"),
+                userId,
+                "user@example.com",
+                Instant.parse("2024-06-01T12:00:00Z"))
+            .withGivenName(Optional.of("Jane"))
+            .withFamilyName(Optional.of("Doe"));
     when(entityRepository.findByUserId(userId.value())).thenReturn(Optional.of(donorEntity));
     when(entityMapper.toDomain(donorEntity)).thenReturn(mappedDonor);
 

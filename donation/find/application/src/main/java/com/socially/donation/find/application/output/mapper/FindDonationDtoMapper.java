@@ -15,7 +15,8 @@ public final class FindDonationDtoMapper {
         donation.description(),
         donation.createdAt(),
         donation.lastUpdatedAt(),
-        new FindDonorSummaryDto(
-            donor.id().value().toString(), donor.givenName(), donor.familyName()));
+        FindDonorSummaryDto.create(donor.id().value().toString())
+            .withGivenName(donor.givenName())
+            .withFamilyName(donor.familyName()));
   }
 }

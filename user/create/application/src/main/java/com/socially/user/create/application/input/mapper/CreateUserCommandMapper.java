@@ -10,11 +10,8 @@ import org.springframework.stereotype.Component;
 @Component
 public final class CreateUserCommandMapper {
   public User toDomain(CreateUserCommand command, Instant now) {
-    return User.create(
-        Id.from(command.userId()),
-        Email.from(command.email()),
-        command.givenName(),
-        command.familyName(),
-        now);
+    return User.create(Id.from(command.userId()), Email.from(command.email()), now)
+        .withGivenName(command.givenName())
+        .withFamilyName(command.familyName());
   }
 }

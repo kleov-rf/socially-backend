@@ -49,7 +49,10 @@ class AssertDonationOwnedByPrincipalCommandHandlerTest {
 
   @BeforeEach
   void setUp() {
-    user = User.create(Id.from(USER_ID), Email.from("user@example.com"), "Jane", "Doe", CREATED_AT);
+    user =
+        User.create(Id.from(USER_ID), Email.from("user@example.com"), CREATED_AT)
+            .withGivenName(Optional.of("Jane"))
+            .withFamilyName(Optional.of("Doe"));
     donation =
         Donation.create(
             Id.from(DONATION_ID),
@@ -60,8 +63,9 @@ class AssertDonationOwnedByPrincipalCommandHandlerTest {
             CREATED_AT,
             CREATED_AT);
     donor =
-        Donor.create(
-            Id.from(DONOR_ID), Id.from(USER_ID), "user@example.com", "Jane", "Doe", CREATED_AT);
+        Donor.create(Id.from(DONOR_ID), Id.from(USER_ID), "user@example.com", CREATED_AT)
+            .withGivenName(Optional.of("Jane"))
+            .withFamilyName(Optional.of("Doe"));
   }
 
   @Test
@@ -88,13 +92,9 @@ class AssertDonationOwnedByPrincipalCommandHandlerTest {
   @Test
   void execute_should_throw_donation_forbidden_when_donor_does_not_match_donation() {
     Donor otherDonor =
-        Donor.create(
-            Id.from(OTHER_DONOR_ID),
-            Id.from(USER_ID),
-            "other@example.com",
-            "Other",
-            "Donor",
-            CREATED_AT);
+        Donor.create(Id.from(OTHER_DONOR_ID), Id.from(USER_ID), "other@example.com", CREATED_AT)
+            .withGivenName(Optional.of("Other"))
+            .withFamilyName(Optional.of("Donor"));
     when(getAuthenticatedUserUseCase.execute(PRINCIPAL)).thenReturn(user);
     when(findDonorByUserIdUseCase.execute(new FindDonorByUserIdQuery(USER_ID)))
         .thenReturn(Optional.of(otherDonor));

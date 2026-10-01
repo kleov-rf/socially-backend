@@ -1,7 +1,6 @@
 package com.socially.user.me.infrastructure.left.adapter.http.me.output.mapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donor.kernel.domain.entity.Donor;
@@ -20,30 +19,35 @@ class UserMeResponseMapperTest {
 
   private final UserMeResponseMapper sut = new UserMeResponseMapper();
 
+  private static User sampleUser() {
+    return User.create(
+            Id.from("550e8400-e29b-41d4-a716-446655440000"), Email.from("a@b.com"), CREATED_AT)
+        .withGivenName(Optional.of("J"))
+        .withFamilyName(Optional.of("D"));
+  }
+
+  private static Donor sampleDonor() {
+    return Donor.create(
+            Id.from("660e8400-e29b-41d4-a716-446655440001"),
+            Id.from("550e8400-e29b-41d4-a716-446655440000"),
+            "d@e.com",
+            CREATED_AT)
+        .withGivenName(Optional.of("X"))
+        .withFamilyName(Optional.of("Y"));
+  }
+
   @Test
   void toResponse_should_map_user_id() {
-    User user =
-        User.create(
-            Id.from("550e8400-e29b-41d4-a716-446655440000"),
-            Email.from("a@b.com"),
-            "J",
-            "D",
-            CREATED_AT);
-    UserMeResponse response = sut.toResponse(new UserMeQueryResult(user, Optional.empty()));
+    User user = sampleUser();
+    UserMeResponse response = sut.toResponse(UserMeQueryResult.create(user));
 
     assertEquals("550e8400-e29b-41d4-a716-446655440000", response.user().id());
   }
 
   @Test
   void toResponse_should_map_user_email() {
-    User user =
-        User.create(
-            Id.from("550e8400-e29b-41d4-a716-446655440000"),
-            Email.from("a@b.com"),
-            "J",
-            "D",
-            CREATED_AT);
-    UserMeResponse response = sut.toResponse(new UserMeQueryResult(user, Optional.empty()));
+    User user = sampleUser();
+    UserMeResponse response = sut.toResponse(UserMeQueryResult.create(user));
 
     assertEquals("a@b.com", response.user().email());
   }
@@ -52,144 +56,82 @@ class UserMeResponseMapperTest {
   void toResponse_should_map_user_name() {
     User user =
         User.create(
-            Id.from("550e8400-e29b-41d4-a716-446655440000"),
-            Email.from("a@b.com"),
-            "Jane",
-            "Doe",
-            CREATED_AT);
-    UserMeResponse response = sut.toResponse(new UserMeQueryResult(user, Optional.empty()));
+                Id.from("550e8400-e29b-41d4-a716-446655440000"), Email.from("a@b.com"), CREATED_AT)
+            .withGivenName(Optional.of("Jane"))
+            .withFamilyName(Optional.of("Doe"));
+    UserMeResponse response = sut.toResponse(UserMeQueryResult.create(user));
 
-    assertEquals("Jane Doe", response.user().name());
+    assertEquals(Optional.of("Jane Doe"), response.user().name());
   }
 
   @Test
-  void toResponse_should_set_user_name_to_null_when_no_names() {
+  void toResponse_should_set_user_name_to_empty_when_no_names() {
     User user =
         User.create(
-            Id.from("550e8400-e29b-41d4-a716-446655440000"),
-            Email.from("a@b.com"),
-            null,
-            null,
-            CREATED_AT);
-    UserMeResponse response = sut.toResponse(new UserMeQueryResult(user, Optional.empty()));
+            Id.from("550e8400-e29b-41d4-a716-446655440000"), Email.from("a@b.com"), CREATED_AT);
+    UserMeResponse response = sut.toResponse(UserMeQueryResult.create(user));
 
-    assertNull(response.user().name());
+    assertEquals(Optional.empty(), response.user().name());
   }
 
   @Test
-  void toResponse_should_set_profiles_organization_to_null() {
-    User user =
-        User.create(
-            Id.from("550e8400-e29b-41d4-a716-446655440000"),
-            Email.from("a@b.com"),
-            "J",
-            "D",
-            CREATED_AT);
-    UserMeResponse response = sut.toResponse(new UserMeQueryResult(user, Optional.empty()));
+  void toResponse_should_set_profiles_organization_to_empty() {
+    User user = sampleUser();
+    UserMeResponse response = sut.toResponse(UserMeQueryResult.create(user));
 
-    assertNull(response.profiles().organization());
+    assertEquals(Optional.empty(), response.profiles().organization());
   }
 
   @Test
-  void toResponse_should_set_donor_to_null_when_absent() {
-    User user =
-        User.create(
-            Id.from("550e8400-e29b-41d4-a716-446655440000"),
-            Email.from("a@b.com"),
-            "J",
-            "D",
-            CREATED_AT);
-    UserMeResponse response = sut.toResponse(new UserMeQueryResult(user, Optional.empty()));
+  void toResponse_should_set_donor_to_empty_when_absent() {
+    User user = sampleUser();
+    UserMeResponse response = sut.toResponse(UserMeQueryResult.create(user));
 
-    assertNull(response.profiles().donor());
+    assertEquals(Optional.empty(), response.profiles().donor());
   }
 
   @Test
   void toResponse_should_map_donor_id_when_present() {
-    User user =
-        User.create(
-            Id.from("550e8400-e29b-41d4-a716-446655440000"),
-            Email.from("a@b.com"),
-            "J",
-            "D",
-            CREATED_AT);
-    Donor donor =
-        Donor.create(
-            Id.from("660e8400-e29b-41d4-a716-446655440001"),
-            Id.from("550e8400-e29b-41d4-a716-446655440000"),
-            "d@e.com",
-            "X",
-            "Y",
-            CREATED_AT);
-    UserMeResponse response = sut.toResponse(new UserMeQueryResult(user, Optional.of(donor)));
+    User user = sampleUser();
+    Donor donor = sampleDonor();
+    UserMeResponse response =
+        sut.toResponse(UserMeQueryResult.create(user).withDonor(Optional.of(donor)));
 
-    UserMeDonorProfileDto donorDto = response.profiles().donor();
-    assertEquals("660e8400-e29b-41d4-a716-446655440001", donorDto.id());
+    assertEquals(
+        Optional.of("660e8400-e29b-41d4-a716-446655440001"),
+        response.profiles().donor().map(UserMeDonorProfileDto::id));
   }
 
   @Test
   void toResponse_should_map_donor_email_when_present() {
-    User user =
-        User.create(
-            Id.from("550e8400-e29b-41d4-a716-446655440000"),
-            Email.from("a@b.com"),
-            "J",
-            "D",
-            CREATED_AT);
-    Donor donor =
-        Donor.create(
-            Id.from("660e8400-e29b-41d4-a716-446655440001"),
-            Id.from("550e8400-e29b-41d4-a716-446655440000"),
-            "d@e.com",
-            "X",
-            "Y",
-            CREATED_AT);
-    UserMeResponse response = sut.toResponse(new UserMeQueryResult(user, Optional.of(donor)));
+    User user = sampleUser();
+    Donor donor = sampleDonor();
+    UserMeResponse response =
+        sut.toResponse(UserMeQueryResult.create(user).withDonor(Optional.of(donor)));
 
-    assertEquals("d@e.com", response.profiles().donor().email());
+    assertEquals(
+        Optional.of("d@e.com"), response.profiles().donor().map(UserMeDonorProfileDto::email));
   }
 
   @Test
   void toResponse_should_map_donor_given_name_when_present() {
-    User user =
-        User.create(
-            Id.from("550e8400-e29b-41d4-a716-446655440000"),
-            Email.from("a@b.com"),
-            "J",
-            "D",
-            CREATED_AT);
-    Donor donor =
-        Donor.create(
-            Id.from("660e8400-e29b-41d4-a716-446655440001"),
-            Id.from("550e8400-e29b-41d4-a716-446655440000"),
-            "d@e.com",
-            "X",
-            "Y",
-            CREATED_AT);
-    UserMeResponse response = sut.toResponse(new UserMeQueryResult(user, Optional.of(donor)));
+    User user = sampleUser();
+    Donor donor = sampleDonor();
+    UserMeResponse response =
+        sut.toResponse(UserMeQueryResult.create(user).withDonor(Optional.of(donor)));
 
-    assertEquals("X", response.profiles().donor().givenName());
+    assertEquals(
+        Optional.of("X"), response.profiles().donor().flatMap(UserMeDonorProfileDto::givenName));
   }
 
   @Test
   void toResponse_should_map_donor_family_name_when_present() {
-    User user =
-        User.create(
-            Id.from("550e8400-e29b-41d4-a716-446655440000"),
-            Email.from("a@b.com"),
-            "J",
-            "D",
-            CREATED_AT);
-    Donor donor =
-        Donor.create(
-            Id.from("660e8400-e29b-41d4-a716-446655440001"),
-            Id.from("550e8400-e29b-41d4-a716-446655440000"),
-            "d@e.com",
-            "X",
-            "Y",
-            CREATED_AT);
-    UserMeResponse response = sut.toResponse(new UserMeQueryResult(user, Optional.of(donor)));
+    User user = sampleUser();
+    Donor donor = sampleDonor();
+    UserMeResponse response =
+        sut.toResponse(UserMeQueryResult.create(user).withDonor(Optional.of(donor)));
 
-    assertEquals("Y", response.profiles().donor().familyName());
+    assertEquals(
+        Optional.of("Y"), response.profiles().donor().flatMap(UserMeDonorProfileDto::familyName));
   }
 }

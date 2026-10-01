@@ -89,7 +89,9 @@ class FindDonationByIdQueryHandlerTest {
   }
 
   private static Donor sampleDonor() {
-    return Donor.create(Id.from(DONOR_ID), Id.from(USER_ID), "a@b.com", "A", "B", CREATED_AT);
+    return Donor.create(Id.from(DONOR_ID), Id.from(USER_ID), "a@b.com", CREATED_AT)
+        .withGivenName(Optional.of("A"))
+        .withFamilyName(Optional.of("B"));
   }
 
   private static DonationDto mappedDonationDto() {
@@ -100,7 +102,9 @@ class FindDonationByIdQueryHandlerTest {
         LOCATION_DTO,
         CREATED_AT,
         LAST_UPDATED_AT,
-        new DonorSummaryDto(DONOR_ID, "a@b.com", "A", "B"),
+        DonorSummaryDto.create(DONOR_ID, "a@b.com")
+            .withGivenName(Optional.of("A"))
+            .withFamilyName(Optional.of("B")),
         List.of());
   }
 

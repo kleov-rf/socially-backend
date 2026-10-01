@@ -9,6 +9,7 @@ import com.socially.user.kernel.domain.valueobject.Email;
 import com.socially.user.kernel.infrastructure.right.adapter.persistence.UserEntityRepository;
 import com.socially.user.kernel.infrastructure.right.adapter.persistence.mapper.UserEntityMapper;
 import java.time.Instant;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,7 +30,9 @@ class JpaCreateUserRepositoryTest {
   @Test
   void create_should_call_entity_mapper_with_received_user() {
     User user =
-        User.create(Id.from(USER_ID), Email.from("user@example.com"), "Jane", "Doe", CREATED_AT);
+        User.create(Id.from(USER_ID), Email.from("user@example.com"), CREATED_AT)
+            .withGivenName(Optional.of("Jane"))
+            .withFamilyName(Optional.of("Doe"));
 
     sut.create(user);
 
@@ -39,10 +42,14 @@ class JpaCreateUserRepositoryTest {
   @Test
   void create_should_call_entity_repository_save_with_mapped_entity() {
     User user =
-        User.create(Id.from(USER_ID), Email.from("user@example.com"), "Jane", "Doe", CREATED_AT);
+        User.create(Id.from(USER_ID), Email.from("user@example.com"), CREATED_AT)
+            .withGivenName(Optional.of("Jane"))
+            .withFamilyName(Optional.of("Doe"));
     var mappedEntity =
         com.socially.user.kernel.infrastructure.right.adapter.persistence.entity.UserEntity.create(
-            Id.from(USER_ID).value(), "user@example.com", "Jane", "Doe", CREATED_AT);
+                Id.from(USER_ID).value(), "user@example.com", CREATED_AT)
+            .withGivenName(Optional.of("Jane"))
+            .withFamilyName(Optional.of("Doe"));
     when(entityMapper.toEntity(user)).thenReturn(mappedEntity);
     when(entityRepository.save(mappedEntity)).thenReturn(mappedEntity);
 

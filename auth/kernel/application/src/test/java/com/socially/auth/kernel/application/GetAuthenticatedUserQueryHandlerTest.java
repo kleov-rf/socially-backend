@@ -104,11 +104,11 @@ class GetAuthenticatedUserQueryHandlerTest {
 
   private static User foundUser() {
     return User.create(
-        Id.from("550e8400-e29b-41d4-a716-446655440000"),
-        Email.from("id-test@example.com"),
-        "Jane",
-        "Doe",
-        CREATED_AT);
+            Id.from("550e8400-e29b-41d4-a716-446655440000"),
+            Email.from("id-test@example.com"),
+            CREATED_AT)
+        .withGivenName(Optional.of("Jane"))
+        .withFamilyName(Optional.of("Doe"));
   }
 
   private static Map<String, Object> baseClaims() {

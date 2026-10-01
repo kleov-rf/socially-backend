@@ -1,6 +1,6 @@
 package com.socially.donation.find.infrastructure.left.adapter.http.find.output.mapper;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donation.find.application.output.FindDonationDto;
@@ -9,6 +9,7 @@ import com.socially.donation.find.infrastructure.left.adapter.http.find.output.F
 import com.socially.donation.kernel.domain.valueobject.Description;
 import com.socially.donation.kernel.domain.valueobject.Title;
 import java.time.Instant;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -28,7 +29,9 @@ class FindDonationResponseMapperTest {
           Description.from("Test Description"),
           CREATED_AT,
           LAST_UPDATED_AT,
-          new FindDonorSummaryDto(DONOR_ID, "Jane", "Doe"));
+          FindDonorSummaryDto.create(DONOR_ID)
+              .withGivenName(Optional.of("Jane"))
+              .withFamilyName(Optional.of("Doe")));
 
   @InjectMocks private FindDonationResponseMapper mapper;
 
@@ -78,13 +81,13 @@ class FindDonationResponseMapperTest {
   void toResponse_should_map_donor_given_name() {
     FindDonationResponse response = mapper.toResponse(DONATION_DTO);
 
-    assertEquals("Jane", response.donor().givenName());
+    assertEquals(Optional.of("Jane"), response.donor().givenName());
   }
 
   @Test
   void toResponse_should_map_donor_family_name() {
     FindDonationResponse response = mapper.toResponse(DONATION_DTO);
 
-    assertEquals("Doe", response.donor().familyName());
+    assertEquals(Optional.of("Doe"), response.donor().familyName());
   }
 }

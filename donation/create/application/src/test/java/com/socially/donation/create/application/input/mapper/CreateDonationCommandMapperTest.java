@@ -12,6 +12,7 @@ import com.socially.donation.kernel.domain.valueobject.Title;
 import com.socially.donor.kernel.domain.entity.Donor;
 import java.security.Principal;
 import java.time.Instant;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,17 +24,17 @@ class CreateDonationCommandMapperTest {
   @InjectMocks private CreateDonationCommandMapper mapper;
 
   private static final String DONATION_ID = "550e8400-e29b-41d4-a716-446655440000";
+  private static final Instant NOW = Instant.parse("2024-06-01T12:00:00Z");
   private static final CreateDonationLocationCommand LOCATION_COMMAND =
       new CreateDonationLocationCommand("Calle Mayor 1, Madrid", 40.4168, -3.7038);
   private static final Donor DONOR =
       Donor.create(
-          Id.from("550e8400-e29b-41d4-a716-446655440001"),
-          Id.from("550e8400-e29b-41d4-a716-446655440010"),
-          "janedoe@email.com",
-          "Jane",
-          "Doe",
-          Instant.now());
-  private static final Instant NOW = Instant.parse("2024-06-01T12:00:00Z");
+              Id.from("550e8400-e29b-41d4-a716-446655440001"),
+              Id.from("550e8400-e29b-41d4-a716-446655440010"),
+              "janedoe@email.com",
+              NOW)
+          .withGivenName(Optional.of("Jane"))
+          .withFamilyName(Optional.of("Doe"));
   private static final Principal PRINCIPAL = () -> "user@example.com";
 
   private static CreateDonationCommand command() {

@@ -33,7 +33,9 @@ class JpaUpdateUserProfileRepositoryTest {
   void updateProfile_should_load_user_by_id() {
     UUID userUuid = UUID.fromString(USER_ID);
     UserEntity userEntity =
-        UserEntity.create(userUuid, "old@example.com", "Jane", "Doe", CREATED_AT);
+        UserEntity.create(userUuid, "old@example.com", CREATED_AT)
+            .withGivenName(Optional.of("Jane"))
+            .withFamilyName(Optional.of("Doe"));
     FederatedIdentityEntity federatedIdentity =
         FederatedIdentityEntity.create(
             UUID.randomUUID(),
@@ -64,7 +66,9 @@ class JpaUpdateUserProfileRepositoryTest {
   void updateProfile_should_save_updated_user_entity_with_new_email() {
     UUID userUuid = UUID.fromString(USER_ID);
     UserEntity userEntity =
-        UserEntity.create(userUuid, "old@example.com", "Jane", "Doe", CREATED_AT);
+        UserEntity.create(userUuid, "old@example.com", CREATED_AT)
+            .withGivenName(Optional.of("Jane"))
+            .withFamilyName(Optional.of("Doe"));
     FederatedIdentityEntity federatedIdentity =
         FederatedIdentityEntity.create(
             UUID.randomUUID(),
@@ -97,7 +101,9 @@ class JpaUpdateUserProfileRepositoryTest {
   void updateProfile_should_load_federated_identity_by_issuer_and_subject() {
     UUID userUuid = UUID.fromString(USER_ID);
     UserEntity userEntity =
-        UserEntity.create(userUuid, "old@example.com", "Jane", "Doe", CREATED_AT);
+        UserEntity.create(userUuid, "old@example.com", CREATED_AT)
+            .withGivenName(Optional.of("Jane"))
+            .withFamilyName(Optional.of("Doe"));
     FederatedIdentityEntity federatedIdentity =
         FederatedIdentityEntity.create(
             UUID.randomUUID(),
@@ -129,7 +135,9 @@ class JpaUpdateUserProfileRepositoryTest {
   void updateProfile_should_save_updated_federated_identity_with_new_email() {
     UUID userUuid = UUID.fromString(USER_ID);
     UserEntity userEntity =
-        UserEntity.create(userUuid, "old@example.com", "Jane", "Doe", CREATED_AT);
+        UserEntity.create(userUuid, "old@example.com", CREATED_AT)
+            .withGivenName(Optional.of("Jane"))
+            .withFamilyName(Optional.of("Doe"));
     FederatedIdentityEntity federatedIdentity =
         FederatedIdentityEntity.create(
             UUID.randomUUID(),

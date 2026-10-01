@@ -36,7 +36,9 @@ class GetDonationControllerTest {
   private static final Instant LAST_UPDATED_AT = Instant.parse("2024-06-20T09:00:00Z");
 
   private static final DonorSummaryDto DONOR_SUMMARY =
-      new DonorSummaryDto(DONOR_ID, "donor@example.com", "Donor", "User");
+      DonorSummaryDto.create(DONOR_ID, "donor@example.com")
+          .withGivenName(Optional.of("Donor"))
+          .withFamilyName(Optional.of("User"));
   private static final DonationLocationDto LOCATION_DTO =
       new DonationLocationDto("Calle Mayor 1, Madrid", 40.4168, -3.7038);
   private static final DonationLocationResponseDto LOCATION_RESPONSE =
@@ -68,7 +70,9 @@ class GetDonationControllerTest {
         LOCATION_RESPONSE,
         CREATED_AT,
         LAST_UPDATED_AT,
-        new DonorResponseDto(DONOR_ID, "donor@example.com", "Donor", "User"),
+        DonorResponseDto.create(DONOR_ID, "donor@example.com")
+            .withGivenName(Optional.of("Donor"))
+            .withFamilyName(Optional.of("User")),
         List.of());
   }
 

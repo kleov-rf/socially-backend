@@ -24,11 +24,9 @@ public class DonationResponseMapper {
             result.location().longitude()),
         result.createdAt(),
         result.lastUpdatedAt(),
-        new DonorResponseDto(
-            result.donor().id(),
-            result.donor().email(),
-            result.donor().givenName(),
-            result.donor().familyName()),
+        DonorResponseDto.create(result.donor().id(), result.donor().email())
+            .withGivenName(result.donor().givenName())
+            .withFamilyName(result.donor().familyName()),
         donationImageResponseMapper.toResponses(result.images()));
   }
 }

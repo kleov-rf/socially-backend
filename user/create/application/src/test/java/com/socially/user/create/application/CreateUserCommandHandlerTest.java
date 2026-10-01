@@ -1,5 +1,6 @@
 package com.socially.user.create.application;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -15,6 +16,7 @@ import com.socially.user.kernel.domain.entity.User;
 import com.socially.user.kernel.domain.valueobject.Email;
 import java.time.Clock;
 import java.time.Instant;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -35,11 +37,22 @@ class CreateUserCommandHandlerTest {
 
   @InjectMocks private CreateUserCommandHandler handler;
 
+  private static CreateUserCommand sampleCommand() {
+    return CreateUserCommand.create(USER_ID, "user@example.com")
+        .withGivenName(Optional.of("Jane"))
+        .withFamilyName(Optional.of("Doe"));
+  }
+
+  private static User sampleUser() {
+    return User.create(Id.from(USER_ID), Email.from("user@example.com"), CREATED_AT)
+        .withGivenName(Optional.of("Jane"))
+        .withFamilyName(Optional.of("Doe"));
+  }
+
   @Test
   void execute_should_call_mapper_with_received_command() {
-    var command = new CreateUserCommand(USER_ID, "user@example.com", "Jane", "Doe");
-    User mappedUser =
-        User.create(Id.from(USER_ID), Email.from("user@example.com"), "Jane", "Doe", CREATED_AT);
+    var command = sampleCommand();
+    User mappedUser = sampleUser();
     when(clock.instant()).thenReturn(CREATED_AT);
     when(createUserCommandMapper.toDomain(command, CREATED_AT)).thenReturn(mappedUser);
 
@@ -50,9 +63,8 @@ class CreateUserCommandHandlerTest {
 
   @Test
   void execute_should_call_mapper_with_clock_instant() {
-    var command = new CreateUserCommand(USER_ID, "user@example.com", "Jane", "Doe");
-    User mappedUser =
-        User.create(Id.from(USER_ID), Email.from("user@example.com"), "Jane", "Doe", CREATED_AT);
+    var command = sampleCommand();
+    User mappedUser = sampleUser();
     when(clock.instant()).thenReturn(CREATED_AT);
     when(createUserCommandMapper.toDomain(command, CREATED_AT)).thenReturn(mappedUser);
 
@@ -63,9 +75,8 @@ class CreateUserCommandHandlerTest {
 
   @Test
   void execute_should_call_repository_create_with_mapped_user() {
-    var command = new CreateUserCommand(USER_ID, "user@example.com", "Jane", "Doe");
-    User mappedUser =
-        User.create(Id.from(USER_ID), Email.from("user@example.com"), "Jane", "Doe", CREATED_AT);
+    var command = sampleCommand();
+    User mappedUser = sampleUser();
     when(clock.instant()).thenReturn(CREATED_AT);
     when(createUserCommandMapper.toDomain(command, CREATED_AT)).thenReturn(mappedUser);
 
@@ -77,9 +88,8 @@ class CreateUserCommandHandlerTest {
 
   @Test
   void execute_should_call_create_donor_after_repository_create() {
-    var command = new CreateUserCommand(USER_ID, "user@example.com", "Jane", "Doe");
-    User mappedUser =
-        User.create(Id.from(USER_ID), Email.from("user@example.com"), "Jane", "Doe", CREATED_AT);
+    var command = sampleCommand();
+    User mappedUser = sampleUser();
     when(clock.instant()).thenReturn(CREATED_AT);
     when(createUserCommandMapper.toDomain(command, CREATED_AT)).thenReturn(mappedUser);
 
@@ -94,9 +104,8 @@ class CreateUserCommandHandlerTest {
 
   @Test
   void execute_should_call_create_donor_with_mapped_user_id_email_and_names() {
-    var command = new CreateUserCommand(USER_ID, "user@example.com", "Jane", "Doe");
-    User mappedUser =
-        User.create(Id.from(USER_ID), Email.from("user@example.com"), "Jane", "Doe", CREATED_AT);
+    var command = sampleCommand();
+    User mappedUser = sampleUser();
     when(clock.instant()).thenReturn(CREATED_AT);
     when(createUserCommandMapper.toDomain(command, CREATED_AT)).thenReturn(mappedUser);
 
@@ -106,9 +115,9 @@ class CreateUserCommandHandlerTest {
         ArgumentCaptor.forClass(CreateDonorCommand.class);
     verify(createDonorUseCase).execute(donorCommandCaptor.capture());
     CreateDonorCommand donorCommand = donorCommandCaptor.getValue();
-    org.junit.jupiter.api.Assertions.assertEquals(USER_ID, donorCommand.userId());
-    org.junit.jupiter.api.Assertions.assertEquals("user@example.com", donorCommand.email());
-    org.junit.jupiter.api.Assertions.assertEquals("Jane", donorCommand.givenName());
-    org.junit.jupiter.api.Assertions.assertEquals("Doe", donorCommand.familyName());
+    assertEquals(USER_ID, donorCommand.userId());
+    assertEquals("user@example.com", donorCommand.email());
+    assertEquals(Optional.of("Jane"), donorCommand.givenName());
+    assertEquals(Optional.of("Doe"), donorCommand.familyName());
   }
 }

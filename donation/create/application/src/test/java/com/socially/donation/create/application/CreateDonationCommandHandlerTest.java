@@ -44,12 +44,12 @@ class CreateDonationCommandHandlerTest {
   private static final Instant CREATED_AT = Instant.parse("2024-06-01T12:00:00Z");
   public static final Donor DONOR =
       Donor.create(
-          Id.from("550e8400-e29b-41d4-a716-446655440001"),
-          Id.from(USER_ID),
-          "user@example.com",
-          "Jane",
-          "Doe",
-          CREATED_AT);
+              Id.from("550e8400-e29b-41d4-a716-446655440001"),
+              Id.from(USER_ID),
+              "user@example.com",
+              CREATED_AT)
+          .withGivenName(Optional.of("Jane"))
+          .withFamilyName(Optional.of("Doe"));
   private static final Principal PRINCIPAL = () -> "user@example.com";
   private static final CreateDonationLocationCommand LOCATION_COMMAND =
       new CreateDonationLocationCommand("Calle Mayor 1, Madrid", 40.4168, -3.7038);
@@ -70,7 +70,10 @@ class CreateDonationCommandHandlerTest {
     command =
         new CreateDonationCommand(
             DONATION_ID, "Test Title", "Test Description", LOCATION_COMMAND, PRINCIPAL);
-    user = User.create(Id.from(USER_ID), Email.from("user@example.com"), "Jane", "Doe", CREATED_AT);
+    user =
+        User.create(Id.from(USER_ID), Email.from("user@example.com"), CREATED_AT)
+            .withGivenName(Optional.of("Jane"))
+            .withFamilyName(Optional.of("Doe"));
     donorAfterCreate = DONOR;
     lenient()
         .when(findDonorByUserIdUseCase.execute(new FindDonorByUserIdQuery(USER_ID)))

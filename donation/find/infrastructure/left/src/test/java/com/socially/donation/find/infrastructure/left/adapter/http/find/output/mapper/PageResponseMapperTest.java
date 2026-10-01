@@ -127,7 +127,9 @@ class PageResponseMapperTest {
         Description.from("Test Description"),
         CREATED_AT,
         LAST_UPDATED_AT,
-        new FindDonorSummaryDto(DONOR_ID, "Jane", "Doe"));
+        FindDonorSummaryDto.create(DONOR_ID)
+            .withGivenName(Optional.of("Jane"))
+            .withFamilyName(Optional.of("Doe")));
   }
 
   private FindDonationResponse givenDonationResponse() {
@@ -137,7 +139,9 @@ class PageResponseMapperTest {
         "Test Description",
         CREATED_AT,
         LAST_UPDATED_AT,
-        new FindDonorResponse(DONOR_ID, "Jane", "Doe"));
+        FindDonorResponse.create(DONOR_ID)
+            .withGivenName(Optional.of("Jane"))
+            .withFamilyName(Optional.of("Doe")));
   }
 
   private Page<FindDonationDto> givenPage(FindDonationDto donationDto) {

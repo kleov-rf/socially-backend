@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.socially.commons.kernel.domain.valueobject.Id;
 import com.socially.donor.create.application.input.CreateDonorCommand;
 import java.time.Instant;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
 class CreateDonorCommandMapperTest {
@@ -16,7 +17,9 @@ class CreateDonorCommandMapperTest {
   private static final Instant NOW = Instant.parse("2024-06-01T12:00:00Z");
 
   private static CreateDonorCommand command() {
-    return new CreateDonorCommand(USER_ID, "donor@example.com", "Jane", "Doe");
+    return CreateDonorCommand.create(USER_ID, "donor@example.com")
+        .withGivenName(Optional.of("Jane"))
+        .withFamilyName(Optional.of("Doe"));
   }
 
   @Test
@@ -44,14 +47,14 @@ class CreateDonorCommandMapperTest {
   void toDomain_should_map_given_name_from_command() {
     var actual = mapper.toDomain(Id.from(DONOR_ID), command(), NOW);
 
-    assertEquals("Jane", actual.givenName());
+    assertEquals(Optional.of("Jane"), actual.givenName());
   }
 
   @Test
   void toDomain_should_map_family_name_from_command() {
     var actual = mapper.toDomain(Id.from(DONOR_ID), command(), NOW);
 
-    assertEquals("Doe", actual.familyName());
+    assertEquals(Optional.of("Doe"), actual.familyName());
   }
 
   @Test

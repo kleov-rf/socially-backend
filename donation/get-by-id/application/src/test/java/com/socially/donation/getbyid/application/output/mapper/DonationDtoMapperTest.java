@@ -12,6 +12,7 @@ import com.socially.donation.kernel.domain.valueobject.Title;
 import com.socially.donor.kernel.domain.entity.Donor;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -48,12 +49,12 @@ class DonationDtoMapperTest {
 
   private static Donor sampleDonor() {
     return Donor.create(
-        Id.from(DONOR_ID),
-        Id.from(USER_ID),
-        "donor@example.com",
-        "Jane",
-        "Doe",
-        Instant.parse("2024-05-01T10:00:00Z"));
+            Id.from(DONOR_ID),
+            Id.from(USER_ID),
+            "donor@example.com",
+            Instant.parse("2024-05-01T10:00:00Z"))
+        .withGivenName(Optional.of("Jane"))
+        .withFamilyName(Optional.of("Doe"));
   }
 
   @Test
@@ -130,14 +131,14 @@ class DonationDtoMapperTest {
   void fromDomain_should_map_donor_given_name_to_summary() {
     DonationDto result = donationDtoMapper.fromDomain(sampleDonation(), sampleDonor(), NO_IMAGES);
 
-    assertEquals("Jane", result.donor().givenName());
+    assertEquals(Optional.of("Jane"), result.donor().givenName());
   }
 
   @Test
   void fromDomain_should_map_donor_family_name_to_summary() {
     DonationDto result = donationDtoMapper.fromDomain(sampleDonation(), sampleDonor(), NO_IMAGES);
 
-    assertEquals("Doe", result.donor().familyName());
+    assertEquals(Optional.of("Doe"), result.donor().familyName());
   }
 
   @Test
